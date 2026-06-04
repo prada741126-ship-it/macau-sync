@@ -16,7 +16,7 @@ const HTML_FILE = (function() {
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, x-sync-password');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
@@ -29,6 +29,19 @@ if (!fs.existsSync(DB_FILE)) {
 }
 
 app.use(express.json({ limit: '5mb' }));
+
+// 密码保护（API 层面）
+var SYNC_PASSWORD = process.env.SYNC_PASSWORD || 'macau888';
+
+// 所有 /api/* 接口都验证密码（静态资源和首页不验证）
+app.use('/api', function(req, res, next) {
+  if (req.method === 'OPTIONS') return next();
+  var pass = req.headers['x-sync-password'] || '';
+  if (pass !== SYNC_PASSWORD) {
+    return res.status(403).json({ ok: false, error: '密码错误' });
+  }
+  next();
+});
 
 // 静态资源（bg_logo.png, css, js 等）
 app.use(express.static(__dirname));

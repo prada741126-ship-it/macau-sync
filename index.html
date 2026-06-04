@@ -67,9 +67,29 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .page > .toolbar > button[style*="#f0f0f0"] { background: rgba(40,40,50,0.8) !important; color: #c0c0c0 !important; border: 1px solid rgba(212,175,55,0.1) !important; }
 .page > .toolbar > button[style*="#f0f0f0"]:hover { background: rgba(50,50,60,0.9) !important; color: #D4AF37 !important; }
 .page > .toolbar > button[style*="#9b59b6"] { background: linear-gradient(135deg, #8e44ad, #732d91) !important; color: white !important; }
+/* 密码保护遮罩 */
+#pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(5,5,12,0.97); z-index:9999; display:flex; align-items:center; justify-content:center; }
+#pw-box { background:#1a1a2e; border:1px solid #D4AF37; border-radius:16px; padding:40px; text-align:center; max-width:360px; width:90%; box-shadow:0 0 40px rgba(212,175,55,0.15); }
+#pw-box h2 { color:#D4AF37; font-size:20px; margin-bottom:8px; }
+#pw-box p { color:#888; font-size:13px; margin-bottom:20px; }
+#pw-box input { width:100%; padding:12px; background:#0a0a1a; border:1px solid #333; border-radius:8px; color:#fff; font-size:16px; text-align:center; letter-spacing:4px; outline:none; }
+#pw-box input:focus { border-color:#D4AF37; }
+#pw-box .pw-error { color:#e74c3c; font-size:12px; margin-top:10px; display:none; }
+#pw-box button { margin-top:14px; padding:10px 36px; background:linear-gradient(135deg,#8B0000,#D4AF37); color:#fff; border:none; border-radius:8px; font-size:15px; cursor:pointer; font-weight:bold; }
 </style>
 </head>
 <body>
+
+<!-- 密码保护遮罩 -->
+<div id="pw-overlay" style="display:none;">
+  <div id="pw-box">
+    <h2>🔐 博盈國際會</h2>
+    <p>請輸入密碼以繼續</p>
+    <input type="password" id="pw-input" placeholder="請輸入密碼" onkeyup="if(event.key==='Enter')checkPw()">
+    <div class="pw-error" id="pw-error">密碼錯誤，請重試</div>
+    <button onclick="checkPw()">確認</button>
+  </div>
+</div>
 
 <div class="container">
 <h1>澳門洗碼報表 v3.2</h1>
@@ -279,6 +299,45 @@ var agentList = [];
 // ===== 月度管理 =====
 var workingMonth = ""; // 當前工作日誌月份，如 "2026-06"
 
+// ==== 密碼保護 ====
+var PASSWORD = 'macau888'; // 同步密碼，需要與 server.js 中的 SYNC_PASSWORD 一致
+
+// 檢查是否從外部網路訪問（非本地）
+function isRemoteAccess() {
+  var h = window.location.hostname;
+  return !h.match(/^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/) && h !== '' && window.location.protocol !== 'file:';
+}
+
+function showPasswordOverlay() {
+  document.getElementById('pw-overlay').style.display = 'flex';
+}
+
+function checkPw() {
+  var input = document.getElementById('pw-input').value.trim();
+  if (input === PASSWORD) {
+    sessionStorage.setItem('macau_auth', '1');
+    document.getElementById('pw-overlay').style.display = 'none';
+    // 重新初始化同步（之前被阻斷）
+    if (typeof initSync === 'function') initSync();
+    if (typeof loadConfig === 'function') loadConfig();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+// 頁面加載時檢查
+(function() {
+  if (isRemoteAccess() && !sessionStorage.getItem('macau_auth')) {
+    showPasswordOverlay();
+    // 不執行 initSync，等密碼驗證後再執行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 密碼覆蓋層已經顯示，阻止後續自動加載
+    });
+  }
+})();
+
 // ===== 雲端同步層 =====
 // 自動判斷同步 API 來源（本地 WiFi = 同 IP:3000；Render 雲端 = 同源）
 var SYNC_API = (function() {
@@ -327,6 +386,7 @@ function _syncPushNow() {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", SYNC_API + "/api/save", true);
     xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("x-sync-password", PASSWORD);
     xhr.timeout = 5000;
     xhr.onload = function() {
       if (xhr.status === 200) {
@@ -346,6 +406,7 @@ function syncPull(callback) {
   try {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", SYNC_API + "/api/all", true);
+    xhr.setRequestHeader("x-sync-password", PASSWORD);
     xhr.timeout = 5000;
     xhr.onload = function() {
       if (xhr.status === 200) {
@@ -393,6 +454,7 @@ function syncPoll() {
   try {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", SYNC_API + "/api/poll?since=" + syncLastModified, true);
+    xhr.setRequestHeader("x-sync-password", PASSWORD);
     xhr.timeout = 3000;
     xhr.onload = function() {
       if (xhr.status === 200) {
