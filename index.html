@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>澳門洗碼報表 v3.2</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", serif; background: linear-gradient(180deg, rgba(5,5,12,0.82) 0%, rgba(8,5,20,0.88) 50%, rgba(5,5,12,0.85) 100%), url('bg_logo.png') center/cover no-repeat fixed; background-color: #05050c; min-height: 100vh; padding: 16px; color: #d0d0d0; }
+.container { max-width: 1200px; margin: 0 auto; }
+h1 { color: #D4AF37; text-align: center; margin-bottom: 12px; font-size: 28px; letter-spacing: 4px; font-weight: 700; text-shadow: 0 2px 20px rgba(212,175,55,0.4), 0 0 40px rgba(212,175,55,0.15); padding: 10px 0; border-bottom: 2px solid rgba(212,175,55,0.3); display: inline-block; width: 100%; }
+.month-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 10px 20px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(20,15,5,0.92), rgba(12,8,4,0.95)); border-radius: 14px; border: 1px solid rgba(212,175,55,0.25); flex-wrap: wrap; }
+.month-bar-label { color: #a09070; font-size: 13px; letter-spacing: 1px; }
+.month-bar-badge { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1a12; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 2px; box-shadow: 0 0 15px rgba(212,175,55,0.3); }
+.month-bar-status { color: #2ecc71; font-size: 11px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
+.month-bar-status::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 6px #2ecc71; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.btn-close-month { background: linear-gradient(135deg, #8e44ad, #6c3483); color: white; padding: 8px 18px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 2px 10px rgba(142,68,173,0.3); transition: all 0.25s; }
+.btn-close-month:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(142,68,173,0.5); }
+.month-bar-hint { color: #e67e22; font-size: 11px; letter-spacing: 0.5px; }
+.card { background: rgba(12,12,22,0.94); backdrop-filter: blur(20px); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,175,55,0.1); overflow: hidden; border: 1px solid rgba(212,175,55,0.2); }
+.tabs { display: flex; background: linear-gradient(180deg, rgba(20,15,5,0.9), rgba(15,10,5,0.95)); border-bottom: 1px solid rgba(212,175,55,0.15); padding: 8px 10px; gap: 4px; }
+.tab { padding: 11px 24px; cursor: pointer; font-weight: 600; color: #9a8b6e; border: none; border-radius: 10px; user-select: none; transition: all 0.3s ease; font-size: 14px; letter-spacing: 1px; }
+.tab:hover { background: rgba(212,175,55,0.08); color: #D4AF37; }
+.tab.active { color: #1a1a12; background: linear-gradient(135deg, #D4AF37, #C9A96E); box-shadow: 0 0 20px rgba(212,175,55,0.3); font-weight: 700; }
+.page { display: none; padding: 20px; }
+.page.active { display: block; }
+.toolbar { margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { padding: 9px 20px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.25s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.3); letter-spacing: 0.5px; }
+.btn-primary { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1a12; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,175,55,0.5); }
+.btn-red { background: linear-gradient(135deg, #c0392b, #8B0000); color: #e0e0e0; font-size: 12px; padding: 5px 12px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 6px rgba(139,0,0,0.4); }
+.btn-red:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(192,57,43,0.5); }
+table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: 13px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.08); }
+th { background: linear-gradient(180deg, #1a1810, #12100a); color: #D4AF37; padding: 12px 12px; text-align: left; font-size: 12px; letter-spacing: 1px; font-weight: 600; border-bottom: 1px solid rgba(212,175,55,0.2); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #c8c8c8; }
+tr:last-child td { border-bottom: none; }
+tbody tr { background: rgba(16,16,28,0.5); transition: background 0.2s; }
+tbody tr:nth-child(even) { background: rgba(20,20,32,0.5); }
+tbody tr:hover { background: rgba(212,175,55,0.06); }
+.num { text-align: right; font-family: "Consolas", "Courier New", monospace; font-weight: 600; color: #e0d0a0; }
+.kpi-box { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+.kpi-card { background: linear-gradient(135deg, rgba(26,18,10,0.95), rgba(18,12,8,0.95)); color: #e0d0a0; padding: 16px 24px; border-radius: 14px; min-width: 140px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.2); }
+.kpi-card .label { font-size: 11px; opacity: 0.7; letter-spacing: 0.5px; }
+.kpi-card .value { font-size: 24px; font-weight: 700; color: #D4AF37; margin-top: 4px; }
+.kpi-card[style*="#27ae60"] { background: linear-gradient(135deg, rgba(18,28,18,0.95), rgba(10,20,14,0.95)); border-color: rgba(39,174,96,0.25); }
+.kpi-card[style*="#27ae60"] .value { color: #2ecc71; }
+.kpi-card[style*="#e67e22"] { background: linear-gradient(135deg, rgba(28,18,10,0.95), rgba(20,12,8,0.95)); border-color: rgba(230,126,34,0.25); }
+.kpi-card[style*="#e67e22"] .value { color: #e67e22; }
+.kpi-card[style*="#2980b9"] { background: linear-gradient(135deg, rgba(14,18,28,0.95), rgba(8,12,20,0.95)); border-color: rgba(41,128,185,0.25); }
+.kpi-card[style*="#2980b9"] .value { color: #3498db; }
+.modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; backdrop-filter: blur(6px); }
+.modal-bg.show { display: flex; justify-content: center; align-items: center; }
+.modal { background: linear-gradient(180deg, #1a1a1e, #121218); border-radius: 18px; padding: 28px; width: 520px; max-width: 95vw; box-shadow: 0 30px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25); color: #d0d0d0; }
+.modal h3 { color: #D4AF37; font-size: 20px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid rgba(212,175,55,0.3); letter-spacing: 1px; }
+.form-row { display: flex; gap: 12px; margin-bottom: 14px; }
+.form-group { flex: 1; }
+.form-group label { display: block; font-size: 12px; color: #a09070; margin-bottom: 5px; font-weight: 600; letter-spacing: 0.5px; }
+.form-group input, .form-group select { width: 100%; padding: 9px 12px; border: 1px solid rgba(212,175,55,0.2); border-radius: 10px; font-size: 14px; transition: all 0.2s; background: rgba(20,20,30,0.8); color: #e0d0a0; }
+.form-group input:focus, .form-group select:focus { border-color: #D4AF37; outline: none; background: rgba(25,25,35,0.9); box-shadow: 0 0 0 3px rgba(212,175,55,0.12); }
+.form-group input[readonly] { background: rgba(30,30,40,0.6); color: #2ecc71; }
+#all-msg { text-align: center; padding: 40px; color: #666; font-size: 14px; }
+.page > .toolbar > button[style*="#27ae60"] { background: linear-gradient(135deg, #2ecc71, #27ae60) !important; color: white !important; }
+.page > .toolbar > button[style*="#f0f0f0"] { background: rgba(40,40,50,0.8) !important; color: #c0c0c0 !important; border: 1px solid rgba(212,175,55,0.1) !important; }
+.page > .toolbar > button[style*="#f0f0f0"]:hover { background: rgba(50,50,60,0.9) !important; color: #D4AF37 !important; }
+.page > .toolbar > button[style*="#9b59b6"] { background: linear-gradient(135deg, #8e44ad, #732d91) !important; color: white !important; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>澳門洗碼報表 v3.2</h1>
+<div class="month-bar" id="month-bar">
+  <span class="month-bar-label">📅 工作日誌月份</span>
+  <span class="month-bar-badge" id="month-badge">2026-06</span>
+  <span class="month-bar-status" id="month-status">開放登錄中</span>
+  <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:#888;margin-left:4px;">
+    <span id="sync-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#888;"></span>
+    <span id="sync-text">連線中...</span>
+  </span>
+  <button class="btn-close-month" id="btn-close-month" onclick="closeCurrentMonth()">🔒 月末結算</button>
+  <span class="month-bar-hint" id="month-hint"></span>
+</div>
+<div class="card">
+  <div class="tabs">
+    <div class="tab active" onclick="showPage('all')">全部交易</div>
+    <div class="tab" onclick="showPage('query')">查詢</div>
+    <div class="tab" onclick="showPage('summary')">統計</div>
+  </div>
+
+  <div class="page active" id="page-all">
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="openModal()">＋ 新增</button>
+      <button class="btn" style="background:#27ae60;color:white;" onclick="saveData()">儲存</button>
+      <button class="btn" style="background:#f0f0f0;" onclick="loadData()">讀取</button>
+      <button class="btn" style="background:#f0f0f0;" onclick="exportCSV()">匯出CSV</button>
+      <button class="btn" style="background:#f0f0f0;" onclick="document.getElementById('file-input').click()">匯入CSV</button>
+      <input type="file" id="file-input" accept=".csv" style="display:none" onchange="importCSV(event)">
+      <button class="btn" style="background:#9b59b6;color:white;" onclick="openAgentMgr()">代理管理</button>
+    </div>
+    <div id="all-msg" style="text-align:center;padding:30px;color:#999;display:none;">尚無資料</div>
+    <table id="all-table" style="display:none;">
+      <thead><tr>
+        <th>類型</th><th>日期</th><th>代理</th><th>客戶</th><th>地點</th>
+        <th class="num">洗碼量(萬)</th><th class="num">佣金</th>
+        <th class="num">碼糧</th><th class="num">已提</th><th class="num">未提</th><th>備註</th><th>操作</th>
+      </tr></thead>
+      <tbody id="all-body"></tbody>
+    </table>
+  </div>
+
+  <div class="page" id="page-query">
+    <div class="toolbar">
+      <label style="line-height:35px;">代理：</label>
+      <select id="q-agent" style="padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;"></select>
+      <label style="line-height:35px;">月份：</label>
+      <input type="text" id="q-month" placeholder="2026-06" style="width:80px;padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
+      <button class="btn btn-primary" onclick="doQuery()">查詢</button>
+    </div>
+    <div id="query-kpi" class="kpi-box"></div>
+    <table>
+      <thead><tr>
+        <th>日期</th><th>代理</th><th>地點</th>
+        <th class="num">洗碼量(萬)</th><th class="num">碼糧</th>
+        <th class="num">已提</th><th class="num">未提</th><th>備註</th>
+      </tr></thead>
+      <tbody id="query-body"></tbody>
+    </table>
+  </div>
+
+  <div class="page" id="page-summary">
+    <div id="summary-kpi" class="kpi-box"></div>
+    <table>
+      <thead><tr>
+        <th>代理</th><th>地點</th><th class="num">洗碼總量(萬)</th>
+        <th class="num">碼糧總額</th><th class="num">已提</th><th class="num">未提</th>
+      </tr></thead>
+      <tbody id="summary-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<div class="modal-bg" id="modal">
+<div class="modal">
+  <h3 id="modal-title">新增交易</h3>
+  <div class="form-row">
+    <div class="form-group" style="flex:1;"><label>交易類型</label><select id="f-type" onchange="toggleTypeFields()"><option value="rolling">洗碼交易</option><option value="cash">現金寄放</option></select></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>日期</label><input type="date" id="f-date" onchange="updateDow()"></div>
+    <div class="form-group"><label>星期</label><input type="text" id="f-dow" readonly></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>代理</label><select id="f-agent"><option value="">請選擇</option></select></div>
+    <div class="form-group" id="fg-client"><label>客戶</label><input type="text" id="f-client"></div>
+  </div>
+  <div class="form-row" id="fg-rolling">
+    <div class="form-group">
+      <label>地點</label>
+      <select id="f-venue">
+        <option value="">請選擇</option>
+        <option>新濠(勵盈1)</option>
+        <option>新濠(勵盈2)</option>
+        <option>銀河(金門1)</option>
+        <option>銀河(金門8)</option>
+        <option>金沙(御匾會)</option>
+        <option>永利(永利會)</option>
+        <option>上葡京</option>
+      </select>
+    </div>
+    <div class="form-group"><label>洗碼量（輸入數字即為萬，例：10＝10萬）</label><input type="text" id="f-vol" oninput="calc()"></div>
+  </div>
+  <div class="form-row" id="fg-rolling-2">
+    <div class="form-group"><label>碼佣率（％）</label><input type="text" id="f-rate" value="1.24" oninput="calc()"></div>
+    <div class="form-group"><label>佣金總額（自動）</label><input type="text" id="f-comm" readonly style="background:#f5f5f5;"></div>
+  </div>
+  <div class="form-row" id="fg-rolling-3">
+    <div class="form-group"><label>代理碼糧</label><input type="text" id="f-bonus" oninput="calc()"></div>
+    <div class="form-group"><label>公基金（自動）</label><input type="text" id="f-fund" readonly style="background:#f5f5f5;"></div>
+  </div>
+  <div class="form-row" id="fg-rolling-4">
+    <div class="form-group"><label>已提領</label><input type="text" id="f-drawn" value="0" oninput="calc()"></div>
+    <div class="form-group"><label>未提領（自動）</label><input type="text" id="f-undrawn" readonly style="background:#f5f5f5;"></div>
+  </div>
+  <div class="form-row" id="fg-cash" style="display:none;">
+    <div class="form-group" style="flex:1;"><label>寄放金額</label><input type="text" id="f-cash" placeholder="代理寄放的現金金額"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group" style="flex:1;"><label>備註</label><input type="text" id="f-note" placeholder="選填"></div>
+  </div>
+  <div style="text-align:right;margin-top:16px;">
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveForm()">儲存</button>
+  </div>
+</div>
+</div>
+<div class="modal-bg" id="fund-modal">
+<div class="modal">
+  <h3>公基金提領</h3>
+  <div class="form-row">
+    <div class="form-group"><label>日期</label><input type="date" id="fund-date"></div>
+    <div class="form-group"><label>類型</label>
+      <select id="fund-type">
+        <option value="deposit">存入</option>
+        <option value="cash_deposit">自存現金</option>
+        <option value="withdraw">提領</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>金額</label><input type="text" id="fund-amount" placeholder="輸入金額"></div>
+    <div class="form-group"><label>備註</label><input type="text" id="fund-note" placeholder="選填"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>可提領餘額</label><input type="text" id="fund-balance" readonly style="background:#f5f5f5;color:#27ae60;font-weight:700;font-size:16px;"></div>
+  </div>
+  <div style="text-align:right;margin-top:16px;">
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeFundModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveFundForm()">儲存</button>
+  </div>
+</div>
+</div>
+
+<div class="modal-bg" id="agent-wallet-modal">
+<div class="modal">
+  <h3 id="agent-wallet-title">代理錢包</h3>
+  <div class="form-row">
+    <div class="form-group"><label>日期</label><input type="date" id="aw-date"></div>
+    <div class="form-group"><label>類型</label>
+      <select id="aw-type">
+        <option value="deposit">存入</option>
+        <option value="cash_deposit">自存現金</option>
+        <option value="withdraw">提領</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>金額</label><input type="text" id="aw-amount" placeholder="輸入金額"></div>
+    <div class="form-group"><label>備註</label><input type="text" id="aw-note" placeholder="選填"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>可提領餘額</label><input type="text" id="aw-balance" readonly style="background:#f5f5f5;color:#27ae60;font-weight:700;font-size:16px;"></div>
+  </div>
+  <div style="text-align:right;margin-top:16px;">
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeAgentWalletModal()">取消</button>
+    <button class="btn btn-primary" onclick="saveAgentWalletForm()">儲存</button>
+  </div>
+</div>
+</div>
+
+<div class="modal-bg" id="agent-mgr-modal">
+<div class="modal">
+  <h3>代理管理</h3>
+  <div style="margin-bottom:14px;display:flex;gap:8px;">
+    <input type="text" id="agent-mgr-new" placeholder="輸入新代理名稱" style="flex:1;padding:9px 12px;border:1px solid rgba(212,175,55,0.2);border-radius:10px;font-size:14px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
+    <button class="btn btn-primary" onclick="addAgentFromMgr()">＋ 新增</button>
+  </div>
+  <div id="agent-mgr-list" style="max-height:300px;overflow-y:auto;"></div>
+  <div style="text-align:right;margin-top:16px;">
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;" onclick="closeAgentMgr()">關閉</button>
+  </div>
+</div>
+</div>
+
+<script>
+var txs = [];
+var fundWithdrawals = [];
+var agentWallets = {};
+var editId = null;
+var nextId = 1;
+var fundNextId = 1;
+var agentWalletNextId = 1;
+var agentList = [];
+
+// ===== 月度管理 =====
+var workingMonth = ""; // 當前工作日誌月份，如 "2026-06"
+
+// ===== 雲端同步層 =====
+// 自動判斷同步 API 來源（本地 WiFi = 同 IP:3000；Render 雲端 = 同源）
+var SYNC_API = (function() {
+  if (window.location.protocol === 'file:') return 'http://192.168.18.157:3000';
+  var h = window.location.hostname;
+  if (h.match(/^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/)) return 'http://' + h + ':3000';
+  return ''; // 雲端同源
+})();
+var syncLastModified = 0;
+var syncPollTimer = null;
+var syncDirty = false;
+var syncDebounce = null;
+var syncOnline = false;
+
+function syncStatus(msg, color) {
+  var el = document.getElementById("sync-dot");
+  var txt = document.getElementById("sync-text");
+  if (!el || !txt) return;
+  el.style.background = color || "#888";
+  el.style.boxShadow = "0 0 6px " + (color || "#888");
+  txt.textContent = msg || "";
+  txt.style.color = color || "#888";
+}
+
+function syncPush() {
+  syncDirty = true;
+  if (syncDebounce) clearTimeout(syncDebounce);
+  syncDebounce = setTimeout(function() {
+    _syncPushNow();
+  }, 800);
+}
+
+function _syncPushNow() {
+  if (!syncOnline) return;
+  syncDirty = false;
+  syncStatus("同步中...", "#D4AF37");
+  var payload = {
+    txs: txs,
+    fundWithdrawals: fundWithdrawals,
+    agentWallets: agentWallets,
+    config: { workingMonth: workingMonth },
+    agentList: agentList,
+    archives: _loadArchivesRaw()
+  };
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", SYNC_API + "/api/save", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.timeout = 5000;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        var r = JSON.parse(xhr.responseText);
+        syncLastModified = r.lastModified || Date.now();
+        syncStatus("已同步", "#2ecc71");
+        setTimeout(function() { syncStatus("", "#2ecc71"); }, 2000);
+      }
+    };
+    xhr.onerror = function() { syncStatus("離線", "#e67e22"); syncOnline = false; };
+    xhr.ontimeout = function() { syncStatus("逾時", "#e74c3c"); };
+    xhr.send(JSON.stringify(payload));
+  } catch(e) { syncStatus("錯誤", "#e74c3c"); }
+}
+
+function syncPull(callback) {
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", SYNC_API + "/api/all", true);
+    xhr.timeout = 5000;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        var r = JSON.parse(xhr.responseText);
+        if (r.ok && r.data) {
+          var d = r.data;
+          // 合併服務器數據到 localStorage + 內存
+          if (d.txs) { txs = d.txs; localStorage.setItem("macau_data", JSON.stringify(d.txs)); }
+          if (d.fundWithdrawals) { fundWithdrawals = d.fundWithdrawals; localStorage.setItem("macau_fund_data", JSON.stringify(d.fundWithdrawals)); }
+          if (d.agentWallets) { agentWallets = d.agentWallets; localStorage.setItem("macau_agent_wallets", JSON.stringify(d.agentWallets)); }
+          if (d.config && d.config.workingMonth) { workingMonth = d.config.workingMonth; localStorage.setItem("macau_config", JSON.stringify(d.config)); }
+          if (d.agentList) { agentList = d.agentList; localStorage.setItem("macau_agent_list", JSON.stringify(d.agentList)); }
+          if (d.archives) { localStorage.setItem("macau_archives", JSON.stringify(d.archives)); }
+          syncLastModified = r.lastModified || Date.now();
+          syncOnline = true;
+          syncStatus("已同步", "#2ecc71");
+          setTimeout(function() { syncStatus("", "#2ecc71"); }, 2000);
+        }
+      }
+      if (callback) callback();
+    };
+    xhr.onerror = function() {
+      syncOnline = false;
+      syncStatus("離線", "#e67e22");
+      if (callback) callback();
+    };
+    xhr.ontimeout = function() {
+      syncStatus("逾時", "#e74c3c");
+      if (callback) callback();
+    };
+    xhr.send();
+  } catch(e) {
+    if (callback) callback();
+  }
+}
+
+function _loadArchivesRaw() {
+  var raw = localStorage.getItem("macau_archives");
+  if (raw) { try { return JSON.parse(raw); } catch(e) {} }
+  return {};
+}
+
+function syncPoll() {
+  if (!syncOnline) return;
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", SYNC_API + "/api/poll?since=" + syncLastModified, true);
+    xhr.timeout = 3000;
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        var r = JSON.parse(xhr.responseText);
+        if (r.changed && r.data) {
+          // 服務器有更新，合併
+          var d = r.data;
+          if (d.txs) { txs = d.txs; localStorage.setItem("macau_data", JSON.stringify(d.txs)); }
+          if (d.fundWithdrawals) { fundWithdrawals = d.fundWithdrawals; localStorage.setItem("macau_fund_data", JSON.stringify(d.fundWithdrawals)); }
+          if (d.agentWallets) { agentWallets = d.agentWallets; localStorage.setItem("macau_agent_wallets", JSON.stringify(d.agentWallets)); }
+          if (d.config && d.config.workingMonth) { workingMonth = d.config.workingMonth; localStorage.setItem("macau_config", JSON.stringify(d.config)); }
+          if (d.agentList) { agentList = d.agentList; localStorage.setItem("macau_agent_list", JSON.stringify(d.agentList)); }
+          if (d.archives) { localStorage.setItem("macau_archives", JSON.stringify(d.archives)); }
+          syncLastModified = r.lastModified;
+          syncStatus("已同步", "#2ecc71");
+          // 刷新 UI
+          loadConfig();
+          populateAgentDropdown();
+          updateMonthBar();
+          renderAll();
+          renderSummary();
+          if (document.getElementById("tab-query").classList.contains("active")) doQuery();
+          setTimeout(function() { syncStatus("", "#2ecc71"); }, 2000);
+        }
+      }
+    };
+    xhr.send();
+  } catch(e) {}
+}
+
+function initSync() {
+  // 先從 localStorage 讀取已有數據
+  loadFromLocal();
+  // 然後從服務器拉取最新數據
+  syncPull(function() {
+    // 合併完成後刷新 UI
+    loadConfig();
+    populateAgentDropdown();
+    updateMonthBar();
+    renderAll();
+    renderSummary();
+    fillAgent();
+    // 啟動定時輪詢（每 4 秒）
+    syncPollTimer = setInterval(syncPoll, 4000);
+  });
+}
+
+function loadFromLocal() {
+  var d = localStorage.getItem("macau_data");
+  if (d) { try { txs = JSON.parse(d); nextId = txs.reduce(function(m, t) { return Math.max(m, (t.id||0)); }, 0) + 1; } catch(e) {} }
+  var f = localStorage.getItem("macau_fund_data");
+  if (f) { try { fundWithdrawals = JSON.parse(f); fundNextId = fundWithdrawals.reduce(function(m, t) { return Math.max(m, (t.id||0)); }, 0) + 1; } catch(e) {} }
+  var aw = localStorage.getItem("macau_agent_wallets");
+  if (aw) { try { agentWallets = JSON.parse(aw); var maxAw = 0; Object.keys(agentWallets).forEach(function(k) { agentWallets[k].forEach(function(t) { maxAw = Math.max(maxAw, t.id||0); }); }); agentWalletNextId = maxAw + 1; } catch(e) {} }
+  var al = localStorage.getItem("macau_agent_list");
+  if (al) { try { agentList = JSON.parse(al); } catch(e) {} }
+  var cfg = localStorage.getItem("macau_config");
+  if (cfg) { try { var c = JSON.parse(cfg); workingMonth = c.workingMonth || workingMonth; } catch(e) {} }
+  // 若 workingMonth 仍為空，設為當前月份
+  if (!workingMonth) {
+    var now = new Date();
+    var b = new Date(now.getTime() + 480 * 60000);
+    workingMonth = b.getUTCFullYear() + "-" + String(b.getUTCMonth()+1).padStart(2,"0");
+  }
+}
+
+function loadConfig() {
+  // workingMonth 已由 loadFromLocal() 載入，此處僅檢測日曆月超前
+  var now = new Date();
+  var b = new Date(now.getTime() + 480 * 60000);
+  var calMonth = b.getUTCFullYear() + "-" + String(b.getUTCMonth()+1).padStart(2,"0");
+  if (workingMonth < calMonth) {
+    document.getElementById("month-hint").textContent = "⚠ 當前日曆月為 " + calMonth + "，建議盡快結算";
+    document.getElementById("month-hint").style.display = "inline";
+  }
+}
+
+function saveConfig() {
+  localStorage.setItem("macau_config", JSON.stringify({ workingMonth: workingMonth }));
+  syncPush();
+}
+
+function getNextMonth(m) {
+  var parts = m.split("-");
+  var y = parseInt(parts[0]), mo = parseInt(parts[1]);
+  mo++;
+  if (mo > 12) { mo = 1; y++; }
+  return y + "-" + String(mo).padStart(2,"0");
+}
+
+function getLastDayOfMonth(m) {
+  var parts = m.split("-");
+  var y = parseInt(parts[0]), mo = parseInt(parts[1]);
+  return new Date(y, mo, 0).getDate(); // mo=month (0-based in JS: mo=6 means July, so day 0 of July = June 30)
+}
+
+function isDateInWorkingMonth(ds, m) {
+  // ds: "2026-06-15", m: "2026-06"
+  if (!ds || !m) return true; // 沒有日期或月份則放行
+  var mo = ds.slice(0, 7);
+  return mo === m;
+}
+
+function getMonthRange(m) {
+  return m + "-01 ~ " + m + "-" + String(getLastDayOfMonth(m)).padStart(2,"0");
+}
+
+function updateMonthBar() {
+  document.getElementById("month-badge").textContent = workingMonth;
+  document.getElementById("month-hint").style.display = "none";
+  document.getElementById("month-status").textContent = "開放登錄中";
+  document.getElementById("month-status").style.color = "#2ecc71";
+  document.getElementById("btn-close-month").style.display = "inline-block";
+  document.getElementById("btn-close-month").textContent = "🔒 月末結算 → " + getNextMonth(workingMonth);
+}
+
+// ===== 月末結算 =====
+function closeCurrentMonth() {
+  // 計算各代理的未提領餘額
+  var summary = [];
+  var agentSet = {};
+  for (var i = 0; i < txs.length; i++) {
+    var a = txs[i].agent || "";
+    if (!a) continue;
+    if (!agentSet[a]) agentSet[a] = { bonus: 0, cash: 0 };
+    agentSet[a].bonus += (txs[i].bonus || 0);
+    agentSet[a].cash += (txs[i].cash || 0);
+  }
+  // 扣除錢包提領
+  var agents = Object.keys(agentSet);
+  for (var j = 0; j < agents.length; j++) {
+    var a = agents[j];
+    var awArr = agentWallets[a] || [];
+    var awDep = 0, awCDep = 0, awWithdraw = 0;
+    for (var k = 0; k < awArr.length; k++) {
+      var t = awArr[k].type;
+      if (t === "deposit") awDep += (awArr[k].amount || 0);
+      else if (t === "cash_deposit") awCDep += (awArr[k].amount || 0);
+      else awWithdraw += (awArr[k].amount || 0);
+    }
+    var bal = agentSet[a].bonus + agentSet[a].cash + awDep + awCDep - awWithdraw;
+    summary.push({ agent: a, balance: Math.max(0, bal), bonus: agentSet[a].bonus, cash: agentSet[a].cash, deposit: awDep, cashDep: awCDep, withdrawn: awWithdraw });
+  }
+  // 計算公基金餘額
+  var totalFund = 0;
+  for (var i = 0; i < txs.length; i++) { totalFund += (txs[i].fund || 0); }
+  var fwDep = 0, fwCDep = 0, fwWithdraw = 0;
+  for (var i = 0; i < fundWithdrawals.length; i++) {
+    var ft = fundWithdrawals[i].type;
+    if (ft === "deposit") fwDep += (fundWithdrawals[i].amount || 0);
+    else if (ft === "cash_deposit") fwCDep += (fundWithdrawals[i].amount || 0);
+    else fwWithdraw += (fundWithdrawals[i].amount || 0);
+  }
+  var fundBal = Math.max(0, totalFund + fwDep + fwCDep - fwWithdraw);
+
+  // 建構確認訊息
+  var msg = "══════════════════════\n";
+  msg += "  月末結算確認\n";
+  msg += "══════════════════════\n\n";
+  msg += "📅 結算月份： " + workingMonth + "\n";
+  msg += "   登錄期限：" + getMonthRange(workingMonth) + "\n\n";
+  msg += "── 代理未提領餘額 ──\n";
+  if (summary.length === 0) {
+    msg += "  (無代理資料)\n";
+  } else {
+    for (var s = 0; s < summary.length; s++) {
+      var sm = summary[s];
+      msg += "  " + sm.agent + "： ¥" + fmt(sm.balance) + "\n";
+      msg += "    碼糧 " + fmt(sm.bonus) + " + 現金 " + fmt(sm.cash) + " + 存入 " + fmt(sm.deposit) + " + 自存 " + fmt(sm.cashDep) + " - 提領 " + fmt(sm.withdrawn) + "\n";
+    }
+  }
+  msg += "\n── 公基金 ──\n";
+  msg += "  可提餘額： ¥" + fmt(fundBal) + "\n";
+  msg += "  (總額 " + fmt(totalFund) + " + 存入 " + fmt(fwDep) + " + 自存 " + fmt(fwCDep) + " - 提領 " + fmt(fwWithdraw) + ")\n\n";
+  msg += "══════════════════════\n";
+  msg += "結算後以上餘額將累入下月 " + getNextMonth(workingMonth) + "\n";
+  msg += "當月明細將存檔保留，下月開始新帳。\n\n";
+  msg += "確定要進行月末結算嗎？";
+
+  if (!confirm(msg)) return;
+
+  // 存檔當前月資料
+  var archive = {
+    txs: JSON.parse(JSON.stringify(txs)),
+    fundWithdrawals: JSON.parse(JSON.stringify(fundWithdrawals)),
+    agentWallets: JSON.parse(JSON.stringify(agentWallets)),
+    closedAt: new Date().toISOString(),
+    carryForward: { agents: summary, fund: fundBal }
+  };
+  var archives = {};
+  var rawArch = localStorage.getItem("macau_archives");
+  if (rawArch) { try { archives = JSON.parse(rawArch); } catch(e) {} }
+  archives[workingMonth] = archive;
+  localStorage.setItem("macau_archives", JSON.stringify(archives));
+
+  // 遞進到下一月
+  workingMonth = getNextMonth(workingMonth);
+  saveConfig();
+  updateMonthBar();
+  doQuery();
+  alert("✅ 月末結算完成！\n\n已存檔 " + (Object.keys(archives).length) + " 個月份\n下月 " + workingMonth + " 已開放登錄\n登錄期限：" + getMonthRange(workingMonth));
+}
+
+// ===== 日期驗證輔助 =====
+function validateMonthDate(dateVal, label) {
+  if (!isDateInWorkingMonth(dateVal, workingMonth)) {
+    alert("⚠ 日期必須在 " + getMonthRange(workingMonth) + " 範圍內！\n\n" + (label||"此筆") + "日期為 " + dateVal + "，不在工作日誌月份中。\n如需記錄其他月份，請先完成月末結算。");
+    return false;
+  }
+  return true;
+}
+
+function toNum(s) {
+  if (!s && s !== 0) return 0;
+  var v = parseFloat(String(s).replace(/,/g, "").replace(/萬/g, ""));
+  return isNaN(v) ? 0 : v;
+}
+
+function fmt(n) {
+  if (!n || isNaN(n)) return "0";
+  return Math.round(n).toLocaleString();
+}
+
+function getDow(ds) {
+  var days = ["日","一","二","三","四","五","六"];
+  return "週" + days[new Date(ds + "T00:00:00+08:00").getDay()];
+}
+
+function nowStr() {
+  var d = new Date();
+  var b = new Date(d.getTime() + 480 * 60000); // 強制 UTC+8
+  return b.getUTCFullYear() + "-" + String(b.getUTCMonth()+1).padStart(2,"0") + "-" + String(b.getUTCDate()).padStart(2,"0");
+}
+
+function loadAgentList() {
+  var raw = localStorage.getItem("macau_agent_list");
+  if (raw) { try { agentList = JSON.parse(raw); } catch(e) { agentList = []; } }
+}
+function saveAgentList() {
+  localStorage.setItem("macau_agent_list", JSON.stringify(agentList));
+  syncPush();
+}
+function populateAgentDropdown() {
+  var sel = document.getElementById("f-agent");
+  if (!sel) return;
+  sel.innerHTML = '<option value="">請選擇</option>';
+  for (var i = 0; i < agentList.length; i++) {
+    sel.innerHTML += '<option value="' + agentList[i] + '">' + agentList[i] + '</option>';
+  }
+}
+function openAgentMgr() {
+  document.getElementById("agent-mgr-new").value = "";
+  renderAgentMgr();
+  document.getElementById("agent-mgr-modal").style.display = "flex";
+}
+function closeAgentMgr() {
+  document.getElementById("agent-mgr-modal").style.display = "none";
+  populateAgentDropdown();
+  fillAgent();
+}
+function addAgentFromMgr() {
+  var name = document.getElementById("agent-mgr-new").value.trim();
+  if (!name) return;
+  if (agentList.indexOf(name) >= 0) { alert("代理已存在！"); return; }
+  agentList.push(name);
+  agentList.sort();
+  saveAgentList();
+  document.getElementById("agent-mgr-new").value = "";
+  renderAgentMgr();
+}
+function removeAgent(name) {
+  if (!confirm("確定刪除代理「" + name + "」？\n（不影響已有交易記錄）")) return;
+  var idx = agentList.indexOf(name);
+  if (idx >= 0) agentList.splice(idx, 1);
+  saveAgentList();
+  renderAgentMgr();
+}
+function renderAgentMgr() {
+  var div = document.getElementById("agent-mgr-list");
+  var h = "";
+  if (!agentList.length) {
+    h = "<div style='text-align:center;color:#999;padding:20px;'>尚無代理，請新增</div>";
+  } else {
+    h = "<table style='margin-top:0;'><thead><tr><th>代理名稱</th><th style='text-align:center;'>操作</th></tr></thead><tbody>";
+    for (var i = 0; i < agentList.length; i++) {
+      h += "<tr><td>" + agentList[i] + "</td><td style='text-align:center;'><button class='btn-red' onclick=\"removeAgent('" + agentList[i] + "')\">刪除</button></td></tr>";
+    }
+    h += "</tbody></table>";
+  }
+  div.innerHTML = h;
+}
+
+function updateDow() {
+  var date = document.getElementById("f-date").value;
+  if (date) document.getElementById("f-dow").value = getDow(date);
+}
+
+function toggleTypeFields() {
+  var isCash = document.getElementById("f-type").value === "cash";
+  var rollingIds = ["fg-rolling","fg-rolling-2","fg-rolling-3","fg-rolling-4"];
+  for (var i = 0; i < rollingIds.length; i++) {
+    document.getElementById(rollingIds[i]).style.display = isCash ? "none" : "flex";
+  }
+  document.getElementById("fg-client").style.display = isCash ? "none" : "flex";
+  document.getElementById("fg-cash").style.display = isCash ? "flex" : "none";
+}
+
+function calcComm(vol, rate) {
+  if (!vol || !rate) return 0;
+  return Math.ceil(vol * 10000 * rate / 100);
+}
+
+function calcFund(comm, bonus) {
+  return Math.max(0, comm - bonus);
+}
+
+function showPage(name) {
+  document.getElementById("page-all").style.display = "none";
+  document.getElementById("page-query").style.display = "none";
+  document.getElementById("page-summary").style.display = "none";
+  var tabs = document.querySelectorAll(".tab");
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].style.color = "#666";
+    tabs[i].style.background = "#f0f0f0";
+    tabs[i].style.borderBottom = "none";
+  }
+  document.getElementById("page-" + name).style.display = "block";
+  var idx = (name === "all") ? 0 : (name === "query") ? 1 : 2;
+  tabs[idx].style.color = "#667eea";
+  tabs[idx].style.background = "white";
+  tabs[idx].style.borderBottom = "3px solid #667eea";
+  if (name === "all") renderAll();
+  if (name === "summary") renderSummary();
+  if (name === "query") { fillAgent(); doQuery(); }
+}
+
+function openModal() {
+  editId = null;
+  document.getElementById("modal-title").textContent = "新增交易";
+  document.getElementById("f-date").value = nowStr();
+  document.getElementById("f-dow").value = getDow(nowStr());
+  populateAgentDropdown();
+  document.getElementById("f-type").value = "rolling";
+  toggleTypeFields();
+  document.getElementById("f-client").value = "";
+  document.getElementById("f-venue").value = "";
+  document.getElementById("f-vol").value = "";
+  document.getElementById("f-rate").value = "1.24";
+  document.getElementById("f-comm").value = "";
+  document.getElementById("f-bonus").value = "";
+  document.getElementById("f-fund").value = "";
+  document.getElementById("f-drawn").value = "0";
+  document.getElementById("f-undrawn").value = "";
+  document.getElementById("f-cash").value = "";
+  document.getElementById("f-note").value = "";
+  document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+}
+
+function calc() {
+  var vol = toNum(document.getElementById("f-vol").value);
+  var rate = toNum(document.getElementById("f-rate").value);
+  var comm = calcComm(vol, rate);
+  var bonus = toNum(document.getElementById("f-bonus").value);
+  document.getElementById("f-comm").value = comm > 0 ? comm : "";
+  document.getElementById("f-fund").value = comm > 0 ? calcFund(comm, bonus) : "";
+  var drawn = toNum(document.getElementById("f-drawn").value);
+  document.getElementById("f-undrawn").value = bonus > 0 ? Math.max(0, bonus - drawn) : "";
+}
+
+function saveForm() {
+  var date = document.getElementById("f-date").value;
+  var type = document.getElementById("f-type").value;
+  var agent = document.getElementById("f-agent").value.trim();
+  var note = document.getElementById("f-note").value.trim();
+  if (!date) { alert("請選擇日期！"); return; }
+  if (!validateMonthDate(date, "交易")) return;
+  if (!agent) { alert("請選擇代理！"); return; }
+
+  if (type === "cash") {
+    // 現金寄放：只需日期、代理、寄放金額、備註
+    var cash = toNum(document.getElementById("f-cash").value);
+    if (!cash) { alert("請輸入寄放金額！"); return; }
+    if (editId) {
+      for (var i = 0; i < txs.length; i++) {
+        if (txs[i].id === editId) {
+          txs[i].date = date;
+          txs[i].dow = getDow(date);
+          txs[i].type = "cash";
+          txs[i].agent = agent;
+          txs[i].cash = cash;
+          txs[i].note = note;
+          txs[i].client = "";
+          txs[i].venue = "";
+          txs[i].volume = 0;
+          txs[i].rate = 0;
+          txs[i].comm = 0;
+          txs[i].bonus = 0;
+          txs[i].drawn = 0;
+          txs[i].undrawn = 0;
+          txs[i].fund = 0;
+          break;
+        }
+      }
+    } else {
+      txs.push({
+        id: nextId++, date: date, dow: getDow(date), type: "cash",
+        agent: agent, client: "", venue: "", volume: 0, rate: 0,
+        comm: 0, bonus: 0, drawn: 0, undrawn: 0, fund: 0,
+        cash: cash, note: note
+      });
+    }
+  } else {
+    // 洗碼交易：原有邏輯
+    var client = document.getElementById("f-client").value.trim();
+    var venue = document.getElementById("f-venue").value;
+    var vol = toNum(document.getElementById("f-vol").value);
+    var rate = toNum(document.getElementById("f-rate").value);
+    var bonus = toNum(document.getElementById("f-bonus").value);
+    var drawn = toNum(document.getElementById("f-drawn").value);
+    if (!vol) { alert("請輸入洗碼量！"); return; }
+    var comm = calcComm(vol, rate);
+    var fund = calcFund(comm, bonus);
+    var undrawn = Math.max(0, bonus - drawn);
+    if (editId) {
+      for (var i = 0; i < txs.length; i++) {
+        if (txs[i].id === editId) {
+          txs[i].date = date; txs[i].dow = getDow(date);
+          txs[i].type = "rolling";
+          txs[i].agent = agent; txs[i].client = client; txs[i].venue = venue;
+          txs[i].volume = vol; txs[i].rate = rate;
+          txs[i].comm = comm; txs[i].bonus = bonus;
+          txs[i].drawn = drawn; txs[i].undrawn = undrawn;
+          txs[i].fund = fund; txs[i].note = note;
+          txs[i].cash = 0;
+          break;
+        }
+      }
+    } else {
+      txs.push({
+        id: nextId++, date: date, dow: getDow(date), type: "rolling",
+        agent: agent, client: client, venue: venue,
+        volume: vol, rate: rate, comm: comm, bonus: bonus,
+        drawn: drawn, undrawn: undrawn, fund: fund, cash: 0, note: note
+      });
+    }
+  }
+  saveData(true);
+  renderAll();
+  renderSummary();
+  closeModal();
+  alert(editId ? "已更新！" : "已新增！");
+  editId = null;
+}
+
+function openFundModal() {
+  document.getElementById("fund-date").value = nowStr();
+  document.getElementById("fund-type").value = "withdraw";
+  document.getElementById("fund-amount").value = "";
+  document.getElementById("fund-note").value = "";
+  var totalF = 0;
+  for (var i = 0; i < txs.length; i++) { totalF += (txs[i].fund || 0); }
+  var totalW = 0, totalD = 0, totalCD = 0;
+  for (var i = 0; i < fundWithdrawals.length; i++) {
+    if (fundWithdrawals[i].type === "deposit") { totalD += (fundWithdrawals[i].amount || 0); }
+    else if (fundWithdrawals[i].type === "cash_deposit") { totalCD += (fundWithdrawals[i].amount || 0); }
+    else { totalW += (fundWithdrawals[i].amount || 0); }
+  }
+  document.getElementById("fund-balance").value = fmt(Math.max(0, totalF + totalD + totalCD - totalW));
+  document.getElementById("fund-modal").classList.add("show");
+}
+function closeFundModal() {
+  document.getElementById("fund-modal").classList.remove("show");
+}
+function saveFundForm() {
+  var date = document.getElementById("fund-date").value;
+  var type = document.getElementById("fund-type").value;
+  var amount = toNum(document.getElementById("fund-amount").value);
+  var note = document.getElementById("fund-note").value.trim();
+  if (!date) { alert("請選擇日期！"); return; }
+  if (!validateMonthDate(date, "公基金異動")) return;
+  if (!amount) { alert("請輸入金額！"); return; }
+  fundWithdrawals.push({ id: fundNextId++, date: date, type: type, amount: amount, note: note });
+  saveFundData(true);
+  closeFundModal();
+  doQuery();
+  alert("已儲存！");
+}
+function deleteFund(id) {
+  if (!confirm("確定刪除？")) return;
+  var newArr = [];
+  for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id !== id) newArr.push(fundWithdrawals[i]); }
+  fundWithdrawals = newArr;
+  saveFundData(true);
+  doQuery();
+}
+function saveFundData(silent) {
+  localStorage.setItem("macau_fund_data", JSON.stringify(fundWithdrawals));
+  syncPush();
+}
+function loadFundData(silent) {
+  var d = localStorage.getItem("macau_fund_data");
+  if (!d) return;
+  fundWithdrawals = JSON.parse(d);
+  var maxId = 0;
+  for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxId) maxId = fundWithdrawals[i].id; }
+  fundNextId = maxId + 1;
+}
+
+// ===== 代理錢包 =====
+function openAgentWalletModal(agentName) {
+  document.getElementById("aw-date").value = nowStr();
+  document.getElementById("aw-amount").value = "";
+  document.getElementById("aw-note").value = "";
+  document.getElementById("aw-type").value = "withdraw";
+  document.getElementById("agent-wallet-title").textContent = "代理錢包 — " + agentName;
+  document.getElementById("agent-wallet-modal").setAttribute("data-agent", agentName);
+  var totalB = 0, totalC = 0, txDrawn = 0;
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].agent === agentName) { totalB += (txs[i].bonus || 0); totalC += (txs[i].cash || 0); txDrawn += (txs[i].drawn || 0); }
+  }
+  var awArr = agentWallets[agentName] || [];
+  var awDeposit = 0, awCashDep = 0, awWithdraw = 0;
+  for (var i = 0; i < awArr.length; i++) {
+    var t = awArr[i].type;
+    if (t === "deposit") awDeposit += (awArr[i].amount || 0);
+    else if (t === "cash_deposit") awCashDep += (awArr[i].amount || 0);
+    else awWithdraw += (awArr[i].amount || 0);
+  }
+  var effectiveDrawn = Math.max(awWithdraw, txDrawn);
+  document.getElementById("aw-balance").value = fmt(Math.max(0, totalB + totalC + awDeposit + awCashDep - effectiveDrawn));
+  document.getElementById("agent-wallet-modal").classList.add("show");
+}
+function closeAgentWalletModal() {
+  document.getElementById("agent-wallet-modal").classList.remove("show");
+}
+function saveAgentWalletForm() {
+  var date = document.getElementById("aw-date").value;
+  var type = document.getElementById("aw-type").value;
+  var amount = toNum(document.getElementById("aw-amount").value);
+  var note = document.getElementById("aw-note").value.trim();
+  var agent = document.getElementById("agent-wallet-modal").getAttribute("data-agent");
+  if (!date) { alert("請選擇日期！"); return; }
+  if (!validateMonthDate(date, "代理錢包異動")) return;
+  if (!amount) { alert("請輸入金額！"); return; }
+  if (!agentWallets[agent]) agentWallets[agent] = [];
+  agentWallets[agent].push({ id: agentWalletNextId++, date: date, type: type, amount: amount, note: note });
+  saveAgentWallets(true);
+  syncAgentDrawn(agent);
+  closeAgentWalletModal();
+  doQuery();
+  alert("已儲存！");
+}
+function deleteAgentWallet(agent, id) {
+  if (!confirm("確定刪除？")) return;
+  var arr = agentWallets[agent] || [];
+  var newArr = [];
+  for (var i = 0; i < arr.length; i++) { if (arr[i].id !== id) newArr.push(arr[i]); }
+  agentWallets[agent] = newArr;
+  saveAgentWallets(true);
+  syncAgentDrawn(agent);
+  doQuery();
+}
+function syncAgentDrawn(agent) {
+  var awArr = agentWallets[agent] || [];
+  var awTotal = 0;
+  for (var i = 0; i < awArr.length; i++) {
+    var t = awArr[i].type;
+    if (!t || t === "withdraw") awTotal += (awArr[i].amount || 0);
+  }
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].agent === agent) txs[i].drawn = awTotal;
+  }
+  saveData(true);
+  renderAll();
+  renderSummary();
+}
+function saveAgentWallets(silent) {
+  localStorage.setItem("macau_agent_wallets", JSON.stringify(agentWallets));
+  syncPush();
+}
+function loadAgentWallets(silent) {
+  var d = localStorage.getItem("macau_agent_wallets");
+  if (!d) return;
+  agentWallets = JSON.parse(d);
+  var maxId = 0;
+  var agents = Object.keys(agentWallets);
+  for (var i = 0; i < agents.length; i++) {
+    var arr = agentWallets[agents[i]];
+    for (var j = 0; j < arr.length; j++) { if (arr[j].id > maxId) maxId = arr[j].id; }
+  }
+  agentWalletNextId = maxId + 1;
+}
+
+function saveData(silent) {
+  localStorage.setItem("macau_data", JSON.stringify(txs));
+  syncPush();
+  if (!silent) alert("已儲存 " + txs.length + " 筆");
+}
+
+function loadData(silent) {
+  var d = localStorage.getItem("macau_data");
+  if (!d) { if (!silent) alert("無資料"); return; }
+  txs = JSON.parse(d);
+  var maxId = 0;
+  for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; }
+  nextId = maxId + 1;
+  renderAll();
+  renderSummary();
+  if (!silent) alert("已讀取 " + txs.length + " 筆");
+}
+
+function deleteTx(id) {
+  if (!confirm("確定刪除此筆交易？")) return;
+  var newTxs = [];
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].id !== id) newTxs.push(txs[i]);
+  }
+  txs = newTxs;
+  saveData(true);
+  renderAll();
+  renderSummary();
+}
+
+document.addEventListener("click", function(e) {
+  var btn = e.target.closest("[data-del]");
+  if (!btn) return;
+  e.preventDefault();
+  var id = parseInt(btn.getAttribute("data-del"));
+  deleteTx(id);
+});
+
+function renderAll() {
+  var tbody = document.getElementById("all-body");
+  tbody.innerHTML = "";
+  var tbl = document.getElementById("all-table");
+  var msg = document.getElementById("all-msg");
+  if (!txs.length) { tbl.style.display = "none"; msg.style.display = "block"; return; }
+  tbl.style.display = "table";
+  msg.style.display = "none";
+  txs.sort(function(a, b) { return a.date.localeCompare(b.date); });
+  for (var i = 0; i < txs.length; i++) {
+    var t = txs[i];
+    var tr = document.createElement("tr");
+    var isCash = t.type === "cash";
+    var typeLabel = isCash ? "<span style='color:#e67e22;font-weight:600;'>現金寄放</span>" : "洗碼";
+    var vol = isCash ? 0 : (toNum(t.volume) || 0);
+    var undrawn = isCash ? (t.cash || 0) : Math.max(0, (t.bonus || 0) - (t.drawn || 0));
+    var commFmt = isCash ? "" : fmt(t.comm);
+    var bonusFmt = isCash ? "" : fmt(t.bonus);
+    var drawnFmt = isCash ? "" : fmt(t.drawn);
+    var undrawnFmt = isCash ? fmt(t.cash) : fmt(undrawn);
+    tr.innerHTML =
+      "<td>" + typeLabel + "</td>" +
+      "<td>" + (t.date || "") + "</td>" +
+      "<td>" + (t.agent || "") + "</td>" +
+      "<td>" + (isCash ? "" : (t.client || "")) + "</td>" +
+      "<td>" + (isCash ? "" : (t.venue || "")) + "</td>" +
+      "<td class='num'>" + (vol > 0 ? vol.toLocaleString() + "萬" : "") + "</td>" +
+      "<td class='num'>" + commFmt + "</td>" +
+      "<td class='num'>" + bonusFmt + "</td>" +
+      "<td class='num'>" + drawnFmt + "</td>" +
+      "<td class='num'>" + undrawnFmt + "</td>" +
+      "<td>" + (t.note || "") + "</td>" +
+      "<td><button class='btn-red' data-del='" + t.id + "'>刪除</button></td>";
+    tbody.appendChild(tr);
+  }
+  fillAgent();
+}
+
+function renderSummary() {
+  var map = {};
+  for (var i = 0; i < txs.length; i++) {
+    var t = txs[i];
+    var key = (t.agent || "未設定") + "|" + (t.venue || "");
+    if (!map[key]) map[key] = { agent: t.agent || "未設定", venue: t.venue, vol: 0, bonus: 0, drawn: 0, cash: 0 };
+    map[key].vol += toNum(t.volume) || 0;
+    map[key].bonus += t.bonus || 0;
+    map[key].drawn += t.drawn || 0;
+    if (t.type === "cash") map[key].cash += (t.cash || 0);
+  }
+  var tbody = document.getElementById("summary-body");
+  tbody.innerHTML = "";
+  var totalBonus = 0, totalFund = 0;
+  var keys = Object.keys(map);
+  for (var k = 0; k < keys.length; k++) {
+    var c = map[keys[k]];
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>" + c.agent + "</td>" +
+      "<td>" + (c.venue || "-") + "</td>" +
+      "<td class='num'>" + (c.vol >= 10000 ? (c.vol/10000).toFixed(1) + "萬" : fmt(c.vol)) + "</td>" +
+      "<td class='num'>" + fmt(c.bonus) + "</td>" +
+      "<td class='num'>" + fmt(c.drawn) + "</td>" +
+      "<td class='num'>" + fmt(Math.max(0, c.bonus - c.drawn + c.cash)) + "</td>";
+    tbody.appendChild(tr);
+    totalBonus += c.bonus;
+    totalFund += Math.max(0, c.bonus - c.drawn + c.cash);
+  }
+  document.getElementById("summary-kpi").innerHTML =
+    "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(totalBonus) + "</div></div>" +
+    "<div class='kpi-card' style='background:#27ae60;'><div class='label'>未提領總額</div><div class='value'>" + fmt(totalFund) + "</div></div>";
+}
+
+function fillAgent() {
+  var sel = document.getElementById("q-agent");
+  var h = "<option value=''>全部</option>";
+  for (var j = 0; j < agentList.length; j++) { h += "<option value='" + agentList[j] + "'>" + agentList[j] + "</option>"; }
+  h += "<option value='__FUND__'>公基金</option>";
+  sel.innerHTML = h;
+}
+
+function doQuery() {
+  var agent = document.getElementById("q-agent").value;
+  var month = document.getElementById("q-month").value.trim();
+  if (!month) month = workingMonth || nowStr().slice(0, 7);
+  // 公基金查询 - 分筆流水（含累計餘額）
+  if (agent === "__FUND__") {
+    var allFundTxs = [], preBalance = 0, totalFund = 0;
+    for (var i = 0; i < txs.length; i++) {
+      var fv = txs[i].fund || 0;
+      totalFund += fv;
+      if (fv > 0) allFundTxs.push({ date: txs[i].date, desc: (txs[i].agent||"") + " " + (txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: txs[i].id });
+    }
+    allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
+    var totalW = 0, totalD = 0, totalCD = 0;
+    for (var i = 0; i < fundWithdrawals.length; i++) {
+      var r = fundWithdrawals[i];
+      if (r.type === "deposit") { totalD += (r.amount || 0); }
+      else if (r.type === "cash_deposit") { totalCD += (r.amount || 0); }
+      else { totalW += (r.amount || 0); }
+      var typeLabel = r.type === "deposit" ? "存入" : (r.type === "cash_deposit" ? "自存現金" : "提領");
+      allFundTxs.push({ date: r.date, desc: r.note||"", amount: r.amount, type: typeLabel, rawType: r.type, source: "fund", id: r.id });
+    }
+    allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
+    // 計算上月累計（當月之前的餘額）
+    preBalance = 0;
+    for (var i = 0; i < allFundTxs.length; i++) {
+      var e = allFundTxs[i];
+      if (e.date < month + "-01") {
+        if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") preBalance += e.amount;
+        else preBalance -= e.amount;
+      }
+    }
+    var balance = Math.max(0, totalFund + totalD + totalCD - totalW);
+    var running = preBalance;
+    document.getElementById("query-kpi").innerHTML =
+      "<div class='kpi-card'><div class='label'>公基金總額</div><div class='value'>" + fmt(totalFund) + "</div></div>" +
+      (totalCD > 0 ? "<div class='kpi-card' style='background:#e67e22;'><div class='label'>自存現金</div><div class='value'>" + fmt(totalCD) + "</div></div>" : "") +
+      "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(totalW) + "</div></div>" +
+      "<div class='kpi-card' style='background:#27ae60;'><div class='label'>可提餘額</div><div class='value'>" + fmt(balance) + "</div></div>" +
+      "<button class='btn btn-primary' style='margin-left:10px;' onclick='openFundModal()'>＋ 提領</button>";
+    var tbody = document.getElementById("query-body");
+    tbody.innerHTML = "";
+    // 上月累計行
+    if (preBalance > 0) {
+      var pr = document.createElement("tr");
+      pr.style.cssText = "background:rgba(212,175,55,0.08);";
+      pr.innerHTML = "<td>" + month + "-01</td><td style='color:#D4AF37;font-weight:600;'>上月累計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-weight:700;color:#D4AF37;'>" + fmt(preBalance) + "</td>";
+      tbody.appendChild(pr);
+    }
+    var hr = document.createElement("tr");
+    hr.innerHTML = "<th>日期</th><th>說明</th><th class='num'>入帳</th><th class='num'>提領</th><th>操作</th><th class='num'>基金餘額</th>";
+    tbody.appendChild(hr);
+    for (var i = 0; i < allFundTxs.length; i++) {
+      var e = allFundTxs[i];
+      if (e.date < month + "-01") continue;
+      if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") running += e.amount;
+      else running -= e.amount;
+      var tr = document.createElement("tr");
+      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(" + e.id + ")'>刪除</button>" : "<span style='color:#999;font-size:11px;'>自動</span>";
+      var inVal = (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") ? fmt(e.amount) : "";
+      var outVal = (e.type === "提領") ? fmt(e.amount) : "";
+      var typeClr = e.type === "提領" ? "color:#e74c3c;font-weight:600;" : (e.type === "存入" ? "color:#2980b9;" : (e.type === "自存現金" ? "color:#e67e22;font-weight:600;" : "color:#27ae60;"));
+      tr.innerHTML = "<td>" + e.date + "</td><td style='" + typeClr + "'>" + e.desc + "</td><td class='num' style='color:#27ae60;'>" + inVal + "</td><td class='num' style='color:#e74c3c;'>" + outVal + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td>";
+      tbody.appendChild(tr);
+    }
+    // 合計行
+    var totalRow = document.createElement("tr");
+    totalRow.style.cssText = "background:rgba(30,30,40,0.8);font-weight:700;color:#D4AF37;";
+    totalRow.innerHTML = "<td></td><td style='color:#1a1a2e;'>合計</td><td class='num' style='color:#27ae60;'></td><td class='num' style='color:#e74c3c;'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td>";
+    tbody.appendChild(totalRow);
+    return;
+  }
+  var data = [];
+  for (var i = 0; i < txs.length; i++) {
+    var t = txs[i];
+    if (t.date && t.date.indexOf(month) !== 0) continue;
+    if (agent && t.agent !== agent) continue;
+    data.push(t);
+  }
+  var tv = 0, tc = 0, tb = 0, td = 0;
+  for (var k = 0; k < data.length; k++) {
+    tv += toNum(data[k].volume) || 0;
+    tc += data[k].comm || 0;
+    tb += data[k].bonus || 0;
+    td += data[k].drawn || 0;
+  }
+  document.getElementById("query-kpi").innerHTML =
+    "<div class='kpi-card'><div class='label'>洗碼總量</div><div class='value'>" + (tv >= 10000 ? (tv/10000).toFixed(1) + "萬" : tv.toLocaleString() + "萬") + "</div></div>" +
+    "<div class='kpi-card'><div class='label'>佣金總額</div><div class='value'>" + fmt(tc) + "</div></div>" +
+    "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(tb) + "</div></div>" +
+    "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(td) + "</div></div>" +
+    "<div class='kpi-card' style='background:#27ae60;'><div class='label'>未提領</div><div class='value'>" + fmt(Math.max(0, tb - td)) + "</div></div>";
+  var tbody = document.getElementById("query-body");
+  tbody.innerHTML = "";
+  for (var m = 0; m < data.length; m++) {
+    var t = data[m];
+    var tr = document.createElement("tr");
+    if (t.type === "cash") {
+      tr.innerHTML =
+        "<td>" + t.date + "</td>" +
+        "<td style='color:#e67e22;font-weight:600;'>現金寄放</td>" +
+        "<td>" + (t.note || "") + "</td>" +
+        "<td class='num'></td>" +
+        "<td class='num' style='color:#e67e22;'>+" + fmt(t.cash || 0) + "</td>" +
+        "<td class='num'></td>" +
+        "<td class='num' style='color:#e67e22;'>" + fmt(t.cash || 0) + "</td>" +
+        "<td>" + (t.note || "") + "</td>";
+    } else {
+      tr.innerHTML =
+        "<td>" + t.date + "</td>" +
+        "<td>" + (t.agent || "") + "</td>" +
+        "<td>" + (t.venue || "") + "</td>" +
+        "<td class='num'>" + (toNum(t.volume) > 0 ? toNum(t.volume).toLocaleString() + "萬" : "") + "</td>" +
+        "<td class='num'>" + fmt(t.bonus) + "</td>" +
+        "<td class='num'>" + fmt(t.drawn) + "</td>" +
+        "<td class='num'>" + fmt(Math.max(0, (t.bonus||0) - (t.drawn||0))) + "</td>" +
+        "<td>" + (t.note || "") + "</td>";
+    }
+    tbody.appendChild(tr);
+  }
+  // 代理錢包（選特定代理時顯示）- 分筆流水含累計餘額
+  if (agent) {
+    var awArr = agentWallets[agent] || [];
+    // 計算全部碼糧總額（不分月份）含現金寄放
+    var allBonus = 0, allCash = 0, allDrawn = 0;
+    for (var n = 0; n < txs.length; n++) {
+      if (txs[n].agent === agent) {
+        allBonus += (txs[n].bonus || 0);
+        allCash += (txs[n].cash || 0);
+      }
+    }
+    for (var p = 0; p < awArr.length; p++) {
+      var wt = awArr[p].type;
+      if (!wt || wt === "withdraw") allDrawn += (awArr[p].amount || 0);
+    }
+    // 計算錢包存款總額
+    var awDep = 0, awCDep = 0;
+    for (var p = 0; p < awArr.length; p++) {
+      var wt = awArr[p].type;
+      if (wt === "deposit") awDep += (awArr[p].amount || 0);
+      else if (wt === "cash_deposit") awCDep += (awArr[p].amount || 0);
+    }
+    var awBalance = Math.max(0, allBonus + allCash + awDep + awCDep - allDrawn);
+    // 建立合併流水：全部交易 + 錢包提領（含現金寄放）
+    var allLedger = [];
+    for (var p = 0; p < txs.length; p++) {
+      if (txs[p].agent !== agent) continue;
+      var bv = txs[p].bonus || 0;
+      var cv = txs[p].cash || 0;
+      if (bv > 0) allLedger.push({ date: txs[p].date, venue: txs[p].venue||"", client: txs[p].client||"", volume: toNum(txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: txs[p].id });
+      if (cv > 0) allLedger.push({ date: txs[p].date, venue: "現金寄放", client: txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: txs[p].id });
+    }
+    for (var p = 0; p < awArr.length; p++) {
+      var wt = awArr[p].type;
+      if (wt === "deposit") {
+        allLedger.push({ date: awArr[p].date, venue: "存入", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_deposit", type: "存入", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
+      } else if (wt === "cash_deposit") {
+        allLedger.push({ date: awArr[p].date, venue: "自存現金", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_cash_dep", type: "自存現金", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
+      } else {
+        allLedger.push({ date: awArr[p].date, venue: "提領", client: "", volume: 0, bonus: -(awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "withdraw", type: "提領", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
+      }
+    }
+    allLedger.sort(function(a,b){ return a.date.localeCompare(b.date); });
+    // 計算上月累計
+    var preRunning = 0;
+    for (var p = 0; p < allLedger.length; p++) {
+      if (allLedger[p].date < month + "-01") {
+        preRunning += allLedger[p].bonus;
+      }
+    }
+    var running = preRunning;
+    // 顯示 KPI + 明細
+    var sep = document.createElement("tr");
+    sep.innerHTML = "<td colspan='7' style='padding:4px;border:none;'></td>";
+    tbody.appendChild(sep);
+    var titleRow = document.createElement("tr");
+    titleRow.innerHTML = "<td colspan='7' style='padding:8px 0;font-weight:700;color:#FFD700;font-size:16px;'>💼 " + agent + " 代理對帳單</td>";
+    tbody.appendChild(titleRow);
+    var kpiRow = document.createElement("tr");
+    kpiRow.innerHTML = "<td colspan='7' style='padding:8px 0;border:none;'>" +
+      "<div class='kpi-box' style='margin-bottom:8px;'>" +
+        "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(allBonus) + "</div></div>" +
+        (allCash > 0 ? "<div class='kpi-card' style='background:#e67e22;'><div class='label'>現金寄放</div><div class='value'>" + fmt(allCash) + "</div></div>" : "") +
+        (awDep > 0 ? "<div class='kpi-card' style='background:#2980b9;'><div class='label'>錢包存入</div><div class='value'>" + fmt(awDep) + "</div></div>" : "") +
+        (awCDep > 0 ? "<div class='kpi-card' style='background:#e67e22;'><div class='label'>自存現金</div><div class='value'>" + fmt(awCDep) + "</div></div>" : "") +
+        "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(allDrawn) + "</div></div>" +
+        "<div class='kpi-card' style='background:#27ae60;'><div class='label'>未提領</div><div class='value'>" + fmt(awBalance) + "</div></div>" +
+        "<button class='btn btn-primary' onclick=\"openAgentWalletModal('" + agent + "')\">＋ 異動</button>" +
+      "</div></td>";
+    tbody.appendChild(kpiRow);
+    // 上月累計行
+    if (preRunning > 0) {
+      var pr = document.createElement("tr");
+      pr.style.cssText = "background:rgba(212,175,55,0.08);";
+      pr.innerHTML = "<td>" + month + "-01</td><td style='color:#D4AF37;font-weight:600;'>上月累計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-weight:700;color:#D4AF37;'>" + fmt(preRunning) + "</td><td></td>";
+      tbody.appendChild(pr);
+    }
+    var thRow = document.createElement("tr");
+    thRow.innerHTML = "<th>日期</th><th>地點</th><th class='num'>轉碼數</th><th class='num'>碼糧</th><th>操作</th><th class='num'>未領餘額</th><th></th>";
+    tbody.appendChild(thRow);
+    for (var q = 0; q < allLedger.length; q++) {
+      var e = allLedger[q];
+      if (e.date < month + "-01") continue;
+      running += e.bonus;
+      var tr2 = document.createElement("tr");
+      if (e.rowType === "withdraw") {
+        // 提領行：日期 | 提領(紅) | | -金額(紅) | 刪除 | 累計餘額
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e74c3c;font-weight:700;'>提領" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e74c3c;font-weight:700;'>-" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+      } else if (e.rowType === "aw_deposit") {
+        // 錢包存入行：日期 | 存入(藍) | | +金額(藍) | 刪除 | 累計餘額
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#2980b9;font-weight:700;'>存入" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#2980b9;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+      } else if (e.rowType === "aw_cash_dep") {
+        // 自存現金行：日期 | 自存現金(橙) | | +金額(橙) | 刪除 | 累計餘額
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>自存現金" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+      } else if (e.rowType === "cash") {
+        // 現金寄放行：日期 | 現金寄放(橙) | | +金額(橙) | 自動 | 累計餘額
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>現金寄放" + (e.client?"："+e.client:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.bonus) + "</td><td><span style='color:#999;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+      } else {
+        // 入帳行：日期 | 地點(客戶) | 轉碼數 | 碼糧 | 自動 | 累計餘額
+        var volStr = e.volume > 0 ? e.volume.toLocaleString() + "萬" : "";
+        tr2.innerHTML = "<td>" + e.date + "</td><td>" + (e.venue||"") + "(" + (e.client||"") + ")</td><td class='num'>" + volStr + "</td><td class='num' style='color:#27ae60;'>" + fmt(e.bonus) + "</td><td><span style='color:#999;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+      }
+      tbody.appendChild(tr2);
+    }
+    // 合計行
+    var totalRow = document.createElement("tr");
+    totalRow.style.cssText = "background:rgba(30,30,40,0.8);font-weight:700;color:#D4AF37;";
+    totalRow.innerHTML = "<td></td><td style='color:#1a1a2e;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+    tbody.appendChild(totalRow);
+  }
+}
+
+function exportCSV() {
+  var csv = "\uFEFF類型,日期,星期,代理,客戶,地點,洗碼量,碼佣率,佣金總額,代理碼糧,已提領,未提領,公基金,寄放金額,備註\n";
+  for (var i = 0; i < txs.length; i++) {
+    var t = txs[i];
+    csv += [t.type||"rolling", t.date || "", t.dow || "", t.agent || "", t.client || "", t.venue || "", t.volume || 0, t.rate || 0, t.comm || 0, t.bonus || 0, t.drawn || 0, t.undrawn || 0, t.fund || 0, t.cash || 0, t.note || ""].join(",") + "\n";
+  }
+  var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "洗碼報表.csv";
+  a.click();
+}
+
+function importCSV(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      var lines = ev.target.result.split("\n").map(function(l) { return l.trim(); }).filter(function(l) { return l; });
+      if (lines.length < 2) { alert("無資料"); return; }
+      var header = lines[0].split(",").map(function(h) { return h.replace(/\uFEFF/g, "").trim(); });
+      function findIdx(names) {
+        for (var n = 0; n < names.length; n++)
+          for (var j = 0; j < header.length; j++)
+            if (header[j].indexOf(names[n]) !== -1) return j;
+        return -1;
+      }
+      var di = findIdx(["日期","date"]), ai = findIdx(["代理","agent"]), ci = findIdx(["客戶","client"]);
+      var vi = findIdx(["洗碼量","volume","金額"]), ri = findIdx(["碼佣率","rate","％","%"]);
+      var bi = findIdx(["代理碼糧","碼糧","bonus"]), dri = findIdx(["已提領","drawn"]);
+      var ti = findIdx(["類型","type"]), cai = findIdx(["寄放金額","cash"]), noi = findIdx(["備註","note"]);
+      var count = 0;
+      for (var i = 1; i < lines.length; i++) {
+        var cols = lines[i].split(",");
+        if (cols.length < 2) continue;
+        var type = ti !== -1 ? cols[ti].trim() : "rolling";
+        var cashVal = cai !== -1 ? toNum(cols[cai]) : 0;
+        var note = noi !== -1 ? cols[noi].trim() : "";
+        if (type === "cash") {
+          txs.push({
+            id: nextId++, date: di !== -1 ? cols[di].trim() : nowStr(),
+            dow: di !== -1 ? getDow(cols[di].trim()) : getDow(nowStr()),
+            type: "cash", agent: ai !== -1 ? cols[ai].trim() : "",
+            client: "", venue: "", volume: 0, rate: 0,
+            comm: 0, bonus: 0, drawn: 0, undrawn: 0, fund: 0,
+            cash: cashVal, note: note
+          });
+          count++;
+          continue;
+        }
+        var vol = toNum(cols[vi !== -1 ? vi : 4]);
+        var rate = ri !== -1 ? toNum(cols[ri]) : 1.24;
+        if (rate > 10) rate = rate / 100;
+        var comm = calcComm(vol, rate);
+        var bonus = bi !== -1 ? toNum(cols[bi]) : comm;
+        var drawn = dri !== -1 ? toNum(cols[dri]) : 0;
+        txs.push({
+          id: nextId++,
+          date: di !== -1 ? cols[di].trim() : nowStr(),
+          dow: di !== -1 ? getDow(cols[di].trim()) : getDow(nowStr()),
+          type: "rolling",
+          agent: ai !== -1 ? cols[ai].trim() : "",
+          client: ci !== -1 ? cols[ci].trim() : "",
+          venue: "",
+          volume: vol,
+          rate: rate,
+          comm: comm,
+          bonus: bonus,
+          drawn: drawn,
+          undrawn: Math.max(0, bonus - drawn),
+          fund: calcFund(comm, bonus),
+          cash: cashVal,
+          note: note
+        });
+        count++;
+      }
+      saveData(true);
+      renderAll();
+      renderSummary();
+      alert("已匯入 " + count + " 筆！");
+    } catch(err) { alert("匯入失敗：" + err.message); }
+  };
+  reader.readAsText(file, "UTF-8");
+  e.target.value = "";
+}
+
+initSync();
+</script>
+</body>
+</html>
