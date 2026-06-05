@@ -672,6 +672,13 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   .rm-hero-val { font-size: 26px; }
   .rm-dash-bar-wrap { padding: 10px 12px 8px; }
 
+  /* 手機版 KPI 與圖表優化 */
+  .charts-row { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-card-new { padding: 12px 14px; }
+  .kpi-card-new .kpi-value { font-size: 22px; }
+  .kpi-card-new .kpi-label { font-size: 10px; }
+
   /* 側邊欄遮罩層 */
   #sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; transition: opacity 0.25s ease; }
   #sidebar-overlay.active { opacity: 1; }
@@ -1054,6 +1061,13 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
     input[type="text"], input[type="number"], input[type="date"], select, textarea {
       font-size: 16px !important; /* 防止 iOS 縮放 */
     }
+    /* 超小螢幕 KPI 卡片優化（如 iPhone SE 375px） */
+    .kpi-grid { grid-template-columns: 1fr; }
+    .kpi-card-new .kpi-value { font-size: 20px; }
+    .kpi-card-new .kpi-label { font-size: 9px; }
+    .rm-hero-val { font-size: 20px; }
+    .rm-hero-card { padding: 8px 10px; }
+    .kpi-card-new { padding: 10px 12px; }
   }
 }
 
