@@ -3,16 +3,22 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0';
+
+console.log('[START] Railway server starting...');
+console.log('[START] PORT=' + PORT + ', HOST=' + HOST);
+console.log('[START] __dirname=' + __dirname);
 
 const DB_FILE = path.join(__dirname, 'db.json');
-// 嘗試 index.html，不存在則用 macau_report.html
-const HTML_FILE = (function() {
-  var idx = path.join(__dirname, 'index.html');
-  if (fs.existsSync(idx)) return idx;
-  return path.join(__dirname, 'macau_report.html');
-})();
 
-// 启用 CORS（允许手机访问）
+// 嘗試 index.html，不存在則用 macau_report.html
+var HTML_FILE = path.join(__dirname, 'index.html');
+if (!fs.existsSync(HTML_FILE)) {
+  HTML_FILE = path.join(__dirname, 'macau_report.html');
+}
+console.log('[START] HTML_FILE=' + HTML_FILE + ', exists=' + fs.existsSync(HTML_FILE));
+
+// 啟用 CORS（允許手機訪問）
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -23,17 +29,25 @@ app.use((req, res, next) => {
   next();
 });
 
-// 确保 db.json 存在
-if (!fs.existsSync(DB_FILE)) {
-  fs.writeFileSync(DB_FILE, JSON.stringify({ txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, lastModified: 0 }, null, 2), 'utf8');
+// 確保 db.json 存在
+try {
+  if (!fs.existsSync(DB_FILE)) {
+    var initData = { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, lastModified: 0 };
+    fs.writeFileSync(DB_FILE, JSON.stringify(initData, null, 2), 'utf8');
+    console.log('[START] Created new db.json');
+  } else {
+    console.log('[START] db.json exists');
+  }
+} catch (e) {
+  console.error('[START] db.json init error:', e.message);
 }
 
 app.use(express.json({ limit: '5mb' }));
 
-// 密码保护（API 层面）
+// 密碼保護（API 層面）
 var SYNC_PASSWORD = process.env.SYNC_PASSWORD || 'macau888';
 
-// 所有 /api/* 接口都验证密码（静态资源和首页不验证）
+// 所有 /api/* 接口都驗證密碼（靜態資源和首頁不驗證）
 app.use('/api', function(req, res, next) {
   if (req.method === 'OPTIONS') return next();
   var pass = req.headers['x-sync-password'] || '';
@@ -43,12 +57,16 @@ app.use('/api', function(req, res, next) {
   next();
 });
 
-// 静态资源（bg_logo.png, css, js 等）
+// 靜態資源（bg_logo.png, css, js 等）
 app.use(express.static(__dirname));
 
-// 根路径 - 返回 HTML
+// 根路徑 - 返回 HTML
 app.get('/', (req, res) => {
-  res.sendFile(HTML_FILE);
+  if (fs.existsSync(HTML_FILE)) {
+    res.sendFile(HTML_FILE);
+  } else {
+    res.status(404).send('index.html not found at: ' + HTML_FILE);
+  }
 });
 
 // Railway 健康檢查
@@ -56,7 +74,7 @@ app.get('/health', (req, res) => {
   res.json({ ok: true, status: 'running', version: '5.9' });
 });
 
-// 读取数据库
+// 讀取數據庫
 function readDB() {
   try {
     if (fs.existsSync(DB_FILE)) {
@@ -66,19 +84,19 @@ function readDB() {
   return { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, lastModified: 0 };
 }
 
-// 写入数据库
+// 寫入數據庫
 function writeDB(data) {
   data.lastModified = Date.now();
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
-// 获取全量数据
+// 獲取全量數據
 app.get('/api/all', (req, res) => {
   const db = readDB();
   res.json({ ok: true, data: db, lastModified: db.lastModified || 0 });
 });
 
-// 检查是否有更新（轻量轮询）
+// 檢查是否有更新（輕量輪詢）
 app.get('/api/poll', (req, res) => {
   const clientTime = parseInt(req.query.since) || 0;
   const db = readDB();
@@ -90,12 +108,11 @@ app.get('/api/poll', (req, res) => {
   }
 });
 
-// 保存全量数据
+// 保存全量數據
 app.post('/api/save', (req, res) => {
   try {
     const body = req.body;
     const db = readDB();
-    // 合并客户端数据
     if (body.txs !== undefined) db.txs = body.txs;
     if (body.fundWithdrawals !== undefined) db.fundWithdrawals = body.fundWithdrawals;
     if (body.agentWallets !== undefined) db.agentWallets = body.agentWallets;
@@ -109,6 +126,6 @@ app.post('/api/save', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log('Sync server running on port ' + PORT);
+app.listen(PORT, HOST, () => {
+  console.log('[START] Sync server running on http://' + HOST + ':' + PORT);
 });
