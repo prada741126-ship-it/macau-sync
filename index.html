@@ -521,6 +521,19 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .rm-btn-del  { background: #e74c3c; color: #fff; }
 .empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); }
 
+/* 桌面版：房務系統填滿剩餘空間，減少空白 */
+@media (min-width: 701px) {
+  #page-room.active {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 140px);
+  }
+  #page-room .room-table-wrap {
+    flex: 1;
+    min-height: 420px;
+  }
+}
+
 #rm-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
 #rm-modal-bg.active { display: flex; }
 .rm-modal { background: rgba(18,15,8,0.98); border: 1px solid rgba(212,175,55,0.15); border-radius: 14px; padding: 20px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
