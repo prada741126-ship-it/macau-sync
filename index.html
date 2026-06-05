@@ -659,8 +659,8 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   .rm-dash-bar-wrap { padding: 10px 12px 8px; }
 
   /* 側邊欄遮罩層 */
-  #sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; transition: opacity 0.25s ease; }
-  #sidebar-overlay.active { display: block; opacity: 1; }
+  #sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; transition: opacity 0.25s ease; }
+  #sidebar-overlay.active { opacity: 1; }
 
   /* 表單元素模化 */
   .form-row { flex-direction: column; gap: 6px; margin-bottom: 8px; }
@@ -2284,9 +2284,22 @@ function loadAgentWallets(silent) {
 }
 
 function saveData(silent) {
-  localStorage.setItem("macau_data", encryptData(txs));
-  if (typeof syncUpload === 'function') syncUpload();
-  if (!silent) showToast("已儲存 " + txs.length + " 筆","success");
+  try {
+    var encrypted = encryptData(txs);
+    localStorage.setItem("macau_data", encrypted);
+    if (typeof syncUpload === 'function') syncUpload();
+    if (!silent) showToast("已儲存 " + txs.length + " 筆","success");
+  } catch(e) {
+    console.error('saveData error:', e);
+    // 如果加密或保存失敗，嘗試直接保存（不加密）
+    try {
+      localStorage.setItem("macau_data", JSON.stringify(txs));
+      if (!silent) showToast("已儲存（未加密）","warning");
+    } catch(e2) {
+      console.error('saveData fallback error:', e2);
+      if (!silent) showToast("儲存失敗！localStorage 可能已滿","error");
+    }
+  }
 }
 
 function loadData(silent) {
