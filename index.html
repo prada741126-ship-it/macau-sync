@@ -649,7 +649,7 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
    手機響應式
    ============================================================ */
 @media (max-width: 700px) {
-  #sidebar { position: fixed; top: 0; left: 0; bottom: 0; z-index: 200; transform: translateX(0); transition: transform 0.25s ease, width 0.25s ease; width: 220px; max-width: 80vw; background: rgba(12,12,18,0.98); backdrop-filter: blur(20px); box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
+  #sidebar { position: fixed; top: 0; left: 0; bottom: 0; z-index: 200; transition: transform 0.25s ease; width: 220px; max-width: 80vw; background: rgba(12,12,18,0.98); backdrop-filter: blur(20px); box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
   #sidebar.mobile-hidden { transform: translateX(-100%); }
   .topbar-toggle { display: block; font-size: 20px; padding: 4px; }
   .rm-form-row { grid-template-columns: 1fr; }
@@ -1166,7 +1166,7 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
       <button class="topbar-btn" onclick="manualSync()">🔄 同步</button>
     </div>
     <!-- 手機版 sidebar 開關 -->
-    <button class="topbar-toggle" id="mobile-sb-btn" style="display:none;" onclick="toggleMobileSidebar()">☰</button>
+    <button class="topbar-toggle" id="mobile-sb-btn" onclick="toggleMobileSidebar()">☰</button>
   </div>
 
   <!-- 可滾動內容區 -->
@@ -1938,7 +1938,7 @@ function showPage(name, sidebarEl) {
   var overlay = document.getElementById("sidebar-overlay");
   if (sb) {
     sb.classList.add("mobile-hidden");
-    sb.style.transform = "translateX(-100%)";
+    // 不直接操作 style.transform，讓 CSS 控制
   }
   if (overlay) {
     overlay.classList.remove("active");
@@ -1986,14 +1986,17 @@ function toggleMobileSidebar() {
   var overlay = document.getElementById("sidebar-overlay");
   if (!sb) return;
   sb.classList.toggle("mobile-hidden");
-  // 控制遮罩層顯示/隱藏
+  // 控制遮罩層顯示/隱藏（只用 classList，不直接操作 style）
   if (overlay) {
     if (sb.classList.contains("mobile-hidden")) {
       overlay.classList.remove("active");
-      overlay.style.display = "none";
+      // 延遲隱藏，確保過渡動畫完成
+      setTimeout(function() { overlay.style.display = "none"; }, 250);
     } else {
       overlay.style.display = "block";
-      setTimeout(function() { overlay.classList.add("active"); }, 10);
+      // 觸發重繪，確保過渡動畫生效
+      overlay.offsetHeight;
+      overlay.classList.add("active");
     }
   }
 }
@@ -3691,6 +3694,23 @@ function rmHandleImport(e){ RM.handleImport(e); }
 
 // 啟動房務系統
 RM.init();
+
+// ===== 手機版側邊欄初始化（預設隱藏）=====
+(function() {
+  function initMobileSidebar() {
+    var sb = document.getElementById('sidebar');
+    if (!sb) return;
+    if (window.innerWidth <= 700) {
+      sb.classList.add('mobile-hidden');
+      sb.style.transform = 'translateX(-100%)';
+    } else {
+      sb.classList.remove('mobile-hidden');
+      sb.style.transform = '';
+    }
+  }
+  initMobileSidebar();
+  window.addEventListener('resize', initMobileSidebar);
+})();
 
 // ===== 側邊欄事件委派（確保手機觸控正常） =====
 (function() {
