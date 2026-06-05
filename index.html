@@ -667,10 +667,31 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   #sidebar:not(.mobile-hidden) { left: 0; }
   .topbar-toggle { display: block; font-size: 20px; padding: 4px; }
   .rm-form-row { grid-template-columns: 1fr; }
-  .rm-dash-hero { grid-template-columns: 1fr; gap: 8px; }
-  .rm-hero-card { padding: 10px 12px; }
-  .rm-hero-val { font-size: 26px; }
-  .rm-dash-bar-wrap { padding: 10px 12px 8px; }
+  /* 手機版房務系統儀表板大幅縮小 */
+  .rm-dashboard { margin-bottom: 8px; }
+  .rm-dash-main { padding: 10px 12px 8px; }
+  .rm-dash-hero { grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+  .rm-hero-card { padding: 8px 10px; border-radius: 8px; }
+  .rm-hero-label { font-size: 8px; margin-bottom: 3px; letter-spacing: 0.5px; }
+  .rm-hero-val { font-size: 15px; }
+  .rm-hero-val span { font-size: 10px; }
+  .rm-dash-bar-wrap { padding: 8px 10px 6px; border-radius: 8px; }
+  .rm-dash-bar-track { height: 6px; }
+  .rm-dash-bar-ticks { height: 10px; }
+  .rm-dash-bar-ticks span { font-size: 7px; }
+  /* 房務統計與圖表縮小 */
+  .rm-stats-row { gap: 6px; margin-bottom: 8px; }
+  .rm-stat-item { padding: 6px 10px; border-radius: 8px; min-width: auto; }
+  .rm-stat-num { font-size: 16px; }
+  .rm-stat-label { font-size: 9px; }
+  .rm-chart-wrap { padding: 8px 10px 6px; border-radius: 8px; margin-bottom: 8px; }
+  .rm-chart-title { font-size: 9px; margin-bottom: 4px; }
+  .rm-chart { height: 50px; padding-top: 4px; gap: 1px; }
+  .rm-chart-bar { min-width: 4px; border-radius: 2px 2px 0 0; }
+  /* 房務控制欄縮小 */
+  .room-controls { gap: 4px; margin-bottom: 8px; }
+  .room-controls .btn { padding: 6px 10px; font-size: 11px; }
+  .rm-select, .rm-input { padding: 5px 8px; font-size: 11px; }
 
   /* 手機版 KPI 與圖表優化 */
   .charts-row { grid-template-columns: 1fr; }
@@ -988,15 +1009,25 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   .timeline-amount { font-size: 12px; }
 
   /* 房務系統儀表板優化 */
-  .rm-dash-main { padding: 12px 10px 10px; }
-  .rm-dash-hero { gap: 6px; }
-  .rm-hero-label { font-size: 9px; }
-  .rm-hero-val { font-size: 22px; }
-  .rm-dash-bar-wrap { padding: 8px 10px 6px; }
-  .rm-stats-row { gap: 6px; }
-  .rm-stat-item { padding: 8px 10px; min-width: calc(50% - 6px); }
-  .rm-stat-num { font-size: 18px; }
-  .rm-stat-label { font-size: 9px; }
+  .rm-dash-main { padding: 8px 10px 6px; }
+  .rm-dash-hero { gap: 4px; margin-bottom: 6px; }
+  .rm-hero-card { padding: 6px 8px; border-radius: 6px; }
+  .rm-hero-label { font-size: 7px; margin-bottom: 2px; }
+  .rm-hero-val { font-size: 13px; }
+  .rm-hero-val span { font-size: 8px; margin-left: 1px; }
+  .rm-dash-bar-wrap { padding: 6px 8px 4px; border-radius: 6px; }
+  .rm-dash-bar-track { height: 5px; border-radius: 3px; }
+  .rm-dash-bar-ticks { height: 8px; }
+  .rm-dash-bar-ticks span { font-size: 6px; top: 1px; }
+  .rm-stats-row { gap: 4px; margin-bottom: 6px; }
+  .rm-stat-item { padding: 5px 8px; min-width: auto; border-radius: 6px; }
+  .rm-stat-num { font-size: 14px; }
+  .rm-stat-label { font-size: 8px; }
+  .rm-chart-wrap { padding: 6px 8px 4px; border-radius: 6px; margin-bottom: 6px; }
+  .rm-chart-title { font-size: 8px; margin-bottom: 2px; }
+  .rm-chart { height: 40px; padding-top: 2px; }
+  .room-controls { gap: 3px; margin-bottom: 6px; }
+  .room-controls .btn { padding: 5px 8px; font-size: 10px; }
 
   /* 房務表格優化 */
   .room-controls { gap: 4px; }
@@ -1065,8 +1096,22 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
     .kpi-grid { grid-template-columns: 1fr; }
     .kpi-card-new .kpi-value { font-size: 20px; }
     .kpi-card-new .kpi-label { font-size: 9px; }
-    .rm-hero-val { font-size: 20px; }
-    .rm-hero-card { padding: 8px 10px; }
+    .rm-hero-val { font-size: 12px; }
+    .rm-hero-card { padding: 5px 6px; }
+    .rm-hero-label { font-size: 6px; }
+    .rm-hero-val span { font-size: 7px; }
+    .rm-dash-bar-wrap { padding: 5px 6px 3px; }
+    .rm-dash-bar-track { height: 4px; }
+    .rm-dash-bar-ticks { height: 6px; }
+    .rm-dash-bar-ticks span { font-size: 5px; }
+    .rm-stats-row { gap: 3px; margin-bottom: 4px; }
+    .rm-stat-item { padding: 4px 6px; }
+    .rm-stat-num { font-size: 12px; }
+    .rm-stat-label { font-size: 7px; }
+    .rm-chart-wrap { padding: 5px 6px 3px; margin-bottom: 4px; }
+    .rm-chart { height: 35px; }
+    .room-controls { gap: 2px; margin-bottom: 4px; }
+    .room-controls .btn { padding: 4px 6px; font-size: 9px; }
     .kpi-card-new { padding: 10px 12px; }
   }
 }
