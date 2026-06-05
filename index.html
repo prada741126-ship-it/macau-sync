@@ -1107,24 +1107,24 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   </div>
 
   <!-- 導航 -->
-  <nav class="sb-nav">
-    <div class="sb-item active" data-label="總覽" onclick="showPage('overview',this)">
+  <nav class="sb-nav" id="sb-nav">
+    <div class="sb-item active" data-label="總覽" data-page="overview">
       <span class="sb-icon">🏠</span>
       <span class="sb-label">總覽</span>
     </div>
-    <div class="sb-item" data-label="全部交易" onclick="showPage('all',this)">
+    <div class="sb-item" data-label="全部交易" data-page="all">
       <span class="sb-icon">📋</span>
       <span class="sb-label">全部交易</span>
     </div>
-    <div class="sb-item" data-label="查詢" onclick="showPage('query',this)">
+    <div class="sb-item" data-label="查詢" data-page="query">
       <span class="sb-icon">🔍</span>
       <span class="sb-label">查詢</span>
     </div>
-    <div class="sb-item" data-label="統計" onclick="showPage('summary',this)">
+    <div class="sb-item" data-label="統計" data-page="summary">
       <span class="sb-icon">📈</span>
       <span class="sb-label">統計</span>
     </div>
-    <div class="sb-item" data-label="房務系統" onclick="showPage('room',this)">
+    <div class="sb-item" data-label="房務系統" data-page="room">
       <span class="sb-icon">🏨</span>
       <span class="sb-label">房務系統</span>
     </div>
@@ -1933,6 +1933,19 @@ document.addEventListener("touchstart", resetSession);
 // ===== 安全防護結束 =====
 
 function showPage(name, sidebarEl) {
+  // 強制關閉手機版側邊欄（放在最前面，確保一定執行）
+  var sb = document.getElementById("sidebar");
+  var overlay = document.getElementById("sidebar-overlay");
+  if (sb) {
+    sb.classList.add("mobile-hidden");
+    sb.style.transform = "translateX(-100%)";
+  }
+  if (overlay) {
+    overlay.classList.remove("active");
+    overlay.style.display = "none";
+    overlay.style.opacity = "0";
+  }
+
   var pages = document.querySelectorAll(".page");
   for (var i = 0; i < pages.length; i++) {
     pages[i].style.display = "none";
@@ -1952,11 +1965,6 @@ function showPage(name, sidebarEl) {
     var titles = { overview:"總覽", all: "全部交易", query: "查詢", summary: "統計", room: "房務系統" };
     tt.textContent = titles[name] || name;
   }
-  // 關閉手機版 sidebar 並隱藏遮罩
-  var sb = document.getElementById("sidebar");
-  var overlay = document.getElementById("sidebar-overlay");
-  if (sb) sb.classList.add("mobile-hidden");
-  if (overlay) { overlay.classList.remove("active"); overlay.style.display = "none"; }
   // 觸發各頁面更新
   if (name === "overview") renderOverview();
   if (name === "all") renderAll();
@@ -3683,6 +3691,26 @@ function rmHandleImport(e){ RM.handleImport(e); }
 
 // 啟動房務系統
 RM.init();
+
+// ===== 側邊欄事件委派（確保手機觸控正常） =====
+(function() {
+  var sbNav = document.getElementById('sb-nav');
+  if (sbNav) {
+    sbNav.addEventListener('click', function(e) {
+      var item = e.target.closest('.sb-item[data-page]');
+      if (!item) return;
+      var page = item.getAttribute('data-page');
+      if (page) showPage(page, item);
+    });
+    // 同時支援 touchstart（手機觸控更即時）
+    sbNav.addEventListener('touchstart', function(e) {
+      var item = e.target.closest('.sb-item[data-page]');
+      if (!item) return;
+      var page = item.getAttribute('data-page');
+      if (page) showPage(page, item);
+    }, { passive: false });
+  }
+})();
 </script>
 </body>
 </html>
