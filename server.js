@@ -51,6 +51,11 @@ app.get('/', (req, res) => {
   res.sendFile(HTML_FILE);
 });
 
+// Railway 健康檢查
+app.get('/health', (req, res) => {
+  res.json({ ok: true, status: 'running', version: '5.9' });
+});
+
 // 读取数据库
 function readDB() {
   try {
