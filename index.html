@@ -649,14 +649,42 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
    手機響應式
    ============================================================ */
 @media (max-width: 700px) {
-  #sidebar { position: fixed; top: 0; left: 0; bottom: 0; z-index: 200; transform: translateX(0); transition: transform 0.25s ease, width 0.25s ease; }
+  #sidebar { position: fixed; top: 0; left: 0; bottom: 0; z-index: 200; transform: translateX(0); transition: transform 0.25s ease, width 0.25s ease; width: 220px; max-width: 80vw; background: rgba(12,12,18,0.98); backdrop-filter: blur(20px); box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
   #sidebar.mobile-hidden { transform: translateX(-100%); }
-  .topbar-toggle { display: block; }
+  .topbar-toggle { display: block; font-size: 20px; padding: 4px; }
   .rm-form-row { grid-template-columns: 1fr; }
   .rm-dash-hero { grid-template-columns: 1fr; gap: 8px; }
   .rm-hero-card { padding: 10px 12px; }
   .rm-hero-val { font-size: 26px; }
   .rm-dash-bar-wrap { padding: 10px 12px 8px; }
+
+  /* 側邊欄遮罩層 */
+  #sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; transition: opacity 0.25s ease; }
+  #sidebar-overlay.active { display: block; opacity: 1; }
+
+  /* 表單元素模化 */
+  .form-row { flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .form-group { width: 100%; }
+  .form-group input, .form-group select { padding: 10px 12px; font-size: 14px; border-radius: 8px; min-height: 42px; }
+  .form-group label { font-size: 11px; margin-bottom: 3px; }
+
+  /* 模態視窗模化 */
+  .modal-scroll { padding: 10px 8px 40px 8px; }
+  .modal { padding: 18px 14px; width: 96vw; max-width: 96vw; margin: 10px auto; border-radius: 14px; }
+  .modal h3 { font-size: 18px; margin-bottom: 14px; padding-bottom: 10px; }
+
+  /* 按鈕觸摸優化（最小44px） */
+  .btn { padding: 10px 18px; font-size: 13px; min-height: 42px; }
+  .btn-primary { padding: 10px 20px; min-height: 44px; }
+  .rm-btn-save, .rm-btn-cancel { padding: 12px 18px; font-size: 14px; min-height: 44px; }
+  .rm-btn-sm { padding: 6px 12px; font-size: 11px; min-height: 32px; }
+
+  /* 密碼頁面優化 */
+  #pw-box { padding: 28px 20px; max-width: 96vw; }
+  #pw-box .pw-emblem-text { font-size: 40px; letter-spacing: 10px; }
+  #pw-box .pw-title { font-size: 24px; letter-spacing: 5px; }
+  #pw-input { padding: 14px 16px 14px 42px; font-size: 15px; min-height: 46px; }
+  .pw-btn { padding: 14px; font-size: 15px; min-height: 48px; letter-spacing: 4px; }
 }
 
 /* ============================================================
@@ -883,7 +911,138 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   .ov-two-col { grid-template-columns: 1fr; }
   .ov-room-wide { flex-direction: column; align-items: flex-start; gap: 10px; }
   .ov-room-wide .ov-room-bar-wrap { max-width: none; width: 100%; }
+
+  /* ===== 手機版全局優化 ===== */
+  /* 防止內容溢出 */
+  body { overflow-x: hidden; }
+
+  /* 頂部標題列優化 */
+  #topbar { padding: 0 10px; height: 48px; gap: 6px; }
+  #topbar-title { font-size: 13px; letter-spacing: 1px; }
+  .topbar-btn { padding: 5px 10px; font-size: 11px; }
+  .topbar-btn.primary { padding: 6px 12px; font-size: 12px; }
+
+  /* 可滾動區域優化 */
+  #page-scroll { padding: 10px 8px; }
+
+  /* 月份選擇列優化 */
+  .month-bar { padding: 8px 10px; gap: 6px; flex-wrap: wrap; }
+  .month-bar-badge { font-size: 12px; padding: 4px 10px; }
+  .month-bar-label { font-size: 11px; }
+  .month-bar-status { font-size: 10px; }
+  .btn-close-month { padding: 5px 10px; font-size: 11px; }
+  .total-wallet { padding: 4px 10px; }
+  .total-wallet .tw-value { font-size: 14px; }
+
+  /* 快速操作按鈕優化 */
+  .quick-actions { gap: 6px; }
+  .qa-btn { padding: 10px 14px; font-size: 12px; min-width: calc(50% - 6px); }
+  .qa-btn-icon { font-size: 16px; }
+
+  /* KPI 卡片網格優化 */
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .kpi-card-new { padding: 10px 12px; border-radius: 10px; }
+  .kpi-label { font-size: 10px; margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; }
+  .kpi-delta { font-size: 9px; }
+
+  /* 圖表區優化 */
+  .chart-full { padding: 8px 10px; }
+  .chart-title { font-size: 9px; letter-spacing: 1px; margin-bottom: 6px; }
+  .sparkline-wide { height: 50px; }
+
+  /* 雙欄區塊優化 */
+  .ov-panel-head { padding: 6px 10px; font-size: 11px; }
+  .ov-panel-body { padding: 4px 6px; }
+  .rank-row { padding: 4px 2px; }
+  .rank-name { font-size: 11px; }
+  .venue-name { font-size: 10px; width: 60px; }
+
+  /* 時間線優化 */
+  .timeline-box { border-radius: 10px; }
+  .timeline-title { padding: 8px 12px; font-size: 12px; }
+  .timeline-item { padding: 6px 12px; gap: 10px; }
+  .timeline-desc { font-size: 11px; }
+  .timeline-meta { font-size: 9px; }
+  .timeline-amount { font-size: 12px; }
+
+  /* 房務系統儀表板優化 */
+  .rm-dash-main { padding: 12px 10px 10px; }
+  .rm-dash-hero { gap: 6px; }
+  .rm-hero-label { font-size: 9px; }
+  .rm-hero-val { font-size: 22px; }
+  .rm-dash-bar-wrap { padding: 8px 10px 6px; }
+  .rm-stats-row { gap: 6px; }
+  .rm-stat-item { padding: 8px 10px; min-width: calc(50% - 6px); }
+  .rm-stat-num { font-size: 18px; }
+  .rm-stat-label { font-size: 9px; }
+
+  /* 房務表格優化 */
+  .room-controls { gap: 4px; }
+  .rm-select, .rm-input { padding: 5px 8px; font-size: 11px; }
+  .room-table { font-size: 11px; }
+  .room-table th { padding: 5px 6px; font-size: 9px; }
+  .room-table td { padding: 6px; font-size: 11px; }
+  .rm-badge { padding: 1px 6px; font-size: 9px; }
+  .rm-btn-sm { padding: 2px 6px; font-size: 9px; }
+
+  /* 工具列優化 */
+  .toolbar { gap: 4px; margin-bottom: 10px; }
+  .search-box { padding: 6px 10px; font-size: 12px; width: 100%; }
+  .btn { padding: 7px 14px; font-size: 12px; }
+  .time-filter { width: 100%; justify-content: center; }
+  .time-filter button { padding: 4px 8px; font-size: 10px; }
+
+  /* 表格優化 - 提高可讀性 */
+  table { font-size: 12px; }
+  th { padding: 8px 6px; font-size: 10px; }
+  td { padding: 8px 6px; }
+  .num { font-size: 12px; }
+
+  /* KPI 迷你卡片優化 */
+  .kpi-mini-box { gap: 6px; }
+  .kpi-mini { padding: 8px 12px; min-width: calc(50% - 6px); }
+  .kpi-mini .label { font-size: 9px; }
+  .kpi-mini .value { font-size: 16px; }
+
+  /* 過濾標籤優化 */
+  .filter-tags { gap: 3px; }
+  .filter-tag { padding: 3px 8px; font-size: 10px; }
+
+  /* 表格優化 - 防止文字溢出並添加滾動提示 */
+  .room-table-wrap { position: relative; }
+  .room-table-wrap::after {
+    content: "← 滑動查看 →";
+    display: block;
+    text-align: center;
+    font-size: 10px;
+    color: rgba(212,175,55,0.4);
+    padding: 4px 0;
+    letter-spacing: 1px;
+  }
+  td, th { word-wrap: break-word; overflow-wrap: break-word; hyphens: auto; }
+  .num { white-space: nowrap; }
+
+  /* 觸摸優化 - 減少點擊延遲 */
+  button, .btn, .sb-item, .tab, .qa-btn, .rm-badge, .filter-tag {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 更好的滾動條樣式（WebKit） */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,0.5); }
+
+  /* 表單焦點優化（防止縮放） */
+  @media (max-width: 480px) {
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+      font-size: 16px !important; /* 防止 iOS 縮放 */
+    }
+  }
 }
+
 
 /* ============================================================
    Toast 通知系統
@@ -993,6 +1152,9 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
     <span class="sb-label">折疊選單</span>
   </div>
 </div>
+
+<!-- 手機版側邊欄遮罩層 -->
+<div id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
 <!-- ===== MAIN CONTENT ===== -->
 <div id="main-content">
@@ -1790,9 +1952,11 @@ function showPage(name, sidebarEl) {
     var titles = { overview:"總覽", all: "全部交易", query: "查詢", summary: "統計", room: "房務系統" };
     tt.textContent = titles[name] || name;
   }
-  // 關閉手機版 sidebar
+  // 關閉手機版 sidebar 並隱藏遮罩
   var sb = document.getElementById("sidebar");
+  var overlay = document.getElementById("sidebar-overlay");
   if (sb) sb.classList.add("mobile-hidden");
+  if (overlay) { overlay.classList.remove("active"); overlay.style.display = "none"; }
   // 觸發各頁面更新
   if (name === "overview") renderOverview();
   if (name === "all") renderAll();
@@ -1811,8 +1975,19 @@ function toggleSidebar() {
 }
 function toggleMobileSidebar() {
   var sb = document.getElementById("sidebar");
+  var overlay = document.getElementById("sidebar-overlay");
   if (!sb) return;
   sb.classList.toggle("mobile-hidden");
+  // 控制遮罩層顯示/隱藏
+  if (overlay) {
+    if (sb.classList.contains("mobile-hidden")) {
+      overlay.classList.remove("active");
+      overlay.style.display = "none";
+    } else {
+      overlay.style.display = "block";
+      setTimeout(function() { overlay.classList.add("active"); }, 10);
+    }
+  }
 }
 
 function toggleTypeFields() {
