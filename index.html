@@ -542,11 +542,9 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   font-size: 22px; font-weight: 800; font-family: "Consolas", monospace;
   color: var(--gold); line-height: 1;
 }
-.rm-stat-num.green { color: var(--green); }
-.rm-stat-num.orange { color: var(--orange); }
 .rm-stat-label { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.8px; white-space: nowrap; }
 
-/* 每日訂房長條圖 v5.9 */
+/* 每日訂房長條圖 */
 .rm-chart-wrap {
   background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
   border-radius: 10px; padding: 12px 16px 10px; margin-bottom: 12px;
@@ -590,32 +588,6 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .rm-btn-del  { background: #e74c3c; color: #fff; }
 .empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); }
 
-/* 本月代理訂房排行 v5.9 */
-.rm-ranking-wrap {
-  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
-  border-radius: 10px; padding: 12px 16px 10px; margin-bottom: 12px;
-}
-.rm-ranking-title { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
-.rm-ranking { display: flex; flex-direction: column; gap: 5px; max-height: 180px; overflow-y: auto; }
-.rm-rank-item {
-  display: flex; align-items: center; gap: 10px; padding: 5px 8px;
-  border-radius: 6px; background: rgba(255,255,255,0.015); transition: background 0.2s;
-}
-.rm-rank-item:hover { background: rgba(212,175,55,0.06); }
-.rm-rank-pos {
-  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; flex-shrink: 0;
-}
-.rm-rank-pos.top1 { background: linear-gradient(135deg, #FFD700, #DAA520); color: #1a1a12; }
-.rm-rank-pos.top2 { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); color: #1a1a12; }
-.rm-rank-pos.top3 { background: linear-gradient(135deg, #CD7F32, #B8860B); color: #1a1a12; }
-.rm-rank-pos.normal { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); }
-.rm-rank-name { flex: 1; font-size: 12px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rm-rank-bar-wrap { width: 80px; height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
-.rm-rank-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, rgba(212,175,55,0.5), rgba(212,175,55,0.15)); transition: width 0.4s ease; }
-.rm-rank-count { font-size: 11px; color: var(--gold); font-weight: 600; min-width: 28px; text-align: right; font-family: monospace; }
-.rm-rank-label { font-size: 9px; color: rgba(255,255,255,0.25); margin-left: 2px; }
-
 /* 桌面版：房務系統填滿剩餘空間，減少空白 */
 @media (min-width: 701px) {
   #page-room.active {
@@ -627,7 +599,6 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   #page-room .rm-dashboard { margin-bottom: 14px; }
   #page-room .rm-stats-row { margin-bottom: 14px; }
   #page-room .rm-chart-wrap { margin-bottom: 14px; }
-  #page-room .rm-ranking-wrap { margin-bottom: 14px; }
   #page-room .room-controls { flex-shrink: 0; }
   #page-room .room-table-wrap {
     flex: 1;
@@ -1211,36 +1182,18 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
       </div>
     </div>
 
-    <!-- 本月統計摘要 v5.9 -->
+    <!-- 本月統計摘要 -->
     <div class="rm-stats-row">
       <div class="rm-stat-item">
         <span class="rm-stat-num" id="rm-stat-total">0</span>
         <span class="rm-stat-label">筆訂房</span>
       </div>
-      <div class="rm-stat-item">
-        <span class="rm-stat-num green" id="rm-stat-free">0</span>
-        <span class="rm-stat-label">免費房</span>
-      </div>
-      <div class="rm-stat-item">
-        <span class="rm-stat-num orange" id="rm-stat-paid">0</span>
-        <span class="rm-stat-label">付費房</span>
-      </div>
-      <div class="rm-stat-item">
-        <span class="rm-stat-num" id="rm-stat-cost">0</span>
-        <span class="rm-stat-label">總費用（萬）</span>
-      </div>
     </div>
 
-    <!-- 本月每日訂房長條圖 v5.9 -->
+    <!-- 本月每日訂房長條圖 -->
     <div class="rm-chart-wrap">
       <div class="rm-chart-title">本月每日訂房量</div>
       <div class="rm-chart" id="rm-chart"></div>
-    </div>
-
-    <!-- 本月代理訂房排行 v5.9 -->
-    <div class="rm-ranking-wrap">
-      <div class="rm-ranking-title">本月代理訂房排行</div>
-      <div class="rm-ranking" id="rm-ranking"></div>
     </div>
 
     <div class="room-controls">
@@ -3419,25 +3372,16 @@ var RM = {
     }
     var pctEl = document.getElementById("rm-progress-pct");
     if (pctEl) pctEl.textContent = pct+"%";
-    // 更新統計摘要列 v5.9
-    var statTotal = 0, statFree = 0, statPaid = 0, statCost = 0;
+    // 更新統計摘要
+    var statTotal = 0;
     for (var si = 0; si < this.bookings.length; si++) {
       if (this.bookings[si].month === month) {
         statTotal++;
-        statCost += (this.bookings[si].totalCost || 0);
-        if (this.bookings[si].status === "免費") statFree++;
-        else statPaid++;
       }
     }
     var elTotal = document.getElementById("rm-stat-total");
-    var elFree = document.getElementById("rm-stat-free");
-    var elPaid = document.getElementById("rm-stat-paid");
-    var elCost = document.getElementById("rm-stat-cost");
     if (elTotal) elTotal.textContent = statTotal;
-    if (elFree) elFree.textContent = statFree;
-    if (elPaid) elPaid.textContent = statPaid;
-    if (elCost) elCost.textContent = this.fmt(statCost);
-    // 更新每日訂房長條圖 v5.9
+    // 更新每日訂房長條圖
     var chartEl = document.getElementById("rm-chart");
     if (chartEl) {
       var ym = month; // "2026-06"
@@ -3476,40 +3420,6 @@ var RM = {
         parent.appendChild(oldLabel);
       }
       oldLabel.innerHTML = labelHtml;
-    }
-    // 更新代理訂房排行 v5.9
-    var rankEl = document.getElementById("rm-ranking");
-    if (rankEl) {
-      var agentCounts = {};
-      for (var ri = 0; ri < this.bookings.length; ri++) {
-        var rb = this.bookings[ri];
-        if (rb.month !== month) continue;
-        agentCounts[rb.agent] = (agentCounts[rb.agent] || 0) + 1;
-      }
-      var rankArr = [];
-      for (var aname in agentCounts) rankArr.push({ name: aname, count: agentCounts[aname] });
-      rankArr.sort(function(a,b){ return b.count - a.count; });
-      if (rankArr.length > 10) rankArr = rankArr.slice(0, 10);
-      if (rankArr.length === 0) {
-        rankEl.innerHTML = '<div class="empty-state" style="padding:16px 0;">本月尚無訂房資料</div>';
-      } else {
-        var maxCnt = rankArr[0].count || 1;
-        var rankHtml = "";
-        for (var ri = 0; ri < rankArr.length; ri++) {
-          var r = rankArr[ri];
-          var posClass = ri===0 ? "top1" : ri===1 ? "top2" : ri===2 ? "top3" : "normal";
-          var barW = Math.max(8, Math.round(r.count / maxCnt * 80));
-          var safeName = (r.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-          rankHtml += '<div class="rm-rank-item">' +
-            '<span class="rm-rank-pos ' + posClass + '">' + (ri+1) + '</span>' +
-            '<span class="rm-rank-name">' + safeName + '</span>' +
-            '<span class="rm-rank-bar-wrap"><span class="rm-rank-bar" style="width:' + barW + 'px;"></span></span>' +
-            '<span class="rm-rank-count">' + r.count + '</span>' +
-            '<span class="rm-rank-label">筆</span>' +
-            '</div>';
-        }
-        rankEl.innerHTML = rankHtml;
-      }
     }
   },
   exportCSV: function() {
