@@ -1137,6 +1137,139 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .toast-warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
 .toast-error   { background: linear-gradient(135deg, #c0392b, #e74c3c); }
 .toast-info    { background: linear-gradient(135deg, #2980b9, #3498db); }
+
+/* ============================================================
+   手機版全面修正：防止溢出與完美排版（v5.9.1）
+   ============================================================ */
+@media (max-width: 700px) {
+  /* 頁面容器：消除多層 padding 造成的寬度損失 */
+  .page { padding: 6px 4px; }
+  #page-scroll { overflow-x: hidden; }
+
+  /* 月份列：強制靠左對齊以利換行，防止單行過寬 */
+  .month-bar { justify-content: flex-start; }
+  .month-bar > * { flex-shrink: 1; min-width: 0; }
+
+  /* 全部交易頁工具列 */
+  #page-all .toolbar { gap: 3px; margin-bottom: 6px; }
+  #page-all .toolbar .search-box { width: 100%; margin-bottom: 4px; font-size: 12px; padding: 6px 8px; }
+  #page-all .toolbar .btn { padding: 4px 8px; font-size: 10px; min-height: 32px; }
+
+  /* KPI 迷你卡片：強制兩欄且不可膨脹 */
+  .kpi-mini-box { gap: 4px; margin-bottom: 6px; }
+  .kpi-mini { flex: 1 1 calc(50% - 4px); max-width: calc(50% - 4px); min-width: 0; padding: 5px 8px; }
+  .kpi-mini .label { font-size: 8px; }
+  .kpi-mini .value { font-size: 13px; }
+
+  /* 查詢/統計頁 KPI 卡片 */
+  .kpi-box { gap: 6px; margin-bottom: 10px; }
+  .kpi-card { padding: 10px 14px; min-width: calc(50% - 6px); border-radius: 10px; }
+  .kpi-card .label { font-size: 10px; }
+  .kpi-card .value { font-size: 18px; }
+
+  /* 全部交易表格：隱藏非必要欄位 (類型/客戶/佣金/備註) */
+  #all-table th:nth-child(1), #all-table td:nth-child(1),
+  #all-table th:nth-child(4), #all-table td:nth-child(4),
+  #all-table th:nth-child(7), #all-table td:nth-child(7),
+  #all-table th:nth-child(11), #all-table td:nth-child(11) { display: none; }
+
+  /* 房務表格：隱藏非必要欄位 (客戶/入住/退房/總費用) */
+  .room-table th:nth-child(3), .room-table td:nth-child(3),
+  .room-table th:nth-child(5), .room-table td:nth-child(5),
+  .room-table th:nth-child(6), .room-table td:nth-child(6),
+  .room-table th:nth-child(9), .room-table td:nth-child(9) { display: none; }
+
+  /* 查詢表格：隱藏備註欄 */
+  #page-query table th:nth-child(8), #page-query table td:nth-child(8) { display: none; }
+
+  /* 房務控制列：限制輸入框寬度防止撐開 */
+  .room-controls .rm-select { max-width: 90px; min-width: 0; }
+  .room-controls .rm-input[type="month"] { max-width: 120px; min-width: 0; }
+
+  /* 表格統一縮小 */
+  table { font-size: 11px; }
+  th { padding: 5px 4px; font-size: 9px; }
+  td { padding: 5px 4px; font-size: 11px; }
+  .num { font-size: 11px; }
+
+  /* 房務表格特別處理：允許換行 */
+  .room-table { font-size: 10px; }
+  .room-table th { padding: 4px 3px; font-size: 8px; letter-spacing: 0; }
+  .room-table td { padding: 4px 3px; font-size: 10px; white-space: normal; word-break: break-all; }
+  .room-table-wrap::after { display: none; }
+
+  /* 房務儀表板再縮小 */
+  .rm-dashboard { margin-bottom: 6px; }
+  .rm-dash-main { padding: 6px 8px 4px; }
+  .rm-dash-hero { gap: 3px; margin-bottom: 4px; }
+  .rm-hero-card { padding: 5px 6px; border-radius: 5px; }
+  .rm-hero-label { font-size: 7px; margin-bottom: 1px; letter-spacing: 0; }
+  .rm-hero-val { font-size: 12px; }
+  .rm-hero-val span { font-size: 7px; margin-left: 1px; }
+  .rm-dash-bar-wrap { padding: 5px 6px 3px; border-radius: 5px; }
+  .rm-dash-bar-info { margin-bottom: 3px; }
+  .rm-dash-bar-label { font-size: 8px; }
+  .rm-dash-bar-pct { font-size: 10px; }
+  .rm-dash-bar-track { height: 4px; }
+  .rm-dash-bar-ticks { height: 6px; }
+  .rm-dash-bar-ticks span { font-size: 5px; top: 0; }
+  .rm-stats-row { gap: 3px; margin-bottom: 4px; }
+  .rm-stat-item { padding: 4px 6px; border-radius: 5px; }
+  .rm-stat-num { font-size: 12px; }
+  .rm-stat-label { font-size: 7px; }
+  .rm-chart-wrap { padding: 5px 6px 3px; border-radius: 5px; margin-bottom: 4px; }
+  .rm-chart-title { font-size: 7px; margin-bottom: 2px; }
+  .rm-chart { height: 32px; padding-top: 2px; }
+  .room-controls { gap: 2px; margin-bottom: 4px; }
+  .room-controls .btn { padding: 4px 6px; font-size: 9px; min-height: 28px; }
+
+  /* 統計頁表格縮小 */
+  #page-summary table { font-size: 11px; }
+  #page-summary th, #page-summary td { padding: 5px 4px; }
+
+  /* 刪除按鈕縮小 */
+  .btn-red { padding: 3px 8px; font-size: 10px; }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 4px 2px; }
+  #page-scroll { padding: 6px 4px; }
+
+  /* 超小螢幕：KPI 卡片改單欄 */
+  .kpi-grid { grid-template-columns: 1fr; gap: 4px; }
+  .kpi-card-new { padding: 8px 10px; }
+  .kpi-card-new .kpi-value { font-size: 18px; }
+  .kpi-card-new .kpi-label { font-size: 9px; }
+
+  .kpi-mini { padding: 4px 6px; }
+  .kpi-mini .label { font-size: 7px; }
+  .kpi-mini .value { font-size: 12px; }
+
+  /* 查詢/統計頁 KPI 卡片 */
+  .kpi-card { padding: 8px 10px; min-width: calc(50% - 4px); }
+  .kpi-card .value { font-size: 16px; }
+
+  /* 頂部列再縮小 */
+  #topbar { height: 44px; padding: 0 8px; }
+  #topbar-title { font-size: 12px; }
+  .topbar-btn { padding: 4px 8px; font-size: 10px; }
+  .topbar-btn.primary { padding: 5px 10px; font-size: 11px; }
+
+  /* 房務儀表板極致縮小 */
+  .rm-hero-val { font-size: 11px; }
+  .rm-hero-card { padding: 4px 5px; }
+  .rm-hero-label { font-size: 6px; }
+
+  /* 表格再縮小 */
+  table { font-size: 10px; }
+  th { padding: 4px 3px; font-size: 8px; }
+  td { padding: 4px 3px; font-size: 10px; }
+  .num { font-size: 10px; }
+
+  .room-table { font-size: 9px; }
+  .room-table th { padding: 3px 2px; font-size: 7px; }
+  .room-table td { padding: 3px 2px; font-size: 9px; }
+}
 </style>
 </head>
 <body>
