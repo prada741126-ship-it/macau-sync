@@ -1186,7 +1186,7 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
             <div class="rm-hero-val" id="rm-q-rolling">0<span>萬</span></div>
           </div>
           <div class="rm-hero-card">
-            <div class="rm-hero-label">已使用免費額度</div>
+            <div class="rm-hero-label">已使用轉碼數</div>
             <div class="rm-hero-val" id="rm-q-used-hero">0<span>晚</span></div>
           </div>
           <div class="rm-hero-card">
@@ -3014,7 +3014,7 @@ function renderOverview() {
   var rmFreeCount = typeof RM!=="undefined" ? RM.bookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免費"&&agentsWithRolling[x.agent];}).length : 0;
   grid.innerHTML=''+
     '<div class="kpi-card-new gold"><div class="kpi-label">本月洗碼量</div><div class="kpi-value">'+fmt(totalVol)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>'+
-    '<div class="kpi-card-new green"><div class="kpi-label">剩餘轉碼</div><div class="kpi-value">'+fmt(Math.max(0,totalVol-rmUsedRolling))+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+rmFreeCount+' 晚免費</div></div>'+
+    '<div class="kpi-card-new green"><div class="kpi-label">剩餘轉碼</div><div class="kpi-value">'+fmt(totalVol-rmUsedRolling)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+rmFreeCount+' 晚免費</div></div>'+
     '<div class="kpi-card-new red"><div class="kpi-label">未提領</div><div class="kpi-value">'+fmt(undrawnTotal)+'</div><div class="kpi-delta down">'+undrawnCount+' 筆待提</div></div>'+
     '<div class="kpi-card-new blue"><div class="kpi-label">公基金</div><div class="kpi-value">'+fmt(fundNet)+'</div><div class="kpi-delta">本月入帳 '+fmt(totalFund)+'</div></div>'+
     '<div class="kpi-card-new orange"><div class="kpi-label">現金寄放</div><div class="kpi-value">'+fmt(totalCash)+'</div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>';
@@ -3407,8 +3407,8 @@ var RM = {
     for (var j=0; j<this.bookings.length; j++)
       if (this.bookings[j].month===month && this.bookings[j].status==="免費")
         rmUsedRolling += (this.bookings[j].nights||0) * (this.bookings[j].threshold||70);
-    // 剩餘轉碼數 = 本月總洗碼量 - 已使用轉碼數
-    var rmRemaining = Math.max(0, totalRolling - rmUsedRolling);
+    // 剩餘轉碼數 = 本月總洗碼量 - 已使用轉碼數（可為負數）
+    var rmRemaining = totalRolling - rmUsedRolling;
     var rollingEl2 = document.getElementById("rm-q-used-rolling");
     if (rollingEl2) rollingEl2.innerHTML = this.fmt(rmRemaining)+"<span>萬</span>";
 
