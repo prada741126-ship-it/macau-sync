@@ -2128,12 +2128,13 @@ function saveForm() {
     }
   }
   saveData(true);
-  renderAll();
-  renderOverview();
-  renderSummary();
-  closeModal();
+  closeModal();  // 先關閉彈窗，確保一定執行
   showToast(editId ? "已更新！" : "已新增！","success");
   editId = null;
+  // 後台重新渲染（即使報錯也不影響彈窗關閉）
+  try { renderAll(); } catch(e) { console.error("renderAll error:", e); }
+  try { renderOverview(); } catch(e) { console.error("renderOverview error:", e); }
+  try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); }
 }
 
 function openFundModal() {
@@ -3456,9 +3457,12 @@ var RM = {
       showToast("訂房已新增","success");
     }
     this.save();
-    this.closeModal();
-    this.render();
-    this.updateQuota();
+    this.closeModal();  // 先關閉彈窗，確保一定執行
+    showToast(this.editingId ? "訂房已更新" : "訂房已新增", "success");
+    this.editingId = null;
+    // 後台重新渲染（即使報錯也不影響彈窗關閉）
+    try { this.render(); } catch(e) { console.error("RM.render error:", e); }
+    try { this.updateQuota(); } catch(e) { console.error("RM.updateQuota error:", e); }
   },
   delete: function(id) {
     if (!confirm("確定要刪除這筆訂房紀錄嗎？")) return;
