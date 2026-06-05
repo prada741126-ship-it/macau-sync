@@ -527,6 +527,26 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .rm-dash-bar-ticks { position: relative; height: 14px; }
 .rm-dash-bar-ticks span { position: absolute; transform: translateX(-50%); font-size: 8px; color: rgba(255,255,255,0.15); top: 2px; }
 
+/* 統計摘要列 v5.9 */
+.rm-stats-row {
+  display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.rm-stat-item {
+  flex: 1; min-width: 80px;
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px;
+  transition: all 0.2s;
+}
+.rm-stat-item:hover { background: rgba(255,255,255,0.04); border-color: rgba(212,175,55,0.15); }
+.rm-stat-num {
+  font-size: 22px; font-weight: 800; font-family: "Consolas", monospace;
+  color: var(--gold); line-height: 1;
+}
+.rm-stat-num.green { color: var(--green); }
+.rm-stat-num.orange { color: var(--orange); }
+.rm-stat-label { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.8px; white-space: nowrap; }
+
 .rm-select, .rm-input { padding: 6px 10px; background: rgba(12,12,20,0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #d4d4d4; font-size: 12px; }
 .rm-select:focus, .rm-input:focus { border-color: var(--gold); outline: none; }
 .room-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
@@ -1124,6 +1144,26 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 本月統計摘要 v5.9 -->
+    <div class="rm-stats-row">
+      <div class="rm-stat-item">
+        <span class="rm-stat-num" id="rm-stat-total">0</span>
+        <span class="rm-stat-label">筆訂房</span>
+      </div>
+      <div class="rm-stat-item">
+        <span class="rm-stat-num green" id="rm-stat-free">0</span>
+        <span class="rm-stat-label">免費房</span>
+      </div>
+      <div class="rm-stat-item">
+        <span class="rm-stat-num orange" id="rm-stat-paid">0</span>
+        <span class="rm-stat-label">付費房</span>
+      </div>
+      <div class="rm-stat-item">
+        <span class="rm-stat-num" id="rm-stat-cost">0</span>
+        <span class="rm-stat-label">總費用（萬）</span>
       </div>
     </div>
 
@@ -3303,6 +3343,24 @@ var RM = {
     }
     var pctEl = document.getElementById("rm-progress-pct");
     if (pctEl) pctEl.textContent = pct+"%";
+    // 更新統計摘要列 v5.9
+    var statTotal = 0, statFree = 0, statPaid = 0, statCost = 0;
+    for (var si = 0; si < this.bookings.length; si++) {
+      if (this.bookings[si].month === month) {
+        statTotal++;
+        statCost += (this.bookings[si].totalCost || 0);
+        if (this.bookings[si].status === "免費") statFree++;
+        else statPaid++;
+      }
+    }
+    var elTotal = document.getElementById("rm-stat-total");
+    var elFree = document.getElementById("rm-stat-free");
+    var elPaid = document.getElementById("rm-stat-paid");
+    var elCost = document.getElementById("rm-stat-cost");
+    if (elTotal) elTotal.textContent = statTotal;
+    if (elFree) elFree.textContent = statFree;
+    if (elPaid) elPaid.textContent = statPaid;
+    if (elCost) elCost.textContent = this.fmt(statCost);
   },
   exportCSV: function() {
     var monthEl = document.getElementById("rm-filter-month");
