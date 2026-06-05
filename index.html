@@ -590,6 +590,32 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .rm-btn-del  { background: #e74c3c; color: #fff; }
 .empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); }
 
+/* 本月代理訂房排行 v5.9 */
+.rm-ranking-wrap {
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px; padding: 12px 16px 10px; margin-bottom: 12px;
+}
+.rm-ranking-title { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+.rm-ranking { display: flex; flex-direction: column; gap: 5px; max-height: 180px; overflow-y: auto; }
+.rm-rank-item {
+  display: flex; align-items: center; gap: 10px; padding: 5px 8px;
+  border-radius: 6px; background: rgba(255,255,255,0.015); transition: background 0.2s;
+}
+.rm-rank-item:hover { background: rgba(212,175,55,0.06); }
+.rm-rank-pos {
+  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.rm-rank-pos.top1 { background: linear-gradient(135deg, #FFD700, #DAA520); color: #1a1a12; }
+.rm-rank-pos.top2 { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); color: #1a1a12; }
+.rm-rank-pos.top3 { background: linear-gradient(135deg, #CD7F32, #B8860B); color: #1a1a12; }
+.rm-rank-pos.normal { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); }
+.rm-rank-name { flex: 1; font-size: 12px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rm-rank-bar-wrap { width: 80px; height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+.rm-rank-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, rgba(212,175,55,0.5), rgba(212,175,55,0.15)); transition: width 0.4s ease; }
+.rm-rank-count { font-size: 11px; color: var(--gold); font-weight: 600; min-width: 28px; text-align: right; font-family: monospace; }
+.rm-rank-label { font-size: 9px; color: rgba(255,255,255,0.25); margin-left: 2px; }
+
 /* 桌面版：房務系統填滿剩餘空間，減少空白 */
 @media (min-width: 701px) {
   #page-room.active {
@@ -601,6 +627,7 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   #page-room .rm-dashboard { margin-bottom: 14px; }
   #page-room .rm-stats-row { margin-bottom: 14px; }
   #page-room .rm-chart-wrap { margin-bottom: 14px; }
+  #page-room .rm-ranking-wrap { margin-bottom: 14px; }
   #page-room .room-controls { flex-shrink: 0; }
   #page-room .room-table-wrap {
     flex: 1;
@@ -1208,6 +1235,12 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
     <div class="rm-chart-wrap">
       <div class="rm-chart-title">本月每日訂房量</div>
       <div class="rm-chart" id="rm-chart"></div>
+    </div>
+
+    <!-- 本月代理訂房排行 v5.9 -->
+    <div class="rm-ranking-wrap">
+      <div class="rm-ranking-title">本月代理訂房排行</div>
+      <div class="rm-ranking" id="rm-ranking"></div>
     </div>
 
     <div class="room-controls">
@@ -3443,6 +3476,40 @@ var RM = {
         parent.appendChild(oldLabel);
       }
       oldLabel.innerHTML = labelHtml;
+    }
+    // 更新代理訂房排行 v5.9
+    var rankEl = document.getElementById("rm-ranking");
+    if (rankEl) {
+      var agentCounts = {};
+      for (var ri = 0; ri < this.bookings.length; ri++) {
+        var rb = this.bookings[ri];
+        if (rb.month !== month) continue;
+        agentCounts[rb.agent] = (agentCounts[rb.agent] || 0) + 1;
+      }
+      var rankArr = [];
+      for (var aname in agentCounts) rankArr.push({ name: aname, count: agentCounts[aname] });
+      rankArr.sort(function(a,b){ return b.count - a.count; });
+      if (rankArr.length > 10) rankArr = rankArr.slice(0, 10);
+      if (rankArr.length === 0) {
+        rankEl.innerHTML = '<div class="empty-state" style="padding:16px 0;">本月尚無訂房資料</div>';
+      } else {
+        var maxCnt = rankArr[0].count || 1;
+        var rankHtml = "";
+        for (var ri = 0; ri < rankArr.length; ri++) {
+          var r = rankArr[ri];
+          var posClass = ri===0 ? "top1" : ri===1 ? "top2" : ri===2 ? "top3" : "normal";
+          var barW = Math.max(8, Math.round(r.count / maxCnt * 80));
+          var safeName = (r.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+          rankHtml += '<div class="rm-rank-item">' +
+            '<span class="rm-rank-pos ' + posClass + '">' + (ri+1) + '</span>' +
+            '<span class="rm-rank-name">' + safeName + '</span>' +
+            '<span class="rm-rank-bar-wrap"><span class="rm-rank-bar" style="width:' + barW + 'px;"></span></span>' +
+            '<span class="rm-rank-count">' + r.count + '</span>' +
+            '<span class="rm-rank-label">筆</span>' +
+            '</div>';
+        }
+        rankEl.innerHTML = rankHtml;
+      }
     }
   },
   exportCSV: function() {
