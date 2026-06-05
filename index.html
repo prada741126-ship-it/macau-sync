@@ -649,8 +649,22 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
    手機響應式
    ============================================================ */
 @media (max-width: 700px) {
-  #sidebar { position: fixed; top: 0; left: 0; bottom: 0; z-index: 200; transition: transform 0.25s ease; width: 220px; max-width: 80vw; background: rgba(12,12,18,0.98); backdrop-filter: blur(20px); box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
-  #sidebar.mobile-hidden { transform: translateX(-100%); }
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 220px;
+    max-width: 80vw;
+    height: 100vh;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    background: rgba(12,12,18,0.98);
+    backdrop-filter: blur(20px);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+    transition: left 0.25s ease;
+  }
+  #sidebar:not(.mobile-hidden) { left: 0; }
   .topbar-toggle { display: block; font-size: 20px; padding: 4px; }
   .rm-form-row { grid-template-columns: 1fr; }
   .rm-dash-hero { grid-template-columns: 1fr; gap: 8px; }
@@ -1982,19 +1996,19 @@ function toggleSidebar() {
   if (icon) icon.textContent = sb.classList.contains("collapsed") ? "▶" : "◀";
 }
 function toggleMobileSidebar() {
+  console.log('toggleMobileSidebar called, mobile=<828>');
   var sb = document.getElementById("sidebar");
   var overlay = document.getElementById("sidebar-overlay");
-  if (!sb) return;
+  if (!sb) { console.log('sidebar not found'); return; }
   sb.classList.toggle("mobile-hidden");
-  // 控制遮罩層顯示/隱藏（只用 classList，不直接操作 style）
+  console.log('mobile-hidden present: <828>', sb.classList.contains("mobile-hidden"));
+  // 控制遮罩層顯示/隱藏
   if (overlay) {
     if (sb.classList.contains("mobile-hidden")) {
       overlay.classList.remove("active");
-      // 延遲隱藏，確保過渡動畫完成
       setTimeout(function() { overlay.style.display = "none"; }, 250);
     } else {
       overlay.style.display = "block";
-      // 觸發重繪，確保過渡動畫生效
       overlay.offsetHeight;
       overlay.classList.add("active");
     }
@@ -3696,7 +3710,7 @@ function rmHandleImport(e){ RM.handleImport(e); }
 RM.init();
 
 // ===== 手機版側邊欄初始化（預設隱藏）=====
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
   function initMobileSidebar() {
     var sb = document.getElementById('sidebar');
     if (!sb) return;
@@ -3708,7 +3722,7 @@ RM.init();
   }
   initMobileSidebar();
   window.addEventListener('resize', initMobileSidebar);
-})();
+});
 
 // ===== 側邊欄事件委派（確保手機觸控正常） =====
 (function() {
