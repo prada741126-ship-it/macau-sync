@@ -595,12 +595,22 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   #page-room.active {
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 140px);
+    height: calc(100vh - 140px);
+    overflow: hidden;
   }
+  #page-room .rm-dashboard { margin-bottom: 14px; }
+  #page-room .rm-stats-row { margin-bottom: 14px; }
+  #page-room .rm-chart-wrap { margin-bottom: 14px; }
+  #page-room .room-controls { flex-shrink: 0; }
   #page-room .room-table-wrap {
     flex: 1;
-    min-height: 420px;
+    min-height: 500px;
+    max-height: calc(100vh - 500px);
+    overflow-y: auto;
   }
+  #page-room .room-table { font-size: 13px; }
+  #page-room .room-table th { padding: 8px 10px; font-size: 11px; }
+  #page-room .room-table td { padding: 9px 10px; }
 }
 
 #rm-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
