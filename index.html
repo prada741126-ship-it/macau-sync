@@ -1160,13 +1160,13 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 <div id="main-content">
   <!-- Topbar -->
   <div id="topbar">
-    <div id="topbar-title">總覽</div>
-    <div id="topbar-actions">
-      <button class="topbar-btn primary" onclick="openModal()">＋ 新增</button>
-      <button class="topbar-btn" onclick="manualSync()">🔄 同步</button>
-    </div>
-    <!-- 手機版 sidebar 開關 -->
-    <button class="topbar-toggle" id="mobile-sb-btn" onclick="toggleMobileSidebar()">☰</button>
+  <!-- 手機版 sidebar 開關（左上角） -->
+  <button class="topbar-toggle" id="mobile-sb-btn" onclick="toggleMobileSidebar()">☰</button>
+  <div id="topbar-title">總覽</div>
+  <div id="topbar-actions">
+    <button class="topbar-btn primary" onclick="openModal()">＋ 新增</button>
+    <button class="topbar-btn" onclick="manualSync()">🔄 同步</button>
+  </div>
   </div>
 
   <!-- 可滾動內容區 -->
@@ -3702,10 +3702,8 @@ RM.init();
     if (!sb) return;
     if (window.innerWidth <= 700) {
       sb.classList.add('mobile-hidden');
-      sb.style.transform = 'translateX(-100%)';
     } else {
       sb.classList.remove('mobile-hidden');
-      sb.style.transform = '';
     }
   }
   initMobileSidebar();
