@@ -32,7 +32,7 @@ app.use((req, res, next) => {
 // 確保 db.json 存在
 try {
   if (!fs.existsSync(DB_FILE)) {
-    var initData = { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, rm_bookings: [], rm_last_id: 1, lastModified: 0 };
+    var initData = { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, rm_bookings: [], rm_last_id: 1, deletedIds: [], lastModified: 0 };
     fs.writeFileSync(DB_FILE, JSON.stringify(initData, null, 2), 'utf8');
     console.log('[START] Created new db.json');
   } else {
@@ -74,7 +74,7 @@ app.get('/', (req, res) => {
 
 // Railway 健康檢查
 app.get('/health', (req, res) => {
-  res.json({ ok: true, status: 'running', version: '6.3.4' });
+  res.json({ ok: true, status: 'running', version: '6.3.5' });
 });
 
 // 讀取數據庫
@@ -84,7 +84,7 @@ function readDB() {
       return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
     }
   } catch (e) { console.error('readDB error:', e.message); }
-  return { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, rm_bookings: [], rm_last_id: 1, lastModified: 0 };
+  return { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, rm_bookings: [], rm_last_id: 1, deletedIds: [], lastModified: 0 };
 }
 
 // 按 ID 合併陣列（保留伺服器上客戶端沒有的資料，防止刪除被還原）
@@ -157,6 +157,36 @@ app.post('/api/save', (req, res) => {
     if (body.config !== undefined) db.config = body.config;
     if (body.agentList !== undefined) db.agentList = body.agentList;
     if (body.archives !== undefined) db.archives = body.archives;
+    // 處理 deletedIds：合併並從陣列中真正移除
+    if (body.deletedIds !== undefined && Array.isArray(body.deletedIds)) {
+      if (!db.deletedIds) db.deletedIds = [];
+      var delSet = new Set(db.deletedIds);
+      for (var di = 0; di < body.deletedIds.length; di++) {
+        delSet.add(body.deletedIds[di]);
+      }
+      db.deletedIds = Array.from(delSet);
+      // 從 txs/fundWithdrawals/rm_bookings 中移除已刪除 ID
+      var txsFresh = [];
+      for (var i = 0; i < db.txs.length; i++) {
+        if (delSet.has(db.txs[i].id)) continue;
+        txsFresh.push(db.txs[i]);
+      }
+      db.txs = txsFresh;
+      var fwFresh = [];
+      for (var i = 0; i < db.fundWithdrawals.length; i++) {
+        if (delSet.has(db.fundWithdrawals[i].id)) continue;
+        fwFresh.push(db.fundWithdrawals[i]);
+      }
+      db.fundWithdrawals = fwFresh;
+      var rmFresh = [];
+      for (var i = 0; i < db.rm_bookings.length; i++) {
+        if (delSet.has(db.rm_bookings[i].id)) continue;
+        rmFresh.push(db.rm_bookings[i]);
+      }
+      db.rm_bookings = rmFresh;
+      console.log('[Sync ↑] 已根據 deletedIds 清理伺服器資料，共 ' + db.deletedIds.length + ' 筆刪除紀錄');
+    }
+
     writeDB(db);
     res.json({ ok: true, lastModified: db.lastModified });
   } catch (e) {
@@ -229,6 +259,36 @@ app.post('/api/sync/upload', (req, res) => {
       db.rm_last_id = body.rm_last_id;
     }
 
+    // 處理 deletedIds：合併並從陣列中真正移除
+    if (body.deletedIds !== undefined && Array.isArray(body.deletedIds)) {
+      if (!db.deletedIds) db.deletedIds = [];
+      var delSet = new Set(db.deletedIds);
+      for (var di = 0; di < body.deletedIds.length; di++) {
+        delSet.add(body.deletedIds[di]);
+      }
+      db.deletedIds = Array.from(delSet);
+      // 從 txs/fundWithdrawals/rm_bookings 中移除已刪除 ID
+      var txsFresh = [];
+      for (var i = 0; i < db.txs.length; i++) {
+        if (delSet.has(db.txs[i].id)) continue;
+        txsFresh.push(db.txs[i]);
+      }
+      db.txs = txsFresh;
+      var fwFresh = [];
+      for (var i = 0; i < db.fundWithdrawals.length; i++) {
+        if (delSet.has(db.fundWithdrawals[i].id)) continue;
+        fwFresh.push(db.fundWithdrawals[i]);
+      }
+      db.fundWithdrawals = fwFresh;
+      var rmFresh = [];
+      for (var i = 0; i < db.rm_bookings.length; i++) {
+        if (delSet.has(db.rm_bookings[i].id)) continue;
+        rmFresh.push(db.rm_bookings[i]);
+      }
+      db.rm_bookings = rmFresh;
+      console.log('[Sync ↑] 已根據 deletedIds 清理伺服器資料，共 ' + db.deletedIds.length + ' 筆刪除紀錄');
+    }
+
     writeDB(db);
     res.json({ ok: true, lastModified: db.lastModified });
   } catch (e) {
@@ -249,6 +309,7 @@ app.get('/api/sync/download', (req, res) => {
     archives: db.archives || {},
     rm_bookings: db.rm_bookings || [],
     rm_last_id: db.rm_last_id || 1,
+    deletedIds: db.deletedIds || [],
     lastModified: db.lastModified || 0
   });
 });

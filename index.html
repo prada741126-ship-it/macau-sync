@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v6.3.4</title>
+<title>澳門洗碼報表 v6.3.5</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1614,7 +1614,7 @@ tbody tr:hover {
     <span class="sb-label">折疊選單</span>
   </div>
   <!-- 版本號（便於確認是否為最新版） -->
-  <div class="sb-version" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:rgba(212,175,55,0.4);letter-spacing:1px;">v6.3.4</div>
+  <div class="sb-version" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:rgba(212,175,55,0.4);letter-spacing:1px;">v6.3.5</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
@@ -2077,6 +2077,7 @@ tbody tr:hover {
 <script>
 var txs = [];
 var fundWithdrawals = [];
+var deletedIds = []; // 刪除 ID 清單（同步用，防止已刪除資料被還原）
 var agentWallets = {};
 var editId = null;
 var nextId = 1;
@@ -2302,26 +2303,22 @@ var lastDeleted = null;
 function deleteTx(id) {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
-  // 找到該筆交易，設為 deleted=true（軟刪除，不下載時從陣列移除）
-  var deleted = null;
+  // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
+  var deleted = null, idx = -1;
   for (var i = 0; i < txs.length; i++) {
-    if (txs[i].id === id) {
-      deleted = txs[i];
-      txs[i].deleted = true;
-      break;
-    }
+    if (txs[i].id === id) { deleted = txs[i]; idx = i; break; }
   }
+  if (idx < 0) { hideLoading(); return; }
+  txs.splice(idx, 1);              // 從陣列移除
+  deletedIds.push(id);              // 記錄已刪除 ID
   lastDeleted = deleted;
-  // 存到 localStorage（包含 deleted:true 的項目，以便同步到伺服器）
-  try {
-    var encrypted = encryptData(txs);
-    localStorage.setItem("macau_data", encrypted);
-  } catch(e) {
-    try { localStorage.setItem("macau_data", JSON.stringify(txs)); } catch(e2) {}
-  }
+  // 存到 localStorage（不含已刪除項目；deletedIds 另存）
+  saveData(true);
+  // 儲存 deletedIds
+  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
   // 標記髒資料，確保上傳
   if (typeof markSyncDirty === 'function') markSyncDirty();
-  // 立即上傳，上傳成功後再渲染（防止 syncDownload 還原）
+  // 立即上傳，上傳成功後再渲染
   var p = (typeof syncUpload === 'function') ? syncUpload() : Promise.resolve({skipped:true});
   p.then(function() {
     renderAll();
@@ -2357,20 +2354,12 @@ function showUndoToast() {
 }
 function undoDelete() {
   if (!lastDeleted) return;
-  // 软删除还原：找到该笔交易，把 deleted 设为 false
-  var found = false;
-  for (var i = 0; i < txs.length; i++) {
-    if (txs[i].id === lastDeleted.id) {
-      txs[i].deleted = false;
-      found = true;
-      break;
-    }
-  }
-  if (!found) {
-    // 已被 syncDownload 移除，重新插入
-    lastDeleted.deleted = false;
-    txs.push(lastDeleted);
-  }
+  // 撤銷刪除：從 deletedIds 移除 ID，並將資料重新插入陣列
+  var did = lastDeleted.id;
+  var di = deletedIds.indexOf(did);
+  if (di >= 0) deletedIds.splice(di, 1);
+  txs.push(lastDeleted);
+  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
   lastDeleted = null;
   saveData(true);
   renderAll();
@@ -3064,13 +3053,15 @@ function saveFundForm() {
 }
 function deleteFund(id) {
   if (!confirm("確定刪除？")) return;
-  // 软删除：标记 deleted=true（同步时保留标记，防止 syncDownload 还原）
+  // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
   var idx = -1;
   for (var i = 0; i < fundWithdrawals.length; i++) {
     if (fundWithdrawals[i].id === id) { idx = i; break; }
   }
   if (idx < 0) return;
-  fundWithdrawals[idx].deleted = true;
+  var deleted = fundWithdrawals.splice(idx, 1)[0]; // 從陣列移除
+  deletedIds.push(id);                               // 記錄已刪除 ID
+  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
   saveFundData(true);
   // 刷新所有頁面的基金餘額顯示
   renderOverview();
@@ -3383,6 +3374,7 @@ function syncUpload() {
   }
   var payload = {
     password: SYNC_PASSWORD,
+    deletedIds: deletedIds,  // 上傳已刪除 ID 清單
     txs: txs,
     agentList: agentList,
     agentWallets: agentWallets,
@@ -3447,49 +3439,66 @@ function syncDownload() {
       if (!d || d.ok === false) {
         throw new Error(d ? d.error : '未知錯誤');
       }
-      // 合併 txs（按 ID 合併，保留本地尚未上傳的資料，防止空陣列覆蓋）
+      // 處理伺服器下發的 deletedIds：合併並從本地陣列中移除
+      if (d.deletedIds && Array.isArray(d.deletedIds)) {
+        // 合併 deletedIds（保留本地和伺服器兩邊的 ID）
+        for (var di = 0; di < d.deletedIds.length; di++) {
+          var did = d.deletedIds[di];
+          if (deletedIds.indexOf(did) < 0) deletedIds.push(did);
+        }
+        // 將 deletedIds 存到 localStorage
+        try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
+        // 從 txs 中移除已被刪除的 ID
+        var txsFresh = [];
+        for (var i = 0; i < txs.length; i++) {
+          if (deletedIds.indexOf(txs[i].id) < 0) txsFresh.push(txs[i]);
+        }
+        txs = txsFresh;
+        // 從 fundWithdrawals 中移除
+        var fwFresh = [];
+        for (var i = 0; i < fundWithdrawals.length; i++) {
+          if (deletedIds.indexOf(fundWithdrawals[i].id) < 0) fwFresh.push(fundWithdrawals[i]);
+        }
+        fundWithdrawals = fwFresh;
+        // 從 RM.bookings 中移除
+        if (typeof RM !== 'undefined' && RM.bookings) {
+          var rmFresh = [];
+          for (var i = 0; i < RM.bookings.length; i++) {
+            if (deletedIds.indexOf(RM.bookings[i].id) < 0) rmFresh.push(RM.bookings[i]);
+          }
+          RM.bookings = rmFresh;
+        }
+        console.log('[Sync ↓] 已根據 deletedIds 清理本地資料，共 ' + deletedIds.length + ' 筆刪除紀錄');
+      }
+      // 合併 txs（按 ID 合併，不含已刪除的 ID）
       if (d.txs !== undefined) {
         var txMap = {};
         for (var i = 0; i < txs.length; i++) txMap[txs[i].id] = txs[i];
         for (var i = 0; i < d.txs.length; i++) {
           var sItem = d.txs[i];
-          var lItem = txMap[sItem.id];
-          // 合併策略：本地或伺服器任一方有 deleted:true 都保留
-          if (lItem && lItem.deleted) {
-            txMap[sItem.id] = lItem;  // 本地已刪除，優先保留
-          } else if (sItem.deleted) {
-            txMap[sItem.id] = sItem;  // 伺服器已刪除，保留
-          } else {
-            txMap[sItem.id] = sItem;  // 雙方都未刪除，用伺服器版本
-          }
+          // 跳過已刪除的 ID
+          if (deletedIds.indexOf(sItem.id) >= 0) continue;
+          txMap[sItem.id] = sItem;
         }
         txs = [];
         for (var tid in txMap) txs.push(txMap[tid]);
       }
-      // 不在此過濾 deleted:true，保留在 txs 中以備上傳；渲染時才過濾
       // agentList：只在上傳成功後才取代（避免空資料覆蓋本地資料）
       if (d.agentList !== undefined && d.agentList.length > 0) agentList = d.agentList;
       // agentWallets：只在上傳成功後才取代
       if (d.agentWallets !== undefined && Object.keys(d.agentWallets).length > 0) agentWallets = d.agentWallets;
-      // 合併 fundWithdrawals（按 ID 合併，保留本地尚未上傳的資料）
+      // 合併 fundWithdrawals（按 ID 合併，不含已刪除的 ID）
       if (d.fundWithdrawals !== undefined) {
         var fwMap = {};
         for (var i = 0; i < fundWithdrawals.length; i++) fwMap[fundWithdrawals[i].id] = fundWithdrawals[i];
         for (var i = 0; i < d.fundWithdrawals.length; i++) {
           var sItem = d.fundWithdrawals[i];
-          var lItem = fwMap[sItem.id];
-          if (lItem && lItem.deleted) {
-            fwMap[sItem.id] = lItem;
-          } else if (sItem.deleted) {
-            fwMap[sItem.id] = sItem;
-          } else {
-            fwMap[sItem.id] = sItem;
-          }
+          if (deletedIds.indexOf(sItem.id) >= 0) continue; // 跳過已刪除的 ID
+          fwMap[sItem.id] = sItem;
         }
         fundWithdrawals = [];
         for (var fid in fwMap) fundWithdrawals.push(fwMap[fid]);
       }
-      // 不在此過濾 deleted:true，保留在 fundWithdrawals 中以備上傳；渲染時才過濾
       if (d.workingMonth) workingMonth = d.workingMonth;
       if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
       // 還原 RM 數據（合併策略，保留本地尚未上傳的資料）
@@ -3509,7 +3518,6 @@ function syncDownload() {
         }
         RM.bookings = [];
         for (var rid in rmMap) RM.bookings.push(rmMap[rid]);
-        // 不在此過濾 deleted:true，保留在 RM.bookings 中以備上傳；渲染時才過濾
         try { localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings)); } catch(e) {}
         if (d.rm_last_id && RM.lastId < d.rm_last_id) RM.lastId = d.rm_last_id;
         try { localStorage.setItem("rm_last_id", RM.lastId.toString()); } catch(e) {}
@@ -3552,17 +3560,13 @@ function manualSync() {
 function initSync() {
   if (!SYNC_API) { console.log('同步伺服器未配置'); return; }
   console.log('同步伺服器：' + SYNC_API + '（增量同步已啟用，間隔 5 秒）');
-  // 檢查本地是否有待上傳的刪除標記，有則標記髒以便首次同步先上傳
-  (function() {
-    var hasDeleted = false;
-    for (var i = 0; i < txs.length; i++) { if (txs[i].deleted) { hasDeleted = true; break; } }
-    for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].deleted) { hasDeleted = true; break; } }
-    if (typeof RM !== 'undefined' && RM.bookings) {
-      for (var i = 0; i < RM.bookings.length; i++) { if (RM.bookings[i].deleted) { hasDeleted = true; break; } }
-    }
-    if (hasDeleted) { _syncDirty = true; console.log('[Sync] 偵測到本地有刪除標記，將先上傳再下載'); }
-  })();
-  // 立即執行一次同步：先上傳再下載（與定期同步邏輯一致）
+  // 載入本地 deletedIds（已刪除 ID 清單，用於跨設備同步刪除）
+  try {
+    var di = JSON.parse(localStorage.getItem("macau_deleted_ids"));
+    if (Array.isArray(di)) deletedIds = di;
+  } catch(e) { deletedIds = []; }
+  console.log('[Sync] 本地 deletedIds 載入：' + deletedIds.length + ' 筆');
+  // 立即執行一次同步（先上傳再下載）
   var firstUpload = _syncDirty ? syncUpload() : Promise.resolve();
   firstUpload.then(function() {
     return syncDownload();
@@ -3587,7 +3591,7 @@ function initSync() {
 function renderSummary() {
   try {
   var map = {};
-  var _txs = txs.filter(function(t) { return !t.deleted; });
+  var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
   for (var i = 0; i < _txs.length; i++) {
     var t = _txs[i];
     var key = (t.agent || "未設定") + "|" + (t.venue || "");
@@ -3779,7 +3783,7 @@ function populateVenueDropdown() {
 
 function doQuery() {
   try {
-  var _txs = txs.filter(function(t) { return !t.deleted; });
+  var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
   if (!month) month = workingMonth || nowStr().slice(0, 7);
@@ -4330,8 +4334,8 @@ initSync();
 function renderOverview() {
   try {
     // 過濾已刪除項目（deleted:true 不下載時顯示）
-    var _txs = txs.filter(function(t) { return !t.deleted; });
-    var _rmBookings = (typeof RM !== 'undefined' && RM.bookings) ? RM.bookings.filter(function(b) { return !b.deleted; }) : [];
+    var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
+    var _rmBookings = (typeof RM !== 'undefined' && RM.bookings) ? RM.bookings : []; // deleted:true 過濾已移除
     // --- KPI 卡片 ---
     var now = workingMonth || nowStr().slice(0,7);
     var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
@@ -4351,7 +4355,7 @@ function renderOverview() {
   var fDep=0,fCD=0,fWit=0;
   for (var j=0;j<fundWithdrawals.length;j++){
     var f=fundWithdrawals[j];
-    if (f.deleted) continue;
+    // if (f.deleted) continue; // 已移除（改用 deletedIds 同步）
     if (!f.date||f.date.slice(0,7)!==now) continue;
     if (f.type==="deposit") fDep+=f.amount; else if (f.type==="cash_deposit") fCD+=f.amount; else fWit+=f.amount;
   }
@@ -4459,7 +4463,7 @@ function renderOverview() {
   // 公基金異動（過濾已刪除）
   for (var j=0;j<fundWithdrawals.length;j++){
     var f=fundWithdrawals[j];
-    if (f.deleted) continue;
+    // if (f.deleted) continue; // 已移除（改用 deletedIds 同步）
     if (!f.date||f.date.slice(0,7)!==now) continue;
     var ftype=f.type==="withdraw"?"提領":(f.type==="cash_deposit"?"自存現金":"存入");
     entries.push({date:f.date,type:"fund",desc:"公基金 "+ftype+(f.note?" — "+f.note:""),amount:f.amount||0,extra:f.type==="withdraw"?"neg":"dep"});
@@ -4847,16 +4851,18 @@ var RM = {
   },
   delete: function(id) {
     if (!confirm("確定要刪除這筆訂房紀錄嗎？")) return;
-    // 軟刪除：標記 deleted=true（同步時保留標記，防止 syncDownload 還原）
+    // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
     var idx = this.bookings.findIndex(function(x){ return x.id === id; });
     if (idx < 0) return;
-    this.bookings[idx].deleted = true;
-    // 先存到 localStorage
+    var deleted = this.bookings.splice(idx, 1)[0]; // 從陣列移除
+    deletedIds.push(id);                               // 記錄已刪除 ID
+    try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
+    // 存到 localStorage
     try { localStorage.setItem("rm_bookings", JSON.stringify(this.bookings)); } catch(e) {}
     try { localStorage.setItem("rm_last_id", this.lastId.toString()); } catch(e) {}
     // 標記髒資料，確保上傳
     if (typeof markSyncDirty === 'function') markSyncDirty();
-    // 立即上傳，上傳成功後再渲染（防止 syncDownload 還原）
+    // 立即上傳
     var self = this;
     showLoading("刪除中…");
     var p = (typeof syncUpload === 'function') ? syncUpload() : Promise.resolve({skipped:true});
@@ -4866,7 +4872,6 @@ var RM = {
       hideLoading();
       if (typeof showToast === 'function') showToast("訂房已刪除","success");
     }).catch(function() {
-      // 上傳失敗也渲染（數據已保存在本地）
       self.render();
       self.updateQuota();
       hideLoading();
@@ -4883,7 +4888,7 @@ var RM = {
     var filtered = this.bookings.slice();
     if (month) filtered = filtered.filter(function(x){ return x.month===month; });
     if (agent) filtered = filtered.filter(function(x){ return x.agent===agent; });
-    filtered = filtered.filter(function(x){ return !x.deleted; });
+    // filtered = filtered.filter(function(x){ return !x.deleted; }); // 已移除（改用 deletedIds 同步）
     filtered.sort(function(a,b){ return b.id-a.id; });
     if (!filtered.length) {
       tbody.innerHTML = "";
@@ -4920,7 +4925,7 @@ var RM = {
     if (!monthEl) return;
     var month = monthEl.value || this.nowStr().substring(0,7);
     // 過濾已刪除項目
-    var _txs = txs.filter(function(t) { return !t.deleted; });
+    var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
     var _bookings = this.bookings.filter(function(b) { return !b.deleted; });
     var totalRolling = 0, now = month || this.nowStr().slice(0,7);
     for (var i = 0; i < _txs.length; i++) { if (_txs[i].date && _txs[i].date.slice(0,7) === now && _txs[i].type !== "cash") { totalRolling += (_txs[i].volume || 0); } }
