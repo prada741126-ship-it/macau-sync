@@ -3166,10 +3166,12 @@ function loadAgentWallets(silent) {
 }
 
 function saveData(silent) {
+  console.log('[saveData] 函數被調用，silent=', silent, '，交易數量：', txs.length);
   try {
     var encrypted = encryptData(txs);
     localStorage.setItem("macau_data", encrypted);
-    if (typeof syncUpload === 'function') syncUpload();
+    console.log('[saveData] 已保存到 localStorage（加密）');
+    if (typeof syncUpload === 'function') { console.log('[saveData] 準備呼叫 syncUpload()'); syncUpload(); }
     if (!silent) showToast("已儲存 " + txs.length + " 筆","success");
   } catch(e) {
     console.error('saveData error:', e);
@@ -3202,6 +3204,7 @@ document.addEventListener("click", function(e) {
   if (!btn) return;
   e.preventDefault();
   var id = parseInt(btn.getAttribute("data-del"));
+  console.log('[Delete] 點擊刪除按鈕，ID:', id);
   deleteTx(id);
 });
 
@@ -3341,9 +3344,10 @@ function syncUpload() {
   if (!db) { console.log('[Sync ↑] Firebase 未初始化'); return; }
   // 如果正在從 Firebase 同步，跳過上傳（防止無限循環）
   if (isSyncingFromFirebase) {
-    console.log('[Sync ↑] 正在從 Firebase 同步，跳過上傳');
+    console.log('[Sync ↑] 正在從 Firebase 同步，跳過上傳（isSyncingFromFirebase=true）');
     return;
   }
+  console.log('[Sync ↑] 開始上傳，isSyncingFromFirebase=false');
   var payload = {
     txs: txs,
     agentList: agentList,
@@ -4998,9 +5002,11 @@ var _MAX_UNDO = 10;
 (function() {
   var _origDeleteTx = deleteTx;
   deleteTx = function(id) {
-    if (!confirm("确定删除此笔交易？")) return;
-    showLoading("删除中…");
+    console.log('[deleteTx] 函數被調用，ID:', id, '，isSyncingFromFirebase=', isSyncingFromFirebase);
+    if (!confirm("確定刪除此筆交易？")) { console.log('[deleteTx] 使用者取消刪除'); return; }
+    showLoading("刪除中…");
     try {
+      console.log('[deleteTx] 開始刪除，交易數量（刪除前）:', txs.length);
       var deleted = null, delIndex = -1;
       for (var i = 0; i < txs.length; i++) {
         if (txs[i].id === id) { deleted = txs[i]; delIndex = i; break; }
