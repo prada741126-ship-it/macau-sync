@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v5.7</title>
+<title>澳門洗碼報表 v6.0</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -594,8 +594,27 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .rm-btn-edit { background: #3498db; color: #fff; }
 .rm-btn-del  { background: #e74c3c; color: #fff; }
 .empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: .7; }
+.empty-state .empty-title { color: var(--gold); font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.empty-state .empty-desc { color: #887755; font-size: 13px; margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
+.empty-state .empty-action { padding: 10px 24px; border: 1px solid var(--gold); border-radius: 8px; background: rgba(212,175,55,.1); color: var(--gold); font-size: 14px; cursor: pointer; transition: all .2s; }
+.empty-state .empty-action:hover { background: rgba(212,175,55,.2); box-shadow: 0 0 15px rgba(212,175,55,.2); }
 
-/* 桌面版：房務系統填滿剩餘空間，減少空白 */
+/* 快捷鍵幫助面板 */
+#kb-help-bg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-overlay); z-index:10000; backdrop-filter:blur(6px); }
+#kb-help-bg.show { display:flex; align-items:center; justify-content:center; animation:fadeIn .2s ease; }
+#kb-help { background:linear-gradient(180deg, #1a1a1e, #121218); border-radius:var(--radius-lg); padding:28px 32px; width:520px; max-width:92vw; max-height:80vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.8); border:1px solid rgba(212,175,55,.2); }
+#kb-help h3 { color:var(--gold); font-size:18px; margin-bottom:16px; letter-spacing:1px; }
+#kb-help table { width:100%; border-collapse:collapse; margin:0; box-shadow:none; border:none; }
+#kb-help td { padding:8px 12px; font-size:13px; border-bottom:1px solid rgba(255,255,255,.04); color:var(--text-secondary); }
+#kb-help td:first-child { color:var(--gold); font-family:monospace; font-weight:600; white-space:nowrap; }
+#kb-help .section-title { color:var(--gold); font-size:12px; font-weight:700; letter-spacing:1px; margin:12px 0 6px; display:block; }
+
+/* 数字跳动动画 */
+@keyframes countUp { 0%{transform:translateY(100%);opacity:0}100%{transform:translateY(0);opacity:1} }
+.count-anim { animation: countUp .4s ease-out; display: inline-block; }
+
+/* 桌面版：房務系統填滿剩餘空間
 @media (min-width: 701px) {
   #page-room.active {
     display: flex;
@@ -1306,6 +1325,163 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   .room-table th { padding: 3px 2px; font-size: 7px; }
   .room-table td { padding: 3px 2px; font-size: 9px; }
 }
+
+
+/* ═══════════════════════════════════════════════
+   v6.0 极致视觉增强 — 玻璃拟态·流光金主题
+   ═══════════════════════════════════════════════ */
+:root {
+  --gold-light: #F0D78C;
+  --gold-dark: #9B7A1A;
+  --gold-glow: rgba(212,175,55,0.5);
+  --gold-border-strong: rgba(212,175,55,0.35);
+  --bg-deep: #030308;
+  --bg-surface: #0a0a18;
+  --bg-glass: rgba(14,12,6,0.85);
+  --text-main: #e8e4d8;
+  --text-dim: #7a7260;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --transition-fast: 0.18s cubic-bezier(0.4,0,0.2,1);
+  --transition-smooth: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* 全局玻璃拟态效果 */
+.glass-effect {
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+}
+.glass-card {
+  background: var(--bg-glass);
+  border: 1px solid rgba(212,175,55,0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(212,175,55,0.05);
+  backdrop-filter: blur(16px);
+}
+
+/* KPI 数字动画 */
+.kpi-animate {
+  display: inline-block;
+  animation: kpiPopIn 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);
+}
+@keyframes kpiPopIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 流光边框效果 */
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--gold), transparent, var(--gold-light), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
+}
+.glow-border:hover::before, .glow-border.pulse::before {
+  opacity: 0.3;
+}
+
+/* 波纹点击效果 */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  transition: width 0.5s, height 0.5s, opacity 0.5s;
+  transform: translate(-50%,-50%);
+}
+.btn-ripple:active::after {
+  width: 300px;
+  height: 300px;
+  opacity: 0;
+}
+
+/* 平滑页面过渡 */
+.page {
+  animation: pageSlideIn 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes pageSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 表格行hover效果 */
+tbody tr {
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+tbody tr:hover {
+  background: rgba(212,175,55,0.08) !important;
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(212,175,55,0.08);
+}
+
+/* KPI 卡片悬停效果 */
+.kpi-card-new:hover, .kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 30px rgba(212,175,55,0.1);
+}
+
+/* 键盘快捷键帮助面板 */
+#shortcut-help-modal .modal {
+  max-width: 480px;
+  animation: modalZoomIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalZoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.shortcut-row:last-child { border-bottom: none; }
+.shortcut-key {
+  background: rgba(255,255,255,0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: "Consolas", monospace;
+  color: var(--gold);
+  border: 1px solid rgba(212,175,55,0.2);
+}
+
+/* 粒子背景动画 */
+.particle-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.3;
+}
+
+/* 计数动画 */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.count-animate { animation: countUp 0.4s ease forwards; }
+
 </style>
 </head>
 <body>
@@ -2049,14 +2225,34 @@ function sortTxs(arr) {
   });
 }
 
-// ===== 鍵盤快捷鍵 =====
+// ===== 鍵盤快捷鍵 (v6.0 強化版) =====
 document.addEventListener("keydown", function(e) {
   // Ctrl+N 新增
   if (e.ctrlKey && e.key === "n") { e.preventDefault(); if (!isModalOpen()) openModal(); return; }
   // Ctrl+S 儲存
   if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveData(true); showToast("已儲存 " + txs.length + " 筆","success"); return; }
+  // Ctrl+Z 復原
+  if (e.ctrlKey && e.key === "z") { e.preventDefault(); undoDelete(); return; }
+  // Ctrl+1~5 切換頁面
+  if (e.ctrlKey && e.key >= "1" && e.key <= "5") {
+    e.preventDefault();
+    var pages = ["overview","all","query","summary","room"];
+    var idx = parseInt(e.key) - 1;
+    var navItems = document.querySelectorAll(".sb-item[data-page]");
+    if (navItems[idx]) showPage(pages[idx], navItems[idx]);
+    return;
+  }
+  // ? 鍵顯示快捷鍵幫助
+  if (e.key === "?" && !isModalOpen()) {
+    e.preventDefault();
+    var bg = document.getElementById("kb-help-bg");
+    if (bg) bg.classList.toggle("show");
+    return;
+  }
   // Escape 關閉彈窗
   if (e.key === "Escape") {
+    var kbBg = document.getElementById("kb-help-bg");
+    if (kbBg && kbBg.classList.contains("show")) { kbBg.classList.remove("show"); return; }
     if (document.getElementById("modal").classList.contains("show")) closeModal();
     else if (document.getElementById("fund-modal").classList.contains("show")) closeFundModal();
     else if (document.getElementById("agent-wallet-modal").classList.contains("show")) closeAgentWalletModal();
@@ -4523,6 +4719,250 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { passive: false });
   }
 })();
+
+
+
+// ═══════════════════════════════════════════════
+// v6.0 功能优化
+// ═══════════════════════════════════════════════
+
+// ── KPI 数字动画 ──
+function animateKPIValue(el, targetValue) {
+  if (!el) return;
+  var startValue = parseFloat(el.textContent.replace(/,/g,'')) || 0;
+  targetValue = parseFloat(targetValue) || 0;
+  if (startValue === targetValue) return;
+  var duration = 600;
+  var startTime = null;
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    var progress = Math.min((ts - startTime) / duration, 1);
+    var ease = 1 - Math.pow(2, -10 * progress);
+    var current = startValue + (targetValue - startValue) * ease;
+    el.textContent = Math.round(current).toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = targetValue.toLocaleString();
+  }
+  requestAnimationFrame(step);
+}
+
+// ── 多级撤销系统 ──
+var _undoStack = [];
+var _MAX_UNDO = 10;
+
+// 重写 deleteTx 以支持多级撤销
+(function() {
+  var _origDeleteTx = deleteTx;
+  deleteTx = function(id) {
+    if (!confirm("确定删除此笔交易？")) return;
+    showLoading("删除中…");
+    var deleted = null, delIndex = -1;
+    for (var i = 0; i < txs.length; i++) {
+      if (txs[i].id === id) { deleted = txs[i]; delIndex = i; break; }
+    }
+    if (deleted) {
+      _undoStack.push({ tx: JSON.parse(JSON.stringify(deleted)), index: delIndex });
+      if (_undoStack.length > _MAX_UNDO) _undoStack.shift();
+    }
+    var newTxs = [];
+    for (var i = 0; i < txs.length; i++) {
+      if (txs[i].id !== id) newTxs.push(txs[i]);
+    }
+    txs = newTxs;
+    saveData(true);
+    renderAll();
+    renderOverview();
+    renderSummary();
+    updateTotalWalletUI();
+    if (deleted) showUndoToast();
+    _origDelete = true;
+    setTimeout(hideLoading, 300);
+  };
+
+  // 增强撤销Toast
+  var _origShowUndoToast = showUndoToast;
+  showUndoToast = function() {
+    var container = document.getElementById("toast-container");
+    var el = document.createElement("div");
+    el.className = "toast toast-warning";
+    el.style.cssText = "cursor:pointer;flex-direction:column;gap:6px;";
+    el.innerHTML = "<span>已删除 1 笔交易（" + _undoStack.length + " 笔可撤销历史）</span>" +
+      "<button style='padding:4px 12px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:6px;color:#fff;cursor:pointer;font-size:12px;margin-right:4px;'>↩ 撤销</button>" +
+      "<button style='padding:4px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#ccc;cursor:pointer;font-size:12px;' onclick='event.stopPropagation();_undoStack=[];this.parentElement.remove();'>清空历史</button>";
+    el.querySelector("button").onclick = function(e) {
+      e.stopPropagation();
+      undoLastDelete();
+      el.remove();
+    };
+    el.onclick = function() { el.remove(); };
+    container.appendChild(el);
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 5000);
+  };
+})();
+
+// 撤销最近删除
+function undoLastDelete() {
+  if (_undoStack.length === 0) { showToast("无可撤销操作", "warning"); return; }
+  var item = _undoStack.pop();
+  txs.splice(item.index, 0, item.tx);
+  saveData(true);
+  renderAll();
+  renderOverview();
+  renderSummary();
+  updateTotalWalletUI();
+  showToast("已恢复交易！（剩余 " + _undoStack.length + " 笔可撤销）", "success");
+}
+
+// ── 键盘快捷键帮助面板 ──
+function openShortcutHelp() {
+  document.getElementById("shortcut-help-modal").classList.add("show");
+  if (typeof lockBody === 'function') lockBody();
+}
+function closeShortcutHelp() {
+  document.getElementById("shortcut-help-modal").classList.remove("show");
+  if (typeof unlockBody === 'function') unlockBody();
+}
+
+// ── 增强键盘快捷键 ──
+(function() {
+  var _enhanced = false;
+  if (!_enhanced) {
+    _enhanced = true;
+    document.addEventListener("keydown", function(e) {
+      // ? 键显示帮助（不在输入框中）
+      if (e.key === "?" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        var active = document.activeElement;
+        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.tagName === "SELECT")) return;
+        e.preventDefault();
+        openShortcutHelp();
+        return;
+      }
+      // Ctrl+1-5 切换页面
+      if (e.ctrlKey && e.key >= "1" && e.key <= "5") {
+        e.preventDefault();
+        var pages = ["overview", "all", "query", "summary", "room"];
+        var idx = parseInt(e.key) - 1;
+        if (idx < pages.length) {
+          var sidebarEl = document.querySelector('[data-page="' + pages[idx] + '"]');
+          if (typeof showPage === 'function') showPage(pages[idx], sidebarEl);
+        }
+        return;
+      }
+      // Ctrl+F 快速搜索
+      if (e.ctrlKey && e.key === "f") {
+        e.preventDefault();
+        var searchEl = document.getElementById("search-all");
+        if (searchEl) { searchEl.focus(); searchEl.select(); }
+        return;
+      }
+      // Escape 关闭弹窗（增强）
+      if (e.key === "Escape") {
+        var scHelp = document.getElementById("shortcut-help-modal");
+        if (scHelp && scHelp.classList.contains("show")) { closeShortcutHelp(); return; }
+      }
+    });
+  }
+})();
+
+// ── 防抖动工具函数 ──
+function debounce(func, wait) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(function() { func.apply(context, args); }, wait);
+  };
+}
+
+// ── 节流工具函数 ──
+function throttle(func, limit) {
+  var lastTime = 0;
+  return function() {
+    var now = Date.now();
+    if (now - lastTime >= limit) {
+      func.apply(this, arguments);
+      lastTime = now;
+    }
+  };
+}
+
+// ── 增强页面切换动画 ──
+(function() {
+  var _origShowPage = showPage;
+  if (typeof showPage === 'function') {
+    showPage = function(name, sidebarEl) {
+      // 添加过渡类
+      var pages = document.querySelectorAll(".page");
+      for (var i = 0; i < pages.length; i++) {
+        if (pages[i].style.display !== "none") {
+          pages[i].style.opacity = "0";
+          pages[i].style.transform = "translateY(10px)";
+        }
+      }
+      // 调用原始函数
+      _origShowPage(name, sidebarEl);
+      // 显示新页面并动画
+      var tp = document.getElementById("page-" + name);
+      if (tp) {
+        tp.style.opacity = "0";
+        tp.style.transform = "translateY(10px)";
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            tp.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+            tp.style.opacity = "1";
+            tp.style.transform = "translateY(0)";
+          });
+        });
+      }
+    };
+  }
+})();
+
+console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键帮助");
+
 </script>
+
+<!-- 快捷鍵幫助面板 v6.0 按 ? 顯示 -->
+<div id="kb-help-bg" onclick="if(event.target===this)this.classList.remove('show')">
+  <div id="kb-help">
+    <h3>⌨️ 鍵盤快捷鍵</h3>
+    <span class="section-title">交易操作</span>
+    <table><tr><td>Ctrl + N</td><td>新增交易</td></tr><tr><td>Ctrl + S</td><td>儲存資料</td></tr><tr><td>Ctrl + Z</td><td>復原刪除</td></tr><tr><td>Escape</td><td>關閉彈窗 / 面板</td></tr></table>
+    <span class="section-title">頁面導航</span>
+    <table><tr><td>Ctrl + 1~5</td><td>切換 總覽 | 交易 | 查詢 | 統計 | 房務</td></tr></table>
+    <span class="section-title">其他</span>
+    <table><tr><td>?</td><td>顯示 / 隱藏此幫助面板</td></tr></table>
+    <div style="text-align:right;margin-top:16px;">
+      <button class="btn btn-gold" onclick="document.getElementById('kb-help-bg').classList.remove('show')">關閉</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- v6.0 键盘快捷键帮助面板 -->
+<div class="modal-bg" id="shortcut-help-modal">
+<div class="modal-scroll">
+<div class="modal">
+  <h3>⌨️ 键盘快捷键指南</h3>
+  <div style="padding:8px 0;">
+    <div class="shortcut-row"><span style="color:#b8b0a0;">新增交易</span><span class="shortcut-key">Ctrl + N</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">保存数据</span><span class="shortcut-key">Ctrl + S</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">快速搜索</span><span class="shortcut-key">Ctrl + F</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">总览页面</span><span class="shortcut-key">Ctrl + 1</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">全部交易</span><span class="shortcut-key">Ctrl + 2</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">查询页面</span><span class="shortcut-key">Ctrl + 3</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">统计页面</span><span class="shortcut-key">Ctrl + 4</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">房务系统</span><span class="shortcut-key">Ctrl + 5</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">关闭弹窗</span><span class="shortcut-key">Esc</span></div>
+    <div class="shortcut-row"><span style="color:#b8b0a0;">显示帮助</span><span class="shortcut-key">?</span></div>
+  </div>
+  <div style="text-align:right;margin-top:16px;">
+    <button onclick="closeShortcutHelp()" style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 20px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">关闭</button>
+  </div>
+</div>
+</div>
+</div>
+
 </body>
 </html>
