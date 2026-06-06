@@ -4793,7 +4793,7 @@ var RM = {
 };
 
 // 全域函式（供 HTML onclick 呼叫）
-function rmOpenModal(id){ console.log('[DEBUG] rmOpenModal called, id='+id); RM.openModal(id||null); }
+function rmOpenModal(id){ alert('[TEST] rmOpenModal fired!'); try { RM.openModal(id||null); } catch(e) { alert('[ERROR] '+e.message); } }
 function rmCloseModal(){ RM.closeModal(); }
 function rmUpdatePrice(){ RM.updatePrice(); }
 function rmCalcNights(){ RM.calcNights(); }
