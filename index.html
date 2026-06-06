@@ -2300,18 +2300,17 @@ var lastDeleted = null;
 function deleteTx(id) {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
-  // 保存副本供撤銷
+  // 找到該筆交易，設為 deleted=true（軟刪除，不下載時從陣列移除）
   var deleted = null;
   for (var i = 0; i < txs.length; i++) {
-    if (txs[i].id === id) { deleted = txs[i]; break; }
+    if (txs[i].id === id) {
+      deleted = txs[i];
+      txs[i].deleted = true;
+      break;
+    }
   }
   lastDeleted = deleted;
-  var newTxs = [];
-  for (var i = 0; i < txs.length; i++) {
-    if (txs[i].id !== id) newTxs.push(txs[i]);
-  }
-  txs = newTxs;
-  // 先存到 localStorage（不同步等待）
+  // 存到 localStorage（包含 deleted:true 的項目，以便同步到伺服器）
   try {
     var encrypted = encryptData(txs);
     localStorage.setItem("macau_data", encrypted);
@@ -2330,7 +2329,6 @@ function deleteTx(id) {
     if (lastDeleted) showUndoToast();
     hideLoading();
   }).catch(function() {
-    // 上傳失敗也渲染（數據已保存在本地）
     renderAll();
     renderOverview();
     renderSummary();
@@ -3248,6 +3246,8 @@ function renderAll() {
   }
   // 排序
   filtered = sortTxs(filtered.slice());
+  // 過濾已刪除項目（deleted:true 不下載時顯示）
+  filtered = filtered.filter(function(t) { return !t.deleted; });
   // ✅ 修正：先更新 KPI 卡片（即使沒有資料也要歸零）
   renderAllMiniKPI();
   if (!filtered.length) {
@@ -3296,16 +3296,18 @@ function renderAll() {
 
 function calcTotalWallet() {
   // 計算所有代理錢包餘額（v4.9 修復）
+  // 過濾已刪除項目
+  var activeTxs = txs.filter(function(t) { return !t.deleted; });
   var agentSet = {};
   var agentTxDrawn = {};  // 每位代理的 tx.drawn（因 syncAgentDrawn 全部設成一樣，只需取一次）
-  for (var i = 0; i < txs.length; i++) {
-    var a = txs[i].agent || "";
+  for (var i = 0; i < activeTxs.length; i++) {
+    var a = activeTxs[i].agent || "";
     if (!a) continue;
     if (!agentSet[a]) agentSet[a] = { bonus: 0, cash: 0 };
-    agentSet[a].bonus += (txs[i].bonus || 0);
-    agentSet[a].cash += (txs[i].cash || 0);
+    agentSet[a].bonus += (activeTxs[i].bonus || 0);
+    agentSet[a].cash += (activeTxs[i].cash || 0);
     // 記錄此代理的 drawn（因 syncAgentDrawn 設全部交易一樣，取第一次即可）
-    if (!agentTxDrawn[a] && txs[i].drawn > 0) agentTxDrawn[a] = txs[i].drawn;
+    if (!agentTxDrawn[a] && activeTxs[i].drawn > 0) agentTxDrawn[a] = activeTxs[i].drawn;
   }
   var totalAgent = 0;
   var agents = Object.keys(agentSet);
@@ -3426,6 +3428,14 @@ function syncDownload() {
         throw new Error(d ? d.error : '未知錯誤');
       }
       txs = d.txs || txs;
+      // 永久移除 deleted:true 資料（軟刪除標記留在伺服器，本地只保留有效資料）
+      (function() {
+        var fresh = [];
+        for (var i = 0; i < txs.length; i++) {
+          if (!txs[i].deleted) fresh.push(txs[i]);
+        }
+        txs = fresh;
+      })();
       agentList = d.agentList || agentList;
       agentWallets = d.agentWallets || agentWallets;
       fundWithdrawals = d.fundWithdrawals || fundWithdrawals;
@@ -3475,14 +3485,14 @@ function manualSync() {
 
 function initSync() {
   if (!SYNC_API) { console.log('同步伺服器未配置'); return; }
-  console.log('同步伺服器：' + SYNC_API + '（增量同步已啟用，間隔 10 秒）');
-  // 立即執行一次同步（不再等待 10 秒）
+  console.log('同步伺服器：' + SYNC_API + '（增量同步已啟用，間隔 5 秒）');
+  // 立即執行一次同步（不再等待 5 秒）
   syncDownload().then(function() {
     console.log('[Sync] 首次同步完成');
   }).catch(function() {
-    console.log('[Sync] 首次同步失敗，將在 10 秒後重試');
+    console.log('[Sync] 首次同步失敗，將在 5 秒後重試');
   });
-  // 定期同步（每 10 秒，使用增量檢查減少流量）
+  // 定期同步（每 5 秒，使用增量檢查減少流量）
   setInterval(function() {
     // 先上傳本地變更
     if (_syncDirty) {
@@ -3490,14 +3500,15 @@ function initSync() {
     }
     // 再檢查伺服器是否有新數據
     syncDownload();
-  }, 10000);
+  }, 5000);
 }
 
 function renderSummary() {
   try {
   var map = {};
-  for (var i = 0; i < txs.length; i++) {
-    var t = txs[i];
+  var _txs = txs.filter(function(t) { return !t.deleted; });
+  for (var i = 0; i < _txs.length; i++) {
+    var t = _txs[i];
     var key = (t.agent || "未設定") + "|" + (t.venue || "");
     if (!map[key]) map[key] = { agent: t.agent || "未設定", venue: t.venue, vol: 0, bonus: 0, drawn: 0, cash: 0 };
     map[key].vol += toNum(t.volume) || 0;
@@ -3687,14 +3698,15 @@ function populateVenueDropdown() {
 
 function doQuery() {
   try {
+  var _txs = txs.filter(function(t) { return !t.deleted; });
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
   if (!month) month = workingMonth || nowStr().slice(0, 7);
   // 公基金查询 - 分筆流水（含累計餘額）
   if (agent === "__FUND__") {
     var allFundTxs = [], preBalance = 0, totalFund = 0;
-    for (var i = 0; i < txs.length; i++) {
-      var fv = txs[i].fund || 0;
+    for (var i = 0; i < _txs.length; i++) {
+      var fv = _txs[i].fund || 0;
       totalFund += fv;
       if (fv > 0) allFundTxs.push({ date: txs[i].date, desc: (txs[i].agent||"") + " " + (txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: txs[i].id });
     }
@@ -3765,8 +3777,8 @@ function doQuery() {
   var dateTo = document.getElementById("q-date-to").value;
   var volMin = toNum(document.getElementById("q-vol-min").value) || 0;
   var volMax = toNum(document.getElementById("q-vol-max").value) || 0;
-  for (var i = 0; i < txs.length; i++) {
-    var t = txs[i];
+  for (var i = 0; i < _txs.length; i++) {
+    var t = _txs[i];
     if (t.date && t.date.indexOf(month) !== 0) continue;
     if (agent && t.agent !== agent) continue;
     if (venue && t.venue !== venue) continue;
@@ -3823,10 +3835,10 @@ function doQuery() {
     var awArr = agentWallets[agent] || [];
     // 計算全部碼糧總額（不分月份）含現金寄放
     var allBonus = 0, allCash = 0, allDrawn = 0;
-    for (var n = 0; n < txs.length; n++) {
-      if (txs[n].agent === agent) {
-        allBonus += (txs[n].bonus || 0);
-        allCash += (txs[n].cash || 0);
+    for (var n = 0; n < _txs.length; n++) {
+      if (_txs[n].agent === agent) {
+        allBonus += (_txs[n].bonus || 0);
+        allCash += (_txs[n].cash || 0);
       }
     }
     for (var p = 0; p < awArr.length; p++) {
@@ -3843,12 +3855,12 @@ function doQuery() {
     var awBalance = Math.max(0, allBonus + allCash + awDep + awCDep - allDrawn);
     // 建立合併流水：全部交易 + 錢包提領（含現金寄放）
     var allLedger = [];
-    for (var p = 0; p < txs.length; p++) {
-      if (txs[p].agent !== agent) continue;
-      var bv = txs[p].bonus || 0;
-      var cv = txs[p].cash || 0;
-      if (bv > 0) allLedger.push({ date: txs[p].date, venue: txs[p].venue||"", client: txs[p].client||"", volume: toNum(txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: txs[p].id });
-      if (cv > 0) allLedger.push({ date: txs[p].date, venue: "現金寄放", client: txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: txs[p].id });
+    for (var p = 0; p < _txs.length; p++) {
+      if (_txs[p].agent !== agent) continue;
+      var bv = _txs[p].bonus || 0;
+      var cv = _txs[p].cash || 0;
+      if (bv > 0) allLedger.push({ date: _txs[p].date, venue: _txs[p].venue||"", client: _txs[p].client||"", volume: toNum(_txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: _txs[p].id });
+      if (cv > 0) allLedger.push({ date: _txs[p].date, venue: "現金寄放", client: _txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: _txs[p].id });
     }
     for (var p = 0; p < awArr.length; p++) {
       var wt = awArr[p].type;
@@ -4235,12 +4247,14 @@ initSync();
 // ===== 總覽頁渲染 =====
 function renderOverview() {
   try {
-  // --- KPI 卡片 ---
-  var now = workingMonth || nowStr().slice(0,7);
-  var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
-  var agentSet = {};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+    // 過濾已刪除項目（deleted:true 不下載時顯示）
+    var _txs = txs.filter(function(t) { return !t.deleted; });
+    // --- KPI 卡片 ---
+    var now = workingMonth || nowStr().slice(0,7);
+    var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
+    var agentSet = {};
+    for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     if (t.type==="cash"){ totalCash+=(t.cash||0); }
     else { totalVol+=(t.volume||0); }
@@ -4266,7 +4280,7 @@ function renderOverview() {
   var rmUsedRolling=0;
   var roomMonth=now.slice(0,7);
   var agentsWithRolling = {};
-  for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
+  for (var kk=0;kk<_txs.length;kk++){ var tr=_txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
   if (typeof RM!=="undefined"&&RM.bookings){
     for (var k=0;k<RM.bookings.length;k++){
       var b=RM.bookings[k];
@@ -4289,8 +4303,8 @@ function renderOverview() {
   var daysInMonth=new Date(parseInt(now.slice(0,4)),parseInt(now.slice(5,7)),0).getDate();
   var daily=[];
   for (var d=1;d<=daysInMonth;d++) daily.push(0);
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash") continue;
     var day=parseInt(t.date.slice(8,10))-1;
     if (day>=0&&day<daysInMonth) daily[day]+=(t.volume||0);
@@ -4313,8 +4327,8 @@ function renderOverview() {
 
   // --- 代理洗碼排行 Top 10（Chart.js 長條圖）---
   var agtVol={};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.agent) continue;
     if (!agtVol[t.agent]) agtVol[t.agent]=0;
     agtVol[t.agent]+=(t.volume||0);
@@ -4328,8 +4342,8 @@ function renderOverview() {
   // --- 場地洗碼分佈 ---
   var venueColors = ['#d4af37','#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c','#f39c12'];
   var venVol={};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.venue) continue;
     if (!venVol[t.venue]) venVol[t.venue]=0;
     venVol[t.venue]+=(t.volume||0);
@@ -4353,8 +4367,8 @@ function renderOverview() {
   var timeline=document.getElementById("ov-timeline");
   var entries=[];
   // 交易紀錄
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     entries.push({date:t.date,type:t.type||"rolling",desc:(t.type==="cash"?t.agent+" 現金寄放":t.agent+" — "+t.client+(t.venue?" @ "+t.venue:"")),amount:t.type==="cash"?(t.cash||0):(t.bonus||0),extra:t.type==="cash"?"dep":"pos"});
   }
@@ -4748,7 +4762,10 @@ var RM = {
   },
   delete: function(id) {
     if (!confirm("確定要刪除這筆訂房紀錄嗎？")) return;
-    this.bookings = this.bookings.filter(function(x){ return x.id !== id; });
+    // 軟刪除：標記 deleted=true（同步時保留標記，防止 syncDownload 還原）
+    var idx = this.bookings.findIndex(function(x){ return x.id === id; });
+    if (idx < 0) return;
+    this.bookings[idx].deleted = true;
     // 先存到 localStorage
     try { localStorage.setItem("rm_bookings", JSON.stringify(this.bookings)); } catch(e) {}
     try { localStorage.setItem("rm_last_id", this.lastId.toString()); } catch(e) {}
@@ -4781,6 +4798,7 @@ var RM = {
     var filtered = this.bookings.slice();
     if (month) filtered = filtered.filter(function(x){ return x.month===month; });
     if (agent) filtered = filtered.filter(function(x){ return x.agent===agent; });
+    filtered = filtered.filter(function(x){ return !x.deleted; });
     filtered.sort(function(a,b){ return b.id-a.id; });
     if (!filtered.length) {
       tbody.innerHTML = "";
@@ -5095,7 +5113,19 @@ var _MAX_UNDO = 10;
 function undoLastDelete() {
   if (_undoStack.length === 0) { showToast("无可撤销操作", "warning"); return; }
   var item = _undoStack.pop();
-  txs.splice(item.index, 0, item.tx);
+  // item.tx 是深拷貝，根據 ID 查找並取消刪除標記
+  var foundIdx = -1;
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].id === item.tx.id) { foundIdx = i; break; }
+  }
+  if (foundIdx >= 0) {
+    // 仍在陣列中，取消刪除標記
+    txs[foundIdx].deleted = false;
+  } else {
+    // 已被 syncDownload 移除，重新插入
+    item.tx.deleted = false;
+    txs.push(item.tx);
+  }
   saveData(true);
   renderAll();
   renderOverview();
