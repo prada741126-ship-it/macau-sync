@@ -32,7 +32,7 @@ app.use((req, res, next) => {
 // 確保 db.json 存在
 try {
   if (!fs.existsSync(DB_FILE)) {
-    var initData = { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, lastModified: 0 };
+    var initData = { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, rm_bookings: [], rm_last_id: 1, lastModified: 0 };
     fs.writeFileSync(DB_FILE, JSON.stringify(initData, null, 2), 'utf8');
     console.log('[START] Created new db.json');
   } else {
@@ -81,7 +81,7 @@ function readDB() {
       return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
     }
   } catch (e) { console.error('readDB error:', e.message); }
-  return { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, lastModified: 0 };
+  return { txs: [], fundWithdrawals: [], agentWallets: {}, config: {}, agentList: [], archives: {}, rm_bookings: [], rm_last_id: 1, lastModified: 0 };
 }
 
 // 寫入數據庫
@@ -141,6 +141,8 @@ app.post('/api/sync/upload', (req, res) => {
       if (!db.config) db.config = {};
       db.config.workingMonth = body.workingMonth;
     }
+    if (body.rm_bookings !== undefined) db.rm_bookings = body.rm_bookings;
+    if (body.rm_last_id !== undefined) db.rm_last_id = body.rm_last_id;
     writeDB(db);
     res.json({ ok: true, lastModified: db.lastModified });
   } catch (e) {
@@ -158,6 +160,8 @@ app.get('/api/sync/download', (req, res) => {
     agentList: db.agentList || [],
     workingMonth: db.config ? db.config.workingMonth : '',
     archives: db.archives || {},
+    rm_bookings: db.rm_bookings || [],
+    rm_last_id: db.rm_last_id || 1,
     lastModified: db.lastModified || 0
   });
 });

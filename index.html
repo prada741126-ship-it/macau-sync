@@ -3344,6 +3344,8 @@ function syncUpload() {
     fundWithdrawals: fundWithdrawals,
     workingMonth: workingMonth,
     archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
+    rm_bookings: (typeof RM !== 'undefined') ? RM.bookings : [],
+    rm_last_id: (typeof RM !== 'undefined') ? RM.lastId : 1,
     timestamp: Date.now()
   };
   return fetch(SYNC_API + '/api/sync/upload', {
@@ -3404,6 +3406,8 @@ function syncDownload() {
       fundWithdrawals = d.fundWithdrawals || fundWithdrawals;
       if (d.workingMonth) workingMonth = d.workingMonth;
       if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
+      if (d.rm_bookings && typeof RM !== 'undefined') { RM.bookings = d.rm_bookings; RM.save(); try { RM.render(); RM.updateQuota(); } catch(e) { console.error('RM sync refresh error:', e); } }
+      if (d.rm_last_id && typeof RM !== 'undefined') { RM.lastId = d.rm_last_id; }
       _lastSyncModified = d.lastModified || data.lastModified || Date.now();
       saveData(true);
       renderAll();
@@ -4540,6 +4544,8 @@ var RM = {
   save: function() {
     localStorage.setItem("rm_bookings", JSON.stringify(this.bookings));
     localStorage.setItem("rm_last_id", this.lastId.toString());
+    if (typeof markSyncDirty === 'function') markSyncDirty();
+    if (typeof syncUpload === 'function') syncUpload();
   },
 
   populateAgentDropdown: function() {
