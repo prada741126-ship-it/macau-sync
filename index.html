@@ -2434,12 +2434,12 @@ function showPage(name, sidebarEl) {
     var titles = { overview:"總覽", all: "全部交易", query: "查詢", summary: "統計", room: "房務系統" };
     tt.textContent = titles[name] || name;
   }
-  // 觸發各頁面更新
-  if (name === "overview") renderOverview();
-  if (name === "all") renderAll();
-  if (name === "summary") renderSummary();
-  if (name === "query") { fillAgent(); doQuery(); updateTotalWalletUI(); }
-  if (name === "room") { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } }
+  // 觸發各頁面更新（加 try-catch 避免單一頁面錯誤導致頁面卡住）
+  if (name === "overview") { try { setTimeout(function(){ try{ renderOverview(); } catch(e) { console.error("renderOverview error:", e); } }, 50); } catch(e) { console.error("overview page error:", e); } }
+  if (name === "all") { try { renderAll(); } catch(e) { console.error("renderAll error:", e); } }
+  if (name === "summary") { try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); } }
+  if (name === "query") { try { fillAgent(); doQuery(); updateTotalWalletUI(); } catch(e) { console.error("query page error:", e); } }
+  if (name === "room") { try { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } } catch(e) { console.error("room page error:", e); } }
 }
 
 // ===== Sidebar toggle =====
@@ -3966,6 +3966,7 @@ initSync();
 
 // ===== 總覽頁渲染 =====
 function renderOverview() {
+  try {
   // --- KPI 卡片 ---
   var now = workingMonth || nowStr().slice(0,7);
   var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
@@ -4133,6 +4134,9 @@ function renderOverview() {
     tlHTML+='<div class="timeline-item"><div class="timeline-dot '+dotClass+'"></div><div class="timeline-content"><div class="timeline-desc">'+en.desc+'</div><div class="timeline-meta">'+en.date.slice(5)+'</div></div><div class="timeline-amount '+amtClass+'" style="color:'+color+'">'+prefix+fmt(en.amount)+'</div></div>';
   }
   timeline.innerHTML=tlHTML||'<div class="timeline-empty">尚無本月動態</div>';
+  } catch(e) {
+    console.error('[renderOverview] fatal error:', e);
+  }
 }
 
 // ===== Chart.js 趨勢圖 =====
