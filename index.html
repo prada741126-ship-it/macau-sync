@@ -1020,7 +1020,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 
   /* ===== 手機版全局優化 ===== */
   /* 防止內容溢出 */
-  body { overflow-x: hidden; }
+  body { overflow-x: auto; }
 
   /* 頂部標題列優化 */
   #topbar { padding: 0 10px; height: 48px; gap: 6px; }
@@ -1239,7 +1239,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 @media (max-width: 700px) {
   /* 頁面容器：消除多層 padding 造成的寬度損失 */
   .page { padding: 6px 4px; }
-  #page-scroll { overflow-x: hidden; }
+  #page-scroll { overflow-x: auto; }
 
   /* 月份列：強制靠左對齊以利換行，防止單行過寬 */
   .month-bar { justify-content: flex-start; }
@@ -2301,21 +2301,44 @@ function deleteTx(id) {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
   // 保存副本供撤銷
+  var deleted = null;
   for (var i = 0; i < txs.length; i++) {
-    if (txs[i].id === id) { lastDeleted = txs[i]; break; }
+    if (txs[i].id === id) { deleted = txs[i]; break; }
   }
+  lastDeleted = deleted;
   var newTxs = [];
   for (var i = 0; i < txs.length; i++) {
     if (txs[i].id !== id) newTxs.push(txs[i]);
   }
   txs = newTxs;
-  saveData(true);
-  renderAll();
-  renderOverview();
-  renderSummary();
-  updateTotalWalletUI();
-  if (lastDeleted) showUndoToast();
-  setTimeout(hideLoading, 300);
+  // 先存到 localStorage（不同步等待）
+  try {
+    var encrypted = encryptData(txs);
+    localStorage.setItem("macau_data", encrypted);
+  } catch(e) {
+    try { localStorage.setItem("macau_data", JSON.stringify(txs)); } catch(e2) {}
+  }
+  // 標記髒資料，確保上傳
+  if (typeof markSyncDirty === 'function') markSyncDirty();
+  // 立即上傳，上傳成功後再渲染（防止 syncDownload 還原）
+  var p = (typeof syncUpload === 'function') ? syncUpload() : Promise.resolve({skipped:true});
+  p.then(function() {
+    renderAll();
+    renderOverview();
+    renderSummary();
+    updateTotalWalletUI();
+    if (lastDeleted) showUndoToast();
+    hideLoading();
+  }).catch(function() {
+    // 上傳失敗也渲染（數據已保存在本地）
+    renderAll();
+    renderOverview();
+    renderSummary();
+    updateTotalWalletUI();
+    if (lastDeleted) showUndoToast();
+    hideLoading();
+    if (typeof showToast === 'function') showToast("刪除成功，但同步失敗", "warning");
+  });
 }
 function showUndoToast() {
   var container = document.getElementById("toast-container");
@@ -4725,11 +4748,28 @@ var RM = {
   },
   delete: function(id) {
     if (!confirm("確定要刪除這筆訂房紀錄嗎？")) return;
-    this.bookings = this.bookings.filter(function(x){ return x.id!==id; });
-    this.save();
-    this.render();
-    this.updateQuota();
-    showToast("訂房已刪除","success");
+    this.bookings = this.bookings.filter(function(x){ return x.id !== id; });
+    // 先存到 localStorage
+    try { localStorage.setItem("rm_bookings", JSON.stringify(this.bookings)); } catch(e) {}
+    try { localStorage.setItem("rm_last_id", this.lastId.toString()); } catch(e) {}
+    // 標記髒資料，確保上傳
+    if (typeof markSyncDirty === 'function') markSyncDirty();
+    // 立即上傳，上傳成功後再渲染（防止 syncDownload 還原）
+    var self = this;
+    showLoading("刪除中…");
+    var p = (typeof syncUpload === 'function') ? syncUpload() : Promise.resolve({skipped:true});
+    p.then(function() {
+      self.render();
+      self.updateQuota();
+      hideLoading();
+      if (typeof showToast === 'function') showToast("訂房已刪除","success");
+    }).catch(function() {
+      // 上傳失敗也渲染（數據已保存在本地）
+      self.render();
+      self.updateQuota();
+      hideLoading();
+      if (typeof showToast === 'function') showToast("訂房已刪除，但同步失敗", "warning");
+    });
   },
 
   render: function() {
