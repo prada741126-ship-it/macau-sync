@@ -41,6 +41,39 @@
   --orange: #e67e22;
   --purple: #9b59b6;
 }
+
+/* ============================================================
+   中國風動畫關鍵幀
+   ============================================================ */
+@keyframes goldShimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes borderGlowPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(212,175,55,0.15), 0 0 20px rgba(212,175,55,0.05); }
+  50% { box-shadow: 0 0 18px rgba(212,175,55,0.35), 0 0 40px rgba(212,175,55,0.12); }
+}
+@keyframes cardGlow {
+  0%, 100% { box-shadow: 0 2px 12px rgba(212,175,55,0.08), inset 0 1px 0 rgba(212,175,55,0.06); }
+  50% { box-shadow: 0 4px 24px rgba(212,175,55,0.18), inset 0 1px 0 rgba(212,175,55,0.12); }
+}
+@keyframes floatUp {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+@keyframes flameFlicker {
+  0%, 100% { opacity: 0.6; transform: translateY(0) scale(1); }
+  25% { opacity: 0.9; transform: translateY(-3px) scale(1.08); }
+  50% { opacity: 0.7; transform: translateY(-1px) scale(0.95); }
+  75% { opacity: 0.85; transform: translateY(-4px) scale(1.05); }
+}
+@keyframes sideGlow {
+  0%, 100% { border-color: rgba(212,175,55,0.15); }
+  50% { border-color: rgba(212,175,55,0.35); }
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", "Noto Serif TC", serif; background: var(--bg-page); color: var(--text-main); display: flex; overflow: hidden; }
@@ -132,12 +165,19 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .page > .toolbar > button[style*="#9b59b6"] { background: linear-gradient(135deg, #8e44ad, #732d91) !important; color: white !important; }
 /* 密码保护遮罩 — 中国风强化 */
 #pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a0a08 0%, #0c0404 60%, #000000 100%); z-index:9999; display:flex; align-items:center; justify-content:center; }
+#pw-particles { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
 #pw-box {
   background: linear-gradient(180deg, rgba(24,14,6,0.97) 0%, rgba(16,8,2,0.98) 50%, rgba(10,4,0,0.99) 100%);
   border:1px solid rgba(212,175,55,0.3); border-radius:16px;
   padding:36px 32px; text-align:center; max-width:420px; width:92%;
-  position:relative; overflow:hidden;
+  position:relative; overflow:hidden; z-index:1;
   box-shadow:0 0 80px rgba(212,175,55,0.1),0 0 160px rgba(140,20,20,0.08),inset 0 1px 0 rgba(212,175,55,0.08);
+  animation: borderGlowPulse 3s ease-in-out infinite;
+}
+#pw-box::before {
+  content:""; position:absolute; top:-80%; left:-80%; width:260%; height:260%;
+  background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.06) 0%, transparent 70%);
+  animation: goldShimmer 6s linear infinite; pointer-events:none; z-index:0;
 }
 #pw-box .pw-corners { position:absolute; inset:0; pointer-events:none; }
 #pw-box .pw-corner { position:absolute; width:24px; height:24px; border-color:rgba(212,175,55,0.4); border-style:solid; }
@@ -179,11 +219,18 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 #pw-box .pw-btn {
   width:100%; padding:14px; border:none; border-radius:10px; margin-top:6px;
   background:linear-gradient(135deg, #8b1a1a 0%, #a82020 50%, #7b1515 100%);
+  background-size: 100% 100%;
   color:#f0d060; font-size:16px; font-weight:700; letter-spacing:6px;
   cursor:pointer; border:1px solid rgba(212,175,55,0.15);
   box-shadow:0 4px 20px rgba(180,30,30,0.3); transition:all 0.25s;
+  position:relative; overflow:hidden;
 }
-#pw-box .pw-btn:hover { box-shadow:0 6px 28px rgba(200,40,40,0.4),0 0 36px rgba(212,175,55,0.08); transform:translateY(-1px); }
+#pw-box .pw-btn::after {
+  content:""; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
+  background:linear-gradient(45deg, transparent 30%, rgba(255,215,0,0.08) 50%, transparent 70%);
+  animation: goldShimmer 3s linear infinite;
+}
+#pw-box .pw-btn:hover { box-shadow:0 6px 28px rgba(200,40,40,0.5),0 0 40px rgba(212,175,55,0.15); transform:translateY(-2px); }
 
 /* ============================================================
    SIDEBAR
@@ -193,6 +240,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   min-width: var(--sidebar-w);
   background: linear-gradient(180deg, rgba(20,10,6,0.98), rgba(14,6,2,0.99));
   border-right: 1px solid rgba(212,175,55,0.15);
+  animation: sideGlow 4s ease-in-out infinite;
   display: flex;
   flex-direction: column;
   transition: width 0.25s ease, min-width 0.25s ease;
@@ -781,6 +829,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   background: rgba(22,14,8,0.96);
   border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; padding: 16px 20px;
   position: relative; overflow: hidden; transition: all 0.25s;
+  animation: cardGlow 4s ease-in-out infinite;
 }
 .kpi-card-new:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
 .kpi-card-new::before {
@@ -1496,6 +1545,7 @@ tbody tr:hover {
 
 <!-- 密码保护遮罩 — 中国风 -->
 <div id="pw-overlay">
+  <canvas id="pw-particles"></canvas>
   <div id="pw-box">
     <div class="pw-corners">
       <div class="pw-corner tl"></div><div class="pw-corner tr"></div>
@@ -2371,6 +2421,7 @@ function checkPw() {
     // ✅ 安全強化：密碼存在 sessionStorage（記憶體，關閉瀏覽器後清除）
     setSessionPw(v);
     sessionStorage.setItem("macau_auth", "1");
+    _stopLoginParticles();
     document.getElementById("pw-overlay").style.display = "none";
     resetSession();
     showToast("登入成功", "success");
@@ -2714,10 +2765,77 @@ function _setupDraftAutoSave() {
     }
   }
 }
+// 登入頁粒子動畫（中國風金塵 + 螢火蟲）
+var _pwParticlesAnimId = null, _pwParticles = [];
+function _startLoginParticles() {
+  try {
+    var cv = document.getElementById("pw-particles");
+    if (!cv) return;
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+    var ctx = cv.getContext("2d");
+    if (!ctx) return;
+    _pwParticles = [];
+    // 金色塵埃
+    for (var i = 0; i < 40; i++) {
+      _pwParticles.push({
+        x: Math.random() * cv.width, y: Math.random() * cv.height,
+        r: Math.random() * 2 + 0.8,
+        speed: Math.random() * 0.4 + 0.1,
+        opacity: Math.random() * 0.45 + 0.1,
+        hue: Math.random() < 0.3 ? 25 + Math.random() * 10 : 38 + Math.random() * 12,
+        sway: Math.random() * 0.5 - 0.25
+      });
+    }
+    // 螢火蟲（較大較亮）
+    for (var i = 0; i < 8; i++) {
+      _pwParticles.push({
+        x: Math.random() * cv.width, y: Math.random() * cv.height,
+        r: Math.random() * 3 + 2,
+        speed: Math.random() * 0.25 + 0.05,
+        opacity: Math.random() * 0.7 + 0.2,
+        hue: 40 + Math.random() * 10,
+        sway: Math.random() * 0.8 - 0.4,
+        firefly: true
+      });
+    }
+    function _anim() {
+      if (!cv || !ctx) return;
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      for (var i = 0; i < _pwParticles.length; i++) {
+        var p = _pwParticles[i];
+        p.y -= p.speed;
+        p.x += p.sway;
+        if (p.y < -20) { p.y = cv.height + 20; p.x = Math.random() * cv.width; }
+        if (p.x < -10) p.x = cv.width + 10;
+        if (p.x > cv.width + 10) p.x = -10;
+        var alpha = p.opacity;
+        if (p.firefly) alpha = p.opacity * (0.5 + 0.5 * Math.sin(Date.now() / 1500 + i));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "hsla(" + p.hue + ", 80%, 70%, " + alpha + ")";
+        ctx.fill();
+        if (p.firefly) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = "hsla(" + p.hue + ", 80%, 70%, " + (alpha * 0.12) + ")";
+          ctx.fill();
+        }
+      }
+      _pwParticlesAnimId = requestAnimationFrame(_anim);
+    }
+    _anim();
+  } catch(e) { console.error("Login particles error:", e); }
+}
+function _stopLoginParticles() {
+  if (_pwParticlesAnimId) { cancelAnimationFrame(_pwParticlesAnimId); _pwParticlesAnimId = null; }
+  _pwParticles = [];
+}
 // 頁面載入後設定草稿自動儲存監聽 + 自動備份檢查 + PWA 註冊
 document.addEventListener("DOMContentLoaded", function() {
   _setupDraftAutoSave();
   _autoBackupCheck();
+  _startLoginParticles();
   // 註冊 Service Worker（PWA 支援）
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js").then(function(reg) {
