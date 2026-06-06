@@ -4543,15 +4543,16 @@ var RM = {
         usedQuota += (this.bookings[i].nights||0);
     var pct = totalQuota>0 ? Math.min(100, Math.round(usedQuota/totalQuota*100)) : 0;
 
-    var rollingEl = document.getElementById("rm-q-rolling");
-    if (rollingEl) rollingEl.innerHTML = this.fmt(totalRolling)+"<span>萬</span>";
-    var usedEl = document.getElementById("rm-q-used-hero");
-    if (usedEl) usedEl.innerHTML = usedQuota+"<span>晚</span>";
-    // 已使用轉碼數（所有免費房晚 × 門檻）
+    // 已使用轉碼數（所有免費房晚 × 門檻，先計算供 KPI 卡片使用）
     var rmUsedRolling = 0;
     for (var j=0; j<this.bookings.length; j++)
       if (this.bookings[j].month===month && this.bookings[j].status==="免費")
         rmUsedRolling += (this.bookings[j].nights||0) * (this.bookings[j].threshold||70);
+
+    var rollingEl = document.getElementById("rm-q-rolling");
+    if (rollingEl) rollingEl.innerHTML = this.fmt(totalRolling)+"<span>萬</span>";
+    var usedEl = document.getElementById("rm-q-used-hero");
+    if (usedEl) usedEl.innerHTML = this.fmt(rmUsedRolling)+"<span>萬</span>";
     // 剩餘轉碼數 = 本月總洗碼量 - 已使用轉碼數（可為負數）
     var rmRemaining = totalRolling - rmUsedRolling;
     var rollingEl2 = document.getElementById("rm-q-used-rolling");
