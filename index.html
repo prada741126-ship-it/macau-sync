@@ -3407,6 +3407,7 @@ function renderSummary() {
   tbody.innerHTML = "";
   var msgEl = document.getElementById("summary-msg");
   var tblEl = document.getElementById("summary-table");
+  var keys = Object.keys(map);
   if (!keys.length) {
     if (tblEl) tblEl.style.display = "none";
     if (msgEl) {
@@ -3419,7 +3420,6 @@ function renderSummary() {
   if (tblEl) tblEl.style.display = "table";
   if (msgEl) msgEl.style.display = "none";
   var totalBonus = 0, totalFund = 0;
-  var keys = Object.keys(map);
   for (var k = 0; k < keys.length; k++) {
     var c = map[keys[k]];
     var tr = document.createElement("tr");
@@ -3616,9 +3616,12 @@ function doQuery() {
       "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(totalW) + "</div></div>" +
       "<div class='kpi-card' style='background:#f0a500;'><div class='label'>可提餘額</div><div class='value'>" + fmt(balance) + "</div></div>" +
       "<button class='btn btn-primary' style='margin-left:10px;' onclick='openFundModal()'>＋ 提領</button>";
-    // 公基金图表
-    if (allFundTxs.length > 0) { setTimeout(function() { renderFundChart(allFundTxs, month); }, 150); }
-    else { document.getElementById("query-chart-wrap").style.display = "none"; }
+    // 公基金图表 — 使用雙重 requestAnimationFrame 確保 DOM 佈局完成
+    if (allFundTxs.length > 0) {
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { renderFundChart(allFundTxs, month); });
+      });
+    }
     var tbody = document.getElementById("query-body");
     tbody.innerHTML = "";
     // 上月累計行
@@ -3683,9 +3686,11 @@ function doQuery() {
     "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(tb) + "</div></div>" +
     "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(td) + "</div></div>" +
     "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領</div><div class='value'>" + fmt(Math.max(0, tb - td)) + "</div></div>";
-  // 图表
+  // 图表 — 使用雙重 requestAnimationFrame 確保 DOM 佈局完成
   if (data.length > 0 && agent && agent !== '__FUND__') {
-    setTimeout(function() { renderQueryChart(data); }, 150);
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { renderQueryChart(data); });
+    });
   } else {
     document.getElementById("query-chart-wrap").style.display = "none";
   }
@@ -3856,7 +3861,9 @@ function renderQueryChart(data) {
     var dates = Object.keys(grouped).sort();
     if (dates.length === 0) { wrap.style.display = "none"; return; }
     wrap.style.display = "block";
-    var W = cv.width = (cv.parentElement.clientWidth - 28) || 600;
+    // 使用 getBoundingClientRect 獲取準確尺寸（更可靠於 display:none→block 轉換）
+    var rect = wrap.getBoundingClientRect();
+    var W = cv.width = Math.max(rect.width - 28, 400) || 600;
     var H = cv.height = 220;
     var pad = { top: 25, right: 20, bottom: 35, left: 55 };
     var cw = W - pad.left - pad.right, ch = H - pad.top - pad.bottom;
@@ -3926,7 +3933,9 @@ function renderFundChart(allFundTxs, month) {
     var months = Object.keys(grouped).sort();
     if (months.length === 0) { wrap.style.display = "none"; return; }
     wrap.style.display = "block";
-    var W = cv.width = (cv.parentElement.clientWidth - 28) || 600;
+    // 使用 getBoundingClientRect 獲取準確尺寸
+    var rect2 = wrap.getBoundingClientRect();
+    var W = cv.width = Math.max(rect2.width - 28, 400) || 600;
     var H = cv.height = 220;
     var pad = { top: 25, right: 20, bottom: 35, left: 55 };
     var cw = W - pad.left - pad.right, ch = H - pad.top - pad.bottom;
