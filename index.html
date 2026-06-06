@@ -892,17 +892,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   flex: 1; min-width: 0; max-width: 24px;
   text-align: center; font-size: 7px; color: rgba(255,255,255,0.12);
 }
-/* 總覽頁房務迷你儀表板 */
-.ov-room-mini { display: flex; flex-direction: column; gap: 6px; }
-.ov-room-hero { display: flex; gap: 14px; align-items: baseline; }
-.ov-room-num { font-size: 20px; font-weight: 800; font-family: "Consolas", monospace; color: var(--gold); line-height: 1; }
-.ov-room-num span { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.25); margin-left: 1px; }
-.ov-room-bar-wrap { display: flex; align-items: center; gap: 6px; }
-.ov-room-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; }
-.ov-room-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; background: linear-gradient(90deg, #27ae60, #2ecc71); }
-.ov-room-bar-fill.warn { background: linear-gradient(90deg, #f39c12, #e67e22); }
-.ov-room-bar-fill.danger { background: linear-gradient(90deg, #e74c3c, #c0392b); }
-.ov-room-bar-pct { font-size: 10px; font-family: monospace; color: var(--gold); min-width: 24px; text-align: right; }
 /* 近期動態 Timeline */
 .timeline-box {
   background: rgba(12,12,22,0.95); border: 1px solid rgba(255,255,255,0.06);
@@ -994,17 +983,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .venue-val { font-size: 10px; color: var(--text-muted); font-family: monospace; min-width: 36px; text-align: right; }
 .venue-empty { text-align: center; padding: 20px; color: rgba(255,255,255,0.15); font-size: 12px; }
 
-/* 總覽頁 — 房務儀表板滿寬 */
-.ov-room-wide {
-  background: rgba(14,12,5,0.9); border: 1px solid rgba(212,175,55,0.1);
-  border-radius: 10px; padding: 12px 16px; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 20px;
-}
-.ov-room-wide .ov-room-hero { gap: 24px; }
-.ov-room-wide .ov-room-num { font-size: 26px; }
-.ov-room-wide .ov-room-bar-wrap { flex: 1; max-width: 320px; }
-.ov-room-wide .ov-room-bar-track { height: 8px; }
-
 /* ===== 桌面端大氣佈局 ===== */
 @media (min-width: 1024px) {
   #page-scroll { padding: 24px 32px; }
@@ -1025,9 +1003,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   .ov-panel { border-radius: 14px; }
   .ov-panel-head { padding: 12px 16px; font-size: 14px; }
   .ov-panel-body { padding: 10px 14px; }
-  .ov-room-wide { padding: 18px 22px; border-radius: 14px; }
-  .ov-room-wide .ov-room-num { font-size: 32px; }
-  .ov-room-wide .ov-room-bar-track { height: 10px; }
   .timeline-box { border-radius: 14px; }
   .timeline-title { padding: 12px 18px; font-size: 14px; }
   .timeline-item { padding: 10px 18px; }
@@ -1042,8 +1017,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 @media (max-width: 700px) {
   .charts-row { grid-template-columns: 1fr; }
   .ov-two-col { grid-template-columns: 1fr; }
-  .ov-room-wide { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .ov-room-wide .ov-room-bar-wrap { max-width: none; width: 100%; }
 
   /* ===== 手機版全局優化 ===== */
   /* 防止內容溢出 */
@@ -1697,7 +1670,7 @@ tbody tr:hover {
     <div class="kpi-grid" id="ov-kpi-grid"></div>
     <!-- 滿寬每日洗碼量 -->
     <div class="chart-full">
-      <div class="chart-title">每日洗碼量（10萬）— 本月趨勢</div>
+      <div class="chart-title">每日洗碼量（100萬）— 本月趨勢</div>
       <div style="position:relative;height:200px;"><canvas id="ov-trend-chart"></canvas></div>
       <div class="sparkline-wide" id="ov-sparkline" style="display:none;"></div>
       <div class="spark-labels-wide" id="ov-sparklabels" style="display:none;"></div>
@@ -1713,20 +1686,6 @@ tbody tr:hover {
       <div class="ov-panel">
         <div class="ov-panel-head"><span>📍</span> 場地洗碼分佈</div>
         <div class="ov-panel-body" id="ov-venue-dist"></div>
-      </div>
-    </div>
-    <!-- 房務額度儀表板（滿寬） -->
-    <div class="ov-room-wide">
-      <div class="chart-title" style="margin-bottom:0;">免費房間額度</div>
-      <div class="ov-room-hero">
-        <div class="ov-room-num" id="ov-rm-rolling">0<span>萬</span></div>
-        <div class="ov-room-num" id="ov-rm-used">0<span>晚</span></div>
-      </div>
-      <div class="ov-room-bar-wrap">
-        <div class="ov-room-bar-track">
-          <div class="ov-room-bar-fill" id="ov-rm-progress" style="width:0%;"></div>
-        </div>
-        <div class="ov-room-bar-pct" id="ov-rm-pct">0%</div>
       </div>
     </div>
     <!-- 近期動態 -->
@@ -3174,6 +3133,7 @@ function loadAgentWallets(silent) {
 
 function saveData(silent) {
   try {
+    markSyncDirty();  // 標記數據已變更，加速同步
     var encrypted = encryptData(txs);
     localStorage.setItem("macau_data", encrypted);
     if (typeof syncUpload === 'function') syncUpload();
@@ -3354,8 +3314,15 @@ function closeCurrentMonth() {
 }
 
 // ===== 同步功能 =====
+var _lastSyncModified = 0; // 紀錄上次同步時間戳，用於增量同步
+var _syncDirty = false;     // 標記數據是否有變更，避免無謂上傳
+function markSyncDirty() { _syncDirty = true; }
 function syncUpload() {
   if (!SYNC_API) return Promise.reject('未配置同步伺服器');
+  // 若數據未變更且已上傳過，跳過上傳以加快速度
+  if (!_syncDirty && _lastSyncModified > 0) {
+    return Promise.resolve({ skipped: true });
+  }
   var payload = {
     password: SYNC_PASSWORD,
     txs: txs,
@@ -3374,6 +3341,7 @@ function syncUpload() {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     }).then(function(resp) {
+    _syncDirty = false; // 上傳成功，清除髒標記
     console.log('[Sync ↑] 上傳成功', resp);
     return resp;
   }).catch(function(err) {
@@ -3384,27 +3352,51 @@ function syncUpload() {
 
 function syncDownload() {
   if (!SYNC_API) return Promise.reject('未配置同步伺服器');
-  var url = SYNC_API + '/api/sync/download?password=' + encodeURIComponent(SYNC_PASSWORD);
-  return fetch(url, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
+  // 先透過 /api/poll 檢查伺服器數據是否有變更，有變更才下載
+  var pollUrl = SYNC_API + '/api/poll?since=' + _lastSyncModified;
+  return fetch(pollUrl, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     })
-    .then(function(data) {
-      if (!data || data.ok === false) {
-        throw new Error(data ? data.error : '未知錯誤');
+    .then(function(pollResp) {
+      if (!pollResp || pollResp.ok === false) {
+        throw new Error(pollResp ? pollResp.error : '未知錯誤');
       }
-      txs = data.txs || txs;
-      agentList = data.agentList || agentList;
-      agentWallets = data.agentWallets || agentWallets;
-      fundWithdrawals = data.fundWithdrawals || fundWithdrawals;
-      if (data.workingMonth) workingMonth = data.workingMonth;
-      if (data.archives) localStorage.setItem('macau_archives', JSON.stringify(data.archives));
+      if (!pollResp.changed) {
+        console.log('[Sync ↓] 數據未變更，跳過下載');
+        return pollResp;
+      }
+      // 有變更：若 poll 回應已含數據則直接使用，否則下載全量
+      if (pollResp.data && pollResp.data.txs !== undefined) {
+        return pollResp;
+      }
+      var url = SYNC_API + '/api/sync/download';
+      return fetch(url, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
+        .then(function(r2) {
+          if (!r2.ok) throw new Error('HTTP ' + r2.status);
+          return r2.json();
+        });
+    })
+    .then(function(data) {
+      if (data.changed === false) return data; // poll 回傳的未變更回應
+      // 處理 poll 回傳的 data 格式或 download 回傳的格式
+      var d = data.data || data;
+      if (!d || d.ok === false) {
+        throw new Error(d ? d.error : '未知錯誤');
+      }
+      txs = d.txs || txs;
+      agentList = d.agentList || agentList;
+      agentWallets = d.agentWallets || agentWallets;
+      fundWithdrawals = d.fundWithdrawals || fundWithdrawals;
+      if (d.workingMonth) workingMonth = d.workingMonth;
+      if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
+      _lastSyncModified = d.lastModified || data.lastModified || Date.now();
       saveData(true);
       renderAll();
       renderOverview();
       renderSummary();
-      console.log('[Sync ↓] 下載並合併完成，共', data.txs ? data.txs.length : 0, '筆');
+      console.log('[Sync ↓] 下載並合併完成，共', d.txs ? d.txs.length : 0, '筆');
       return data;
     }).catch(function(err) {
       console.error('[Sync ↓] 下載失敗', err);
@@ -3415,6 +3407,9 @@ function syncDownload() {
 function manualSync() {
   if (!SYNC_API) { showToast('未配置同步伺服器', 'warning'); return; }
   showLoading('正在同步…');
+  // 強制上傳並重設時間戳，確保下載最新全量
+  _syncDirty = true;
+  _lastSyncModified = 0;
   syncUpload().then(function() {
     return syncDownload();
   }).then(function() {
@@ -3428,12 +3423,16 @@ function manualSync() {
 
 function initSync() {
   if (!SYNC_API) { console.log('同步伺服器未配置'); return; }
-  console.log('同步伺服器：' + SYNC_API);
-  // 定期同步（每 30 秒）
+  console.log('同步伺服器：' + SYNC_API + '（增量同步已啟用，間隔 10 秒）');
+  // 定期同步（每 10 秒，使用增量檢查減少流量）
   setInterval(function() {
-    if (typeof syncUpload === 'function') syncUpload();
-    if (typeof syncDownload === 'function') syncDownload();
-  }, 30000);
+    // 先上傳本地變更
+    if (_syncDirty) {
+      syncUpload();
+    }
+    // 再檢查伺服器是否有新數據
+    syncDownload();
+  }, 10000);
 }
 
 function renderSummary() {
@@ -4247,7 +4246,7 @@ function renderOverview() {
   for (var d=0;d<daysInMonth;d++){
     var v=daily[d];
     var h=v>0?Math.max(2,Math.round(v/maxV*maxH)):2;
-    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(v)+'萬 ('+fmt(v/10)+'×10萬)"><span>'+fmt(v/10)+'</span></div>';
+    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(v)+'萬 ('+fmt(v/100)+'×100萬)"><span>'+fmt(v/100)+'</span></div>';
     lblHTML+='<span>'+(d%3===0||d===0||d===daysInMonth-1?(d+1)+'日':'')+'</span>';
   }
   spark.innerHTML=sparkHTML;
@@ -4289,36 +4288,10 @@ function renderOverview() {
     var vpct=Math.round(vn.vol/maxVV*100);
     var vcol=venueColors[vi%venueColors.length];
     var shortName=vn.name.length>8?vn.name.slice(0,8)+'..':vn.name;
-    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬 <span style="color:rgba(255,255,255,0.3);font-size:10px;">('+fmt(vn.vol/10)+'×10萬)</span></div></div></div>';
+    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬 <span style="color:rgba(255,255,255,0.3);font-size:10px;">('+fmt(vn.vol/100)+'×100萬)</span></div></div></div>';
   }
   if (!venArr.length) venHTML='<div class="venue-empty">本月尚無數據</div>';
   document.getElementById("ov-venue-dist").innerHTML=venHTML;
-
-  // --- 房務迷你儀表板 ---
-  var rmRolling=document.getElementById("ov-rm-rolling");
-  var rmUsed=document.getElementById("ov-rm-used");
-  var rmProg=document.getElementById("ov-rm-progress");
-  var rmPct=document.getElementById("ov-rm-pct");
-  if (rmRolling){
-    var rmTotalNights=0,rmFreeNights=0;
-    var roomMonth=nowStr().slice(0,7);
-    if (typeof RM!=="undefined"&&RM.bookings){
-      for (var k=0;k<RM.bookings.length;k++){
-        var b=RM.bookings[k];
-        if (!b.date||b.date.slice(0,7)!==roomMonth) continue;
-        rmTotalNights+=(b.nights||0);
-        if (b.status==="免費") rmFreeNights+=(b.nights||0);
-      }
-    }
-    rmRolling.innerHTML=fmt(totalVol)+'<span>萬</span>';
-    rmUsed.innerHTML=rmFreeNights+'<span>晚</span>';
-    // Use first agent's threshold (just for visual)
-    var quota=totalVol>0?Math.floor(totalVol/55):0; // rough estimate
-    var pct=quota>0?Math.min(100,Math.round(rmFreeNights/quota*100)):0;
-    rmProg.style.width=pct+'%';
-    rmProg.className='ov-room-bar-fill'+(pct>=80?'':' warn')+(pct>=90?' danger':'');
-    rmPct.textContent=pct+'%';
-  }
 
   // --- 近期動態 Timeline ---
   var timeline=document.getElementById("ov-timeline");
@@ -4361,9 +4334,9 @@ function renderTrendChart(daily, monthLabel) {
     var spark = document.getElementById("ov-sparkline");
     var slbl = document.getElementById("ov-sparklabels");
     if (!canvas) return;
-    // 資料轉為 10 萬單位
-    var daily10 = daily.map(function(v) { return v / 10; });
-    var hasData = daily10.some(function(v) { return v > 0; });
+    // 資料轉為 100 萬單位
+    var daily100 = daily.map(function(v) { return v / 100; });
+    var hasData = daily100.some(function(v) { return v > 0; });
     // 檢查 Chart.js 是否可用
     if (typeof Chart === "undefined" || !hasData) {
       if (spark) spark.style.display = hasData ? "" : "none";
@@ -4384,8 +4357,8 @@ function renderTrendChart(daily, monthLabel) {
 
     // 生成標籤（每 3 天顯示一次）
     var labels = [];
-    for (var d = 0; d < daily10.length; d++) {
-      labels.push((d + 1) % 3 === 0 || d === 0 || d === daily10.length - 1 ? (d + 1) + "日" : "");
+    for (var d = 0; d < daily100.length; d++) {
+      labels.push((d + 1) % 3 === 0 || d === 0 || d === daily100.length - 1 ? (d + 1) + "日" : "");
     }
     // 銷毀舊圖表
     if (_trendChartInst) { _trendChartInst.destroy(); _trendChartInst = null; }
@@ -4398,14 +4371,14 @@ function renderTrendChart(daily, monthLabel) {
       data: {
         labels: labels,
         datasets: [{
-          label: "洗碼量（10萬）",
-          data: daily10,
+          label: "洗碼量（100萬）",
+          data: daily100,
           borderColor: "#D4AF37",
           backgroundColor: gradient,
           borderWidth: 2,
           fill: true,
           tension: 0.3,
-          pointRadius: daily10.map(function(v) { return v > 0 ? 3 : 0; }),
+          pointRadius: daily100.map(function(v) { return v > 0 ? 3 : 0; }),
           pointBackgroundColor: "#D4AF37",
           pointBorderColor: "#1a1a2e",
           pointBorderWidth: 1
@@ -4424,7 +4397,7 @@ function renderTrendChart(daily, monthLabel) {
             borderWidth: 1,
             callbacks: {
               title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
-              label: function(item) { return "洗碼量: " + fmt(item.raw * 10) + " 萬 (" + fmt(item.raw) + "×10萬)"; }
+              label: function(item) { return "洗碼量: " + fmt(item.raw * 100) + " 萬 (" + fmt(item.raw) + "×100萬)"; }
             }
           }
         },
@@ -4481,7 +4454,7 @@ function renderRankChart(agtArr) {
     var labels = [], data = [];
     for (var i = agtArr.length - 1; i >= 0; i--) {
       labels.push(agtArr[i].name);
-      data.push(agtArr[i].vol / 10); // 轉為 10 萬單位
+      data.push(agtArr[i].vol / 100); // 轉為 100 萬單位
     }
     var ctx = canvas.getContext("2d");
     _rankChartInst = new Chart(ctx, {
@@ -4489,7 +4462,7 @@ function renderRankChart(agtArr) {
       data: {
         labels: labels,
         datasets: [{
-          label: "洗碼量（10萬）",
+          label: "洗碼量（100萬）",
           data: data,
           backgroundColor: data.map(function(v, idx) {
             var colors = ["rgba(212,175,55,0.6)","rgba(160,160,160,0.5)","rgba(205,127,50,0.5)","rgba(255,255,255,0.25)","rgba(255,255,255,0.2)"];
@@ -4516,7 +4489,7 @@ function renderRankChart(agtArr) {
             bodyColor: "#e0d0a0",
             borderColor: "rgba(212,175,55,0.3)",
             borderWidth: 1,
-            callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw * 10) + " 萬 (" + fmt(item.raw) + "×10萬)"; } }
+            callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw * 100) + " 萬 (" + fmt(item.raw) + "×100萬)"; } }
           }
         },
         scales: {
@@ -5341,20 +5314,6 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
   box-shadow: 0 0 30px rgba(212,175,55,0.28);
 }
 
-/* 房务仪表板加强 */
-.ov-room-wide {
-  background: linear-gradient(180deg, rgba(20,12,8,0.96), rgba(16,8,4,0.98)) !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-}
-.ov-room-bar-track {
-  height: 8px !important;
-  border-radius: 4px !important;
-}
-.ov-room-bar-fill {
-  border-radius: 4px !important;
-  transition: width 0.6s ease !important;
-}
-
 /* 桌面版进一步优化 */
 @media (min-width: 1024px) {
   .quick-actions { gap: 16px; margin-bottom: 18px; }
@@ -5370,7 +5329,6 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
   .timeline-item { padding: 10px 20px; }
   .month-bar { padding: 12px 24px; border-radius: 16px; }
   .total-wallet { padding: 8px 22px; border-radius: 14px; }
-  .ov-room-wide { padding: 18px 24px; border-radius: 16px; }
 }
 
 /* 手机版优化 */
