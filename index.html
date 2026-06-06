@@ -5126,5 +5126,175 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
 </div>
 </div>
 
+
+<!-- ========== 总览页加强美化 v6.3-enhanced ========== -->
+<style>
+/* 快速操作按钮加强 */
+.quick-actions { gap: 12px; margin-bottom: 16px; }
+.qa-btn {
+  background: linear-gradient(135deg, rgba(26,18,10,0.92), rgba(18,10,6,0.96)) !important;
+  border: 1px solid rgba(212,175,55,0.22) !important;
+  position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+}
+.qa-btn::before {
+  content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.06), transparent);
+  transition: left 0.5s ease;
+}
+.qa-btn:hover::before { left: 100%; }
+.qa-btn:hover {
+  border-color: rgba(212,175,55,0.55) !important;
+  box-shadow: 0 4px 20px rgba(212,175,55,0.18);
+  transform: translateY(-2px);
+}
+.qa-btn-icon {
+  background: rgba(212,175,55,0.12) !important;
+  box-shadow: 0 0 20px rgba(212,175,55,0.15) !important;
+  transition: all 0.3s ease;
+}
+.qa-btn:hover .qa-btn-icon {
+  background: rgba(212,175,55,0.22) !important;
+  transform: scale(1.12);
+}
+
+/* KPI卡片加强 - 装饰性边角 + hover */
+.kpi-grid { gap: 12px; margin-bottom: 16px; }
+.kpi-card-new {
+  position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+}
+.kpi-card-new::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, rgba(212,175,55,0.6), rgba(212,175,55,0.2), transparent);
+  border-radius: 14px 14px 0 0;
+}
+.kpi-card-new::after {
+  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
+}
+.kpi-card-new:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(212,175,55,0.35);
+}
+.kpi-label {
+  font-size: 11px !important;
+  color: rgba(212,175,55,0.6) !important;
+  letter-spacing: 1.2px !important;
+  margin-bottom: 6px !important;
+}
+.kpi-value {
+  font-size: 30px !important;
+  transition: all 0.3s ease;
+}
+.kpi-card-new:hover .kpi-value {
+  text-shadow: 0 0 24px rgba(212,175,55,0.55);
+}
+
+/* 图表容器加强 */
+.chart-full, .ov-panel, .chart-box {
+  background: rgba(18,10,6,0.92) !important;
+  border: 1px solid rgba(212,175,55,0.22) !important;
+  position: relative; overflow: hidden;
+  transition: all 0.3s ease;
+}
+.chart-full::before, .ov-panel::before, .chart-box::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.45), transparent);
+}
+.chart-full:hover, .ov-panel:hover, .chart-box:hover {
+  border-color: rgba(212,175,55,0.38) !important;
+}
+.chart-title {
+  font-size: 11px !important;
+  letter-spacing: 1.5px !important;
+  color: rgba(212,175,55,0.65) !important;
+  text-transform: uppercase;
+  margin-bottom: 12px !important;
+}
+
+/* 时间线加强 */
+.timeline-box {
+  background: rgba(18,10,6,0.92) !important;
+  border: 1px solid rgba(212,175,55,0.22) !important;
+  transition: all 0.3s ease;
+}
+.timeline-box:hover {
+  border-color: rgba(212,175,55,0.38) !important;
+}
+.timeline-dot {
+  box-shadow: 0 0 10px currentColor;
+  transition: all 0.3s ease;
+}
+.timeline-item:hover .timeline-dot { transform: scale(1.35); }
+.timeline-item {
+  transition: all 0.2s ease;
+}
+.timeline-item:hover { background: rgba(212,175,55,0.035); }
+
+/* 月份栏加强 */
+.month-bar {
+  background: linear-gradient(135deg, rgba(24,12,8,0.97), rgba(16,6,4,0.98)) !important;
+  border: 1px solid rgba(212,175,55,0.32) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.32);
+}
+
+/* 总钱包加强 */
+.total-wallet {
+  background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(184,134,11,0.13)) !important;
+  border: 1px solid rgba(212,175,55,0.42) !important;
+  box-shadow: 0 0 20px rgba(212,175,55,0.18);
+  transition: all 0.3s ease;
+}
+.total-wallet:hover {
+  border-color: rgba(212,175,55,0.65) !important;
+  box-shadow: 0 0 30px rgba(212,175,55,0.28);
+}
+
+/* 房务仪表板加强 */
+.ov-room-wide {
+  background: linear-gradient(180deg, rgba(20,12,8,0.96), rgba(16,8,4,0.98)) !important;
+  border: 1px solid rgba(212,175,55,0.22) !important;
+}
+.ov-room-bar-track {
+  height: 8px !important;
+  border-radius: 4px !important;
+}
+.ov-room-bar-fill {
+  border-radius: 4px !important;
+  transition: width 0.6s ease !important;
+}
+
+/* 桌面版进一步优化 */
+@media (min-width: 1024px) {
+  .quick-actions { gap: 16px; margin-bottom: 18px; }
+  .qa-btn { padding: 16px 28px; font-size: 15px; border-radius: 14px; }
+  .qa-btn-icon { width: 36px; height: 36px; font-size: 18px; border-radius: 10px; }
+  .kpi-grid { gap: 16px; margin-bottom: 18px; }
+  .kpi-card-new { padding: 20px 26px; border-radius: 16px; }
+  .kpi-value { font-size: 34px !important; }
+  .kpi-label { font-size: 12px !important; letter-spacing: 1.5px !important; }
+  .chart-full, .ov-panel { padding: 18px 22px; border-radius: 16px; }
+  .timeline-box { padding: 0; border-radius: 16px; }
+  .timeline-title { padding: 12px 20px; font-size: 14px; }
+  .timeline-item { padding: 10px 20px; }
+  .month-bar { padding: 12px 24px; border-radius: 16px; }
+  .total-wallet { padding: 8px 22px; border-radius: 14px; }
+  .ov-room-wide { padding: 18px 24px; border-radius: 16px; }
+}
+
+/* 手机版优化 */
+@media (max-width: 700px) {
+  .quick-actions { gap: 8px; margin-bottom: 12px; }
+  .qa-btn { padding: 10px 14px; font-size: 12px; border-radius: 10px; }
+  .qa-btn-icon { width: 28px; height: 28px; font-size: 14px; border-radius: 8px; }
+  .kpi-grid { gap: 8px; margin-bottom: 12px; }
+  .kpi-card-new { padding: 12px 14px; border-radius: 12px; }
+  .kpi-value { font-size: 22px !important; }
+  .chart-full, .ov-panel { padding: 10px 12px; border-radius: 12px; }
+  .timeline-item { padding: 6px 12px; }
+}
+</style>
+
 </body>
 </html>
