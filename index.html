@@ -3419,7 +3419,7 @@ function initSync() {
       renderAll();
       renderOverview();
       renderSummary();
-      if (typeof renderRoom === 'function') renderRoom();
+      if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
       if (typeof renderAgentWallets === 'function') renderAgentWallets();
       if (typeof updateAllAgentBalances === 'function') updateAllAgentBalances();
       
@@ -4522,6 +4522,8 @@ var RM = {
   save: function() {
     localStorage.setItem("rm_bookings", JSON.stringify(this.bookings));
     localStorage.setItem("rm_last_id", this.lastId.toString());
+    // 同步到 Firebase
+    if (typeof syncUpload === 'function') syncUpload();
   },
 
   populateAgentDropdown: function() {
