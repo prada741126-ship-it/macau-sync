@@ -2143,6 +2143,7 @@ var agentWalletNextId = 1;
 var agentList = [];
 var lastSyncTimestamp = 0;  // Firebase 最後同步時間戳（防止舊資料覆蓋新資料）
 var isSyncingFromFirebase = false;  // 防止 Firebase 同步時觸發上傳（避免無限循環）
+var localEditLockUntil = 0;  // 本地編輯鎖定時間（防止 Firebase 舊資料覆蓋剛刪除的資料）
 var sortState = { table: "", col: "", asc: true };
 
 // ===== 同步配置（v4.9 安全強化）=====
@@ -3358,9 +3359,11 @@ function syncUpload() {
     archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
     timestamp: Date.now()
   };
+  // 設定本地編輯鎖定：上傳後 2 秒內忽略 Firebase 更新（防止競態條件覆蓋剛刪除的資料）
+  localEditLockUntil = Date.now() + 2000;
   db.ref('macau_data').set(payload)
-    .then(function() { console.log('[Sync ↑] Firebase 上傳成功'); })
-    .catch(function(err) { console.error('[Sync ↑] Firebase 上傳失敗', err); });
+    .then(function() { console.log('[Sync ↑] Firebase 上傳成功（已鎖定 2 秒）'); })
+    .catch(function(err) { console.error('[Sync ↑] Firebase 上傳失敗', err); localEditLockUntil = 0; });
 }
 
 function syncDownload() {
@@ -3391,6 +3394,13 @@ function initSync() {
       var incomingTs = data.timestamp || 0;
       if (incomingTs < lastSyncTimestamp) {
         console.log('[Sync ↓] 收到舊資料（' + incomingTs + ' < ' + lastSyncTimestamp + '），跳過');
+        return;
+      }
+
+      // 本地編輯鎖定檢查：剛執行本地刪除/編輯後的 2 秒內，忽略 Firebase 更新（防止競態條件導致資料被覆蓋）
+      var now = Date.now();
+      if (now < localEditLockUntil) {
+        console.log('[Sync ↓] 本地編輯鎖定中（剩餘 ' + Math.ceil((localEditLockUntil - now) / 1000) + ' 秒），跳過 Firebase 更新');
         return;
       }
 
