@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v6.3.1</title>
+<title>澳門洗碼報表 v6.3.2</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3452,9 +3452,14 @@ function syncDownload() {
         for (var i = 0; i < d.txs.length; i++) {
           var sItem = d.txs[i];
           var lItem = txMap[sItem.id];
-          // 合併時保留本地已刪除標記，防止伺服器覆寫
-          if (lItem && lItem.deleted) txMap[sItem.id] = lItem;
-          else txMap[sItem.id] = sItem;
+          // 合併策略：本地或伺服器任一方有 deleted:true 都保留
+          if (lItem && lItem.deleted) {
+            txMap[sItem.id] = lItem;  // 本地已刪除，優先保留
+          } else if (sItem.deleted) {
+            txMap[sItem.id] = sItem;  // 伺服器已刪除，保留
+          } else {
+            txMap[sItem.id] = sItem;  // 雙方都未刪除，用伺服器版本
+          }
         }
         txs = [];
         for (var tid in txMap) txs.push(txMap[tid]);
@@ -3471,8 +3476,13 @@ function syncDownload() {
         for (var i = 0; i < d.fundWithdrawals.length; i++) {
           var sItem = d.fundWithdrawals[i];
           var lItem = fwMap[sItem.id];
-          if (lItem && lItem.deleted) fwMap[sItem.id] = lItem;
-          else fwMap[sItem.id] = sItem;
+          if (lItem && lItem.deleted) {
+            fwMap[sItem.id] = lItem;
+          } else if (sItem.deleted) {
+            fwMap[sItem.id] = sItem;
+          } else {
+            fwMap[sItem.id] = sItem;
+          }
         }
         fundWithdrawals = [];
         for (var fid in fwMap) fundWithdrawals.push(fwMap[fid]);
@@ -3487,8 +3497,13 @@ function syncDownload() {
         for (var ri = 0; ri < d.rm_bookings.length; ri++) {
           var sItem = d.rm_bookings[ri];
           var lItem = rmMap[sItem.id];
-          if (lItem && lItem.deleted) rmMap[sItem.id] = lItem;
-          else rmMap[sItem.id] = sItem;
+          if (lItem && lItem.deleted) {
+            rmMap[sItem.id] = lItem;
+          } else if (sItem.deleted) {
+            rmMap[sItem.id] = sItem;
+          } else {
+            rmMap[sItem.id] = sItem;
+          }
         }
         RM.bookings = [];
         for (var rid in rmMap) RM.bookings.push(rmMap[rid]);
@@ -3535,8 +3550,21 @@ function manualSync() {
 function initSync() {
   if (!SYNC_API) { console.log('同步伺服器未配置'); return; }
   console.log('同步伺服器：' + SYNC_API + '（增量同步已啟用，間隔 5 秒）');
-  // 立即執行一次同步（不再等待 5 秒）
-  syncDownload().then(function() {
+  // 檢查本地是否有待上傳的刪除標記，有則標記髒以便首次同步先上傳
+  (function() {
+    var hasDeleted = false;
+    for (var i = 0; i < txs.length; i++) { if (txs[i].deleted) { hasDeleted = true; break; } }
+    for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].deleted) { hasDeleted = true; break; } }
+    if (typeof RM !== 'undefined' && RM.bookings) {
+      for (var i = 0; i < RM.bookings.length; i++) { if (RM.bookings[i].deleted) { hasDeleted = true; break; } }
+    }
+    if (hasDeleted) { _syncDirty = true; console.log('[Sync] 偵測到本地有刪除標記，將先上傳再下載'); }
+  })();
+  // 立即執行一次同步：先上傳再下載（與定期同步邏輯一致）
+  var firstUpload = _syncDirty ? syncUpload() : Promise.resolve();
+  firstUpload.then(function() {
+    return syncDownload();
+  }).then(function() {
     console.log('[Sync] 首次同步完成');
   }).catch(function() {
     console.log('[Sync] 首次同步失敗，將在 5 秒後重試');
