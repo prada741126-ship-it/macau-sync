@@ -3325,6 +3325,7 @@ function closeCurrentMonth() {
   if (!confirm('確定執行 ' + now + ' 月末結算？\n\n結算後將鎖定本月資料，無法再登錄新交易。')) return;
   workingMonth = now;
   localStorage.setItem('macau_working_month', now);
+  if (typeof syncUpload === 'function') syncUpload();
   document.getElementById('month-badge').textContent = now;
   document.getElementById('month-status').textContent = '已鎖定';
   document.getElementById('month-status').style.color = '#e74c3c';
@@ -4049,6 +4050,7 @@ function loadAgentList() {
 function saveAgentList() {
   agentList.sort();
   localStorage.setItem('macau_agent_list', JSON.stringify(agentList));
+  if (typeof syncUpload === 'function') syncUpload();
 }
 
 function populateAgentDropdown() {
