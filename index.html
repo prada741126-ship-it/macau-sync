@@ -1913,7 +1913,7 @@ h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(2
     <div class="room-controls">
       <select class="rm-select" id="rm-filter-agent"><option value="">全部代理</option></select>
       <input class="rm-input" type="month" id="rm-filter-month" onchange="RM.updateQuota()">
-      <button class="btn btn-gold" id="rm-add-btn" style="touch-action:manipulation">＋ 新增訂房</button>
+      <button class="btn btn-gold" id="rm-add-btn" onclick="rmOpenModal()" style="touch-action:manipulation">＋ 新增訂房</button>
       <button class="btn btn-ghost" onclick="rmExportCSV()">匯出</button>
       <button class="btn btn-ghost" onclick="document.getElementById('rm-file-input').click()">匯入</button>
       <input type="file" id="rm-file-input" accept=".csv" style="display:none" onchange="rmImportCSV(event)">
