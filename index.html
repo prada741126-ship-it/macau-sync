@@ -694,6 +694,8 @@ html { margin:0; padding:0; width:100%; height:100%; }
 @keyframes notifPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .notif-count { display: inline-block; background: var(--red); color: #fff; font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 8px; margin-left: auto; flex-shrink: 0; padding: 0 4px; }
 
+/* 預設隱藏 sidebar-overlay，手機版透過 JS 控制顯示 */
+#sidebar-overlay { display: none; }
 .decorative-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.15), transparent); margin: 6px 0; }
 .hover-lift { transition: all 0.25s ease; }
 .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(212,175,55,0.08); }
@@ -753,9 +755,9 @@ html { margin:0; padding:0; width:100%; height:100%; }
   .kpi-card-new .kpi-value { font-size: 22px; }
   .kpi-card-new .kpi-label { font-size: 10px; }
 
-  /* 側邊欄遮罩層 */
-  #sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; transition: opacity 0.25s ease; }
-  #sidebar-overlay.active { opacity: 1; }
+  /* 側邊欄遮罩層 — 預設不可見、不可點擊 */
+  #sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+  #sidebar-overlay.active { opacity: 1; pointer-events: auto; }
 
   /* 表單元素模化 */
   .form-row { flex-direction: column; gap: 6px; margin-bottom: 8px; }
@@ -1911,7 +1913,7 @@ h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(2
     <div class="room-controls">
       <select class="rm-select" id="rm-filter-agent"><option value="">全部代理</option></select>
       <input class="rm-input" type="month" id="rm-filter-month" onchange="RM.updateQuota()">
-      <button class="btn btn-gold" onclick="rmOpenModal()">＋ 新增訂房</button>
+      <button class="btn btn-gold" id="rm-add-btn" style="touch-action:manipulation">＋ 新增訂房</button>
       <button class="btn btn-ghost" onclick="rmExportCSV()">匯出</button>
       <button class="btn btn-ghost" onclick="document.getElementById('rm-file-input').click()">匯入</button>
       <input type="file" id="rm-file-input" accept=".csv" style="display:none" onchange="rmImportCSV(event)">
@@ -4791,7 +4793,7 @@ var RM = {
 };
 
 // 全域函式（供 HTML onclick 呼叫）
-function rmOpenModal(id){ RM.openModal(id||null); }
+function rmOpenModal(id){ console.log('[DEBUG] rmOpenModal called, id='+id); RM.openModal(id||null); }
 function rmCloseModal(){ RM.closeModal(); }
 function rmUpdatePrice(){ RM.updatePrice(); }
 function rmCalcNights(){ RM.calcNights(); }
@@ -4803,6 +4805,22 @@ function rmExportCSV(){ RM.exportCSV(); }
 function rmImportCSV(){ RM.importCSV(); }
 function rmHandleImport(e){ RM.handleImport(e); }
 
+// 綁定「新增訂房」按鈕（addEventListener 在手機上比 onclick 更可靠）
+(function(){
+  var btn = document.getElementById('rm-add-btn');
+  if (btn) {
+    btn.addEventListener('click', function(e) {
+      console.log('[DEBUG] rm-add-btn addEventListener click');
+      RM.openModal(null);
+    });
+    btn.addEventListener('touchend', function(e) {
+      console.log('[DEBUG] rm-add-btn touchend');
+    });
+  } else {
+    console.log('[DEBUG] rm-add-btn NOT FOUND in DOM');
+  }
+})();
+
 // 啟動房務系統
 RM.init();
 
@@ -4810,11 +4828,15 @@ RM.init();
 document.addEventListener('DOMContentLoaded', function() {
   function initMobileSidebar() {
     var sb = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
     if (!sb) return;
     if (window.innerWidth <= 700) {
       sb.classList.add('mobile-hidden');
+      // 手機版初始狀態：確保遮罩層不阻擋點擊
+      if (overlay) { overlay.classList.remove('active'); overlay.style.display = 'none'; }
     } else {
       sb.classList.remove('mobile-hidden');
+      if (overlay) { overlay.style.display = 'none'; }
     }
   }
   initMobileSidebar();
