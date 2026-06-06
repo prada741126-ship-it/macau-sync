@@ -1550,6 +1550,25 @@ tbody tr:hover {
 .count-animate { animation: countUp 0.4s ease forwards; }
 
 </style>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPLDEr5QnMQ_AD-z7Wppt2fylxWoBuxj0U",
+    authDomain: "macau-sync.firebaseapp.com",
+    databaseURL: "https://macau-sync-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "macau-sync",
+    storageBucket: "macau-sync.appspot.com",
+    messagingSenderId: "5394959664910",
+    appId: "1:5394959664910:web:f445ede79937711fdd65f",
+    measurementId: "G-8BFD758YCF"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.database();
+  console.log('[Firebase] 初始化完成');
+</script>
 </head>
 <body>
 
@@ -3315,78 +3334,98 @@ function closeCurrentMonth() {
 
 // ===== 同步功能 =====
 function syncUpload() {
-  if (!SYNC_API) return;
+  if (!db) { console.log('[Sync ↑] Firebase 未初始化'); return; }
   var payload = {
-    password: SYNC_PASSWORD,
     txs: txs,
     agentList: agentList,
     agentWallets: agentWallets,
     fundWithdrawals: fundWithdrawals,
     workingMonth: workingMonth,
+    rmBookings: (typeof RM !== 'undefined' && RM.bookings) ? RM.bookings : [],
     archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
     timestamp: Date.now()
   };
-  fetch(SYNC_API + '/api/sync/upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-sync-password': SYNC_PASSWORD || '' },
-    body: JSON.stringify(payload)
-  }).then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    }).then(function(resp) {
-    console.log('[Sync ↑] 上傳成功', resp);
-  }).catch(function(err) {
-    console.error('[Sync ↑] 上傳失敗', err);
-  });
+  db.ref('macau_data').set(payload)
+    .then(function() { console.log('[Sync ↑] Firebase 上傳成功'); })
+    .catch(function(err) { console.error('[Sync ↑] Firebase 上傳失敗', err); });
 }
 
 function syncDownload() {
-  if (!SYNC_API) return;
-  var url = SYNC_API + '/api/sync/download?password=' + encodeURIComponent(SYNC_PASSWORD);
-  fetch(url, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
-    .then(function(r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function(data) {
-      if (!data || data.ok === false) {
-        console.log('[Sync ↓] 下載失敗：', data ? data.error : '未知錯誤');
-        return;
-      }
-      txs = data.txs || txs;
-      agentList = data.agentList || agentList;
-      agentWallets = data.agentWallets || agentWallets;
-      fundWithdrawals = data.fundWithdrawals || fundWithdrawals;
-      if (data.workingMonth) workingMonth = data.workingMonth;
-      if (data.archives) localStorage.setItem('macau_archives', JSON.stringify(data.archives));
-      saveData(true);
-      renderAll();
-      renderOverview();
-      renderSummary();
-      console.log('[Sync ↓] 下載並合併完成，共', data.txs ? data.txs.length : 0, '筆');
-    }).catch(function(err) {
-      console.error('[Sync ↓] 下載失敗', err);
-    });
+  // Firebase 使用即時監聽，無需手動下載
+  console.log('[Sync ↓] Firebase 使用即時監聽');
 }
 
 function manualSync() {
-  if (!SYNC_API) { showToast('未配置同步伺服器', 'warning'); return; }
   showLoading('正在同步…');
   syncUpload();
-  setTimeout(function() {
-    syncDownload();
-    setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 1200);
-  }, 800);
+  setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 800);
 }
 
 function initSync() {
-  if (!SYNC_API) { console.log('同步伺服器未配置'); return; }
-  console.log('同步伺服器：' + SYNC_API);
-  // 定期同步（每 30 秒）
-  setInterval(function() {
-    if (typeof syncUpload === 'function') syncUpload();
-    if (typeof syncDownload === 'function') syncDownload();
-  }, 30000);
+  if (!db) { console.log('[Sync] Firebase 未初始化'); return; }
+  console.log('[Sync] Firebase 即時同步已啟動');
+  
+  // 監聽 Firebase 資料變化（即時推送）
+  db.ref('macau_data').on('value', function(snapshot) {
+    var data = snapshot.val();
+    if (!data) { console.log('[Sync ↓] Firebase 無資料'); return; }
+    
+    console.log('[Sync ↓] Firebase 收到資料更新');
+    
+    var hasChanges = false;
+    
+    if (data.txs && Array.isArray(data.txs)) {
+      txs = data.txs;
+      var maxId = 0;
+      for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; }
+      nextId = maxId + 1;
+      hasChanges = true;
+    }
+    if (data.agentList && Array.isArray(data.agentList)) {
+      agentList = data.agentList;
+      hasChanges = true;
+    }
+    if (data.agentWallets && typeof data.agentWallets === 'object') {
+      agentWallets = data.agentWallets;
+      hasChanges = true;
+    }
+    if (data.fundWithdrawals && Array.isArray(data.fundWithdrawals)) {
+      fundWithdrawals = data.fundWithdrawals;
+      var maxFwId = 0;
+      for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxFwId) maxFwId = fundWithdrawals[i].id; }
+      fundNextId = maxFwId + 1;
+      hasChanges = true;
+    }
+    if (data.workingMonth) {
+      workingMonth = data.workingMonth;
+      hasChanges = true;
+    }
+    if (data.archives) {
+      localStorage.setItem('macau_archives', JSON.stringify(data.archives));
+    }
+    if (data.rmBookings && typeof RM !== 'undefined') {
+      RM.bookings = data.rmBookings;
+      hasChanges = true;
+    }
+    
+    // 同時保存到 localStorage（加密備份）
+    if (hasChanges) {
+      try {
+        var encrypted = encryptData(txs);
+        localStorage.setItem("macau_data", encrypted);
+      } catch(e) { console.error('localStorage save error:', e); }
+      
+      // 渲染所有頁面
+      renderAll();
+      renderOverview();
+      renderSummary();
+      if (typeof renderRoom === 'function') renderRoom();
+      if (typeof renderAgentWallets === 'function') renderAgentWallets();
+      if (typeof updateAllAgentBalances === 'function') updateAllAgentBalances();
+      
+      console.log('[Sync ↓] Firebase 資料已合併並渲染');
+    }
+  });
 }
 
 function renderSummary() {
