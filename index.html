@@ -2944,13 +2944,19 @@ function saveAgentWalletForm() {
   if (!date) { showToast("請選擇日期！","warning"); return; }
   if (!validateMonthDate(date, "代理錢包異動")) return;
   if (!amount) { showToast("請輸入金額！","warning"); return; }
-  if (!agentWallets[agent]) agentWallets[agent] = [];
-  agentWallets[agent].push({ id: agentWalletNextId++, date: date, type: type, amount: amount, note: note });
-  saveAgentWallets(true);
-  syncAgentDrawn(agent);
-  closeAgentWalletModal();
-  doQuery();
-  showToast("已儲存！","success");
+  try {
+    if (!agentWallets[agent]) agentWallets[agent] = [];
+    agentWallets[agent].push({ id: agentWalletNextId++, date: date, type: type, amount: amount, note: note });
+    saveAgentWallets(true);
+    syncAgentDrawn(agent);
+    closeAgentWalletModal();
+    try { doQuery(); } catch(e2) { console.error("[saveAgentWalletForm] doQuery error:", e2); }
+    showToast("已儲存！","success");
+  } catch(e) {
+    console.error("[saveAgentWalletForm] error:", e);
+    showToast("儲存失敗：" + (e.message||e), "error");
+    try { closeAgentWalletModal(); } catch(e2) {}
+  }
 }
 function deleteAgentWallet(agent, id) {
   if (!confirm("確定刪除？")) return;
@@ -2963,6 +2969,7 @@ function deleteAgentWallet(agent, id) {
   doQuery();
 }
 function syncAgentDrawn(agent) {
+  try {
   var awArr = agentWallets[agent] || [];
   var awTotal = 0;
   for (var i = 0; i < awArr.length; i++) {
@@ -2973,9 +2980,13 @@ function syncAgentDrawn(agent) {
     if (txs[i].agent === agent) txs[i].drawn = awTotal;
   }
   saveData(true);
-  renderAll();
-  renderOverview();
-  renderSummary();
+  try { renderAll(); } catch(e1) { console.error("[syncAgentDrawn] renderAll error:", e1); }
+  try { renderOverview(); } catch(e2) { console.error("[syncAgentDrawn] renderOverview error:", e2); }
+  try { renderSummary(); } catch(e3) { console.error("[syncAgentDrawn] renderSummary error:", e3); }
+  } catch(e) {
+    console.error("[syncAgentDrawn] fatal error:", e);
+    showToast("同步代理提領失敗：" + (e.message||e), "error");
+  }
 }
 function saveAgentWallets(silent) {
   localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
