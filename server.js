@@ -71,7 +71,7 @@ app.get('/', (req, res) => {
 
 // Railway 健康檢查
 app.get('/health', (req, res) => {
-  res.json({ ok: true, status: 'running', version: '6.3' });
+  res.json({ ok: true, status: 'running', version: '6.3.1' });
 });
 
 // 讀取數據庫

@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v6.0</title>
+<title>澳門洗碼報表 v6.3.1</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3449,18 +3449,17 @@ function syncDownload() {
       if (d.txs !== undefined) {
         var txMap = {};
         for (var i = 0; i < txs.length; i++) txMap[txs[i].id] = txs[i];
-        for (var i = 0; i < d.txs.length; i++) txMap[d.txs[i].id] = d.txs[i];
+        for (var i = 0; i < d.txs.length; i++) {
+          var sItem = d.txs[i];
+          var lItem = txMap[sItem.id];
+          // 合併時保留本地已刪除標記，防止伺服器覆寫
+          if (lItem && lItem.deleted) txMap[sItem.id] = lItem;
+          else txMap[sItem.id] = sItem;
+        }
         txs = [];
         for (var tid in txMap) txs.push(txMap[tid]);
       }
-      // 永久移除 deleted:true 資料（軟刪除標記留在伺服器，本地只保留有效資料）
-      (function() {
-        var fresh = [];
-        for (var i = 0; i < txs.length; i++) {
-          if (!txs[i].deleted) fresh.push(txs[i]);
-        }
-        txs = fresh;
-      })();
+      // 不在此過濾 deleted:true，保留在 txs 中以備上傳；渲染時才過濾
       // agentList：只在上傳成功後才取代（避免空資料覆蓋本地資料）
       if (d.agentList !== undefined && d.agentList.length > 0) agentList = d.agentList;
       // agentWallets：只在上傳成功後才取代
@@ -3469,23 +3468,31 @@ function syncDownload() {
       if (d.fundWithdrawals !== undefined) {
         var fwMap = {};
         for (var i = 0; i < fundWithdrawals.length; i++) fwMap[fundWithdrawals[i].id] = fundWithdrawals[i];
-        for (var i = 0; i < d.fundWithdrawals.length; i++) fwMap[d.fundWithdrawals[i].id] = d.fundWithdrawals[i];
+        for (var i = 0; i < d.fundWithdrawals.length; i++) {
+          var sItem = d.fundWithdrawals[i];
+          var lItem = fwMap[sItem.id];
+          if (lItem && lItem.deleted) fwMap[sItem.id] = lItem;
+          else fwMap[sItem.id] = sItem;
+        }
         fundWithdrawals = [];
         for (var fid in fwMap) fundWithdrawals.push(fwMap[fid]);
-        // 永久移除 deleted:true 資料
-        fundWithdrawals = fundWithdrawals.filter(function(f) { return !f.deleted; });
       }
+      // 不在此過濾 deleted:true，保留在 fundWithdrawals 中以備上傳；渲染時才過濾
       if (d.workingMonth) workingMonth = d.workingMonth;
       if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
       // 還原 RM 數據（合併策略，保留本地尚未上傳的資料）
       if (d.rm_bookings !== undefined && typeof RM !== 'undefined') {
         var rmMap = {};
         for (var ri = 0; ri < RM.bookings.length; ri++) rmMap[RM.bookings[ri].id] = RM.bookings[ri];
-        for (var ri = 0; ri < d.rm_bookings.length; ri++) rmMap[d.rm_bookings[ri].id] = d.rm_bookings[ri];
+        for (var ri = 0; ri < d.rm_bookings.length; ri++) {
+          var sItem = d.rm_bookings[ri];
+          var lItem = rmMap[sItem.id];
+          if (lItem && lItem.deleted) rmMap[sItem.id] = lItem;
+          else rmMap[sItem.id] = sItem;
+        }
         RM.bookings = [];
         for (var rid in rmMap) RM.bookings.push(rmMap[rid]);
-        // 過濾 deleted:true（軟刪除標記留在伺服器）
-        RM.bookings = RM.bookings.filter(function(b) { return !b.deleted; });
+        // 不在此過濾 deleted:true，保留在 RM.bookings 中以備上傳；渲染時才過濾
         try { localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings)); } catch(e) {}
         if (d.rm_last_id && RM.lastId < d.rm_last_id) RM.lastId = d.rm_last_id;
         try { localStorage.setItem("rm_last_id", RM.lastId.toString()); } catch(e) {}
