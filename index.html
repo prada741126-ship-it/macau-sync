@@ -2249,10 +2249,12 @@ function unlockBody() { document.documentElement.style.overflow = ""; document.b
 // ===== Toast 通知系統 =====
 function showToast(msg, type) {
   type = type || "info";
+  var icons = { success: "✅ ", warning: "⚠️ ", error: "❌ ", info: "ℹ️ " };
+  var icon = icons[type] || "ℹ️ ";
   var container = document.getElementById("toast-container");
   var el = document.createElement("div");
   el.className = "toast toast-" + type;
-  el.textContent = msg;
+  el.textContent = icon + msg;
   el.onclick = function() { el.remove(); };
   container.appendChild(el);
   setTimeout(function() { if (el.parentNode) el.remove(); }, 3000);
@@ -5238,6 +5240,14 @@ function throttle(func, limit) {
 
 console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键帮助");
 
+  // 回到顶部按钮
+  var btt = document.getElementById("back-to-top");
+  if (btt) {
+    window.addEventListener("scroll", function() {
+      if (window.scrollY > 300) btt.style.display = "flex";
+      else btt.style.display = "none";
+    });
+  }
 </script>
 
 <!-- 快捷鍵幫助面板 v6.0 按 ? 顯示 -->
@@ -5450,7 +5460,104 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
   .chart-full, .ov-panel { padding: 10px 12px; border-radius: 12px; }
   .timeline-item { padding: 6px 12px; }
 }
+
+/* ========== P1 美化：全部交易页 ========== */
+/* 工具栏按钮统一中国风色系 */
+#page-all .toolbar .btn:not(.btn-primary) {
+  background: linear-gradient(135deg, rgba(26,18,10,0.92), rgba(18,10,6,0.96)) !important;
+  color: #c8b890 !important;
+  border: 1px solid rgba(212,175,55,0.22) !important;
+  transition: all 0.25s ease;
+}
+#page-all .toolbar .btn:not(.btn-primary):hover {
+  border-color: rgba(212,175,55,0.55) !important;
+  color: #f0d060 !important;
+  box-shadow: 0 2px 12px rgba(212,175,55,0.12);
+}
+/* 表格斑马纹 + 行 hover 高亮 */
+#all-table tbody tr:nth-child(even) { background: rgba(212,175,55,0.03) !important; }
+#all-table tbody tr:nth-child(odd) { background: rgba(18,10,6,0.92) !important; }
+#all-table tbody tr:hover {
+  background: rgba(212,175,55,0.1) !important;
+  box-shadow: inset 3px 0 0 rgba(212,175,55,0.5);
+}
+/* 表头排序箭头 + hover */
+#all-table th.sortable { cursor: pointer; user-select: none; position: relative; }
+#all-table th.sortable:hover { color: #f0d060 !important; }
+#all-table th.sortable.sort-asc::after { content: " ▲"; font-size: 9px; color: #D4AF37; }
+#all-table th.sortable.sort-desc::after { content: " ▼"; font-size: 9px; color: #D4AF37; }
+/* 空状态引导 */
+#all-msg {
+  background: linear-gradient(180deg, rgba(212,175,55,0.04), transparent) !important;
+  border: 1px dashed rgba(212,175,55,0.2) !important;
+  border-radius: 12px !important;
+  padding: 40px 20px !important;
+  font-size: 14px !important;
+  color: rgba(212,175,55,0.5) !important;
+}
+#all-msg::before {
+  content: "📋"; display: block; font-size: 36px; margin-bottom: 10px;
+}
+/* 输入框金色 focus 发光（全局） */
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(212,175,55,0.55) !important;
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.1) !important;
+  outline: none;
+}
+/* ========== P1 美化：统计页 ========== */
+#summary-table th { position: relative; }
+#summary-table tbody tr:hover {
+  background: rgba(212,175,55,0.08) !important;
+}
+#summary-table tbody td:first-child {
+  color: #D4AF37 !important; font-weight: 600;
+}
+/* ========== P1 美化：查询页 ========== */
+#query-kpi .kpi-card {
+  background: rgba(22,14,8,0.96) !important;
+  border: 1px solid rgba(212,175,55,0.25) !important;
+  animation: cardGlow 4s ease-in-out infinite;
+}
+#query-chart-wrap {
+  border: 1px solid rgba(212,175,55,0.18) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+/* ========== P2 回到顶部按钮 ========== */
+#back-to-top {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(212,175,55,0.85), rgba(184,134,11,0.9));
+  color: #1a1206;
+  font-size: 18px;
+  border: 1px solid rgba(212,175,55,0.5);
+  box-shadow: 0 2px 12px rgba(212,175,55,0.25);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  animation: backTopPulse 2.5s ease-in-out infinite;
+}
+#back-to-top:hover {
+  transform: scale(1.12);
+  box-shadow: 0 4px 20px rgba(212,175,55,0.45);
+}
+@keyframes backTopPulse {
+  0%, 100% { box-shadow: 0 2px 12px rgba(212,175,55,0.25); }
+  50% { box-shadow: 0 2px 22px rgba(212,175,55,0.55); }
+}
+/* 手机版调整到左下角 */
+@media (max-width: 700px) {
+  #back-to-top { bottom: 18px; right: 18px; width: 38px; height: 38px; font-size: 16px; }
+}
 </style>
 
+  <div id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">▲</div>
 </body>
 </html>
