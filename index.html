@@ -1156,6 +1156,17 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   letter-spacing: 2px; text-shadow: 0 0 10px rgba(212,175,55,0.3);
 }
 
+/* 空白狀態 */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; text-align: center; min-height: 200px;
+}
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.7; }
+.empty-state .empty-title { color: #D4AF37; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.empty-state .empty-desc { color: #887755; font-size: 13px; margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
+.empty-state .empty-action { padding: 10px 24px; border: 1px solid #D4AF37; border-radius: 8px; background: rgba(212,175,55,0.1); color: #D4AF37; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.empty-state .empty-action:hover { background: rgba(212,175,55,0.2); box-shadow: 0 0 15px rgba(212,175,55,0.2); }
+
 /* ============================================================
    手機版全面修正：防止溢出與完美排版（v5.9.1）
    ============================================================ */
@@ -1532,7 +1543,8 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 
   <div class="page" id="page-summary">
     <div id="summary-kpi" class="kpi-box"></div>
-    <table>
+    <div id="summary-msg" style="display:none;"></div>
+    <table id="summary-table">
       <thead><tr>
         <th>代理</th><th>地點</th><th class="num">洗碼總量(萬)</th>
         <th class="num">碼糧總額</th><th class="num">已提</th><th class="num">未提</th>
@@ -1604,7 +1616,7 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
           <tr><th>日期</th><th>代理</th><th>客戶</th><th>酒店</th><th>入住</th><th>退房</th><th>天數</th><th class="num">所需轉碼</th><th class="num">總費用</th><th>狀態</th><th>操作</th></tr>
         </thead>
         <tbody id="rm-tbody"></tbody>
-        <tr id="rm-empty" style="display:none;"><td colspan="11" class="empty-state">尚無訂房資料</td></tr>
+        <tr id="rm-empty" style="display:none;"><td colspan="11"><div class="empty-state" style="padding:40px 20px;"><div class="empty-icon">🏨</div><div class="empty-title">尚無訂房紀錄</div><div class="empty-desc">使用上方表單新增第一筆訂房</div></div></td></tr>
       </table>
     </div>
   </div>
@@ -2819,7 +2831,15 @@ function renderAll() {
   filtered = sortTxs(filtered.slice());
   // ✅ 修正：先更新 KPI 卡片（即使沒有資料也要歸零）
   renderAllMiniKPI();
-  if (!filtered.length) { tbl.style.display = "none"; msg.style.display = "block"; msg.textContent = keyword ? "無符合搜尋結果" : "尚無資料"; document.getElementById("tx-count").textContent = ""; return; }
+  if (!filtered.length) {
+    tbl.style.display = "none";
+    msg.style.display = "block";
+    msg.innerHTML = keyword
+      ? '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">無符合搜尋結果</div><div class="empty-desc">請嘗試其他關鍵字或清除搜尋</div></div>'
+      : '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">尚無交易紀錄</div><div class="empty-desc">點擊上方「＋ 新增」開始第一筆交易</div><button class="empty-action" onclick="openModal()">＋ 新增交易</button></div>';
+    document.getElementById("tx-count").textContent = "";
+    return;
+  }
   tbl.style.display = "table";
   msg.style.display = "none";
   document.getElementById("tx-count").textContent = "共 " + filtered.length + " 筆";
@@ -3006,6 +3026,19 @@ function renderSummary() {
   }
   var tbody = document.getElementById("summary-body");
   tbody.innerHTML = "";
+  var msgEl = document.getElementById("summary-msg");
+  var tblEl = document.getElementById("summary-table");
+  if (!keys.length) {
+    if (tblEl) tblEl.style.display = "none";
+    if (msgEl) {
+      msgEl.style.display = "block";
+      msgEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">尚無統計資料</div><div class="empty-desc">新增交易後將自動產生統計報表</div></div>';
+    }
+    document.getElementById("summary-kpi").innerHTML = "";
+    return;
+  }
+  if (tblEl) tblEl.style.display = "table";
+  if (msgEl) msgEl.style.display = "none";
   var totalBonus = 0, totalFund = 0;
   var keys = Object.keys(map);
   for (var k = 0; k < keys.length; k++) {
