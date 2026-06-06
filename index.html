@@ -2062,7 +2062,7 @@ h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(2
 </div>
 
 <!-- 房務系統 Modal -->
-  <div id="rm-modal-bg">
+  <div id="rm-modal-bg" style="display:none">
   <div class="rm-modal">
     <h2 id="rm-modal-title">新增訂房</h2>
     <div class="rm-form-row">
@@ -2460,17 +2460,17 @@ function resetSession() {
 
 // 確保所有模態框完全關閉（防止殘留可見元素）
 function ensureAllModalsClosed() {
+  // 只移除 CSS class，不清除 inline style（rm-modal-bg 有 style="display:none"）
   var modals = document.querySelectorAll(
     '#rm-modal-bg, #agent-mgr-modal, #agent-wallet-modal, #shortcut-help-modal, ' +
     '#kb-help-bg, #modal, .modal-bg'
   );
   for (var i = 0; i < modals.length; i++) {
     modals[i].classList.remove('active', 'show');
-    modals[i].style.display = '';
   }
-  // 額外確保 rm-modal-bg 沒有 active 類
+  // 額外確保 rm-modal-bg 完全隱藏：移除 active class + 恢復 inline display:none
   var rmBg = document.getElementById('rm-modal-bg');
-  if (rmBg) { rmBg.classList.remove('active'); rmBg.style.display = ''; }
+  if (rmBg) { rmBg.classList.remove('active'); rmBg.style.display = 'none'; }
 }
 
 function checkPw() {
