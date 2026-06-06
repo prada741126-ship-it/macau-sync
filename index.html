@@ -3990,6 +3990,16 @@ function renderOverview() {
     if (f.type==="deposit") fDep+=f.amount; else if (f.type==="cash_deposit") fCD+=f.amount; else fWit+=f.amount;
   }
   var fundNet = totalFund+fDep+fCD-fWit;
+  // 公基金累计馀额（所有时间）
+  var totalFundAll=0, fDepAll=0, fCDAll=0, fWitAll=0;
+  for (var ii=0;ii<txs.length;ii++) totalFundAll+=(txs[ii].fund||0);
+  for (var jj=0;jj<fundWithdrawals.length;jj++){
+    var ff=fundWithdrawals[jj];
+    if (ff.type==="deposit") fDepAll+=ff.amount;
+    else if (ff.type==="cash_deposit") fCDAll+=ff.amount;
+    else fWitAll+=ff.amount;
+  }
+  var fundBalance = Math.max(0, totalFundAll+fDepAll+fCDAll-fWitAll);
   var undrawnTotal = Math.max(0,totalBonus-totalDrawn);
 
   var grid=document.getElementById("ov-kpi-grid");
@@ -4011,7 +4021,7 @@ function renderOverview() {
     '<div class="kpi-card-new gold"><div class="kpi-label">本月洗碼量</div><div class="kpi-value">'+fmt(totalVol)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>'+
     '<div class="kpi-card-new green"><div class="kpi-label">剩餘轉碼</div><div class="kpi-value">'+fmt(totalVol-rmUsedRolling)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div></div>'+
     '<div class="kpi-card-new red"><div class="kpi-label">未提領</div><div class="kpi-value">'+fmt(undrawnTotal)+'</div><div class="kpi-delta down">'+undrawnCount+' 筆待提</div></div>'+
-    '<div class="kpi-card-new blue"><div class="kpi-label">公基金</div><div class="kpi-value">'+fmt(fundNet)+'</div><div class="kpi-delta">本月入帳 '+fmt(totalFund)+'</div></div>'+
+    '<div class="kpi-card-new blue"><div class="kpi-label">公基金</div><div class="kpi-value">'+fmt(fundBalance)+'</div><div class="kpi-delta">本月入帳 '+fmt(totalFund)+'</div></div>'+
     '<div class="kpi-card-new orange"><div class="kpi-label">現金寄放</div><div class="kpi-value">'+fmt(totalCash)+'</div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>';
 
   // --- 每日洗碼量 Sparkline（滿寬，顯示全部天數）---
