@@ -60,9 +60,12 @@ app.use('/api', function(req, res, next) {
 // 靜態資源（bg_logo.png, css, js 等）
 app.use(express.static(__dirname));
 
-// 根路徑 - 返回 HTML
+// 根路徑 - 返回 HTML（禁止快取，確保客戶端總是取得最新版本）
 app.get('/', (req, res) => {
   if (fs.existsSync(HTML_FILE)) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(HTML_FILE);
   } else {
     res.status(404).send('index.html not found at: ' + HTML_FILE);
@@ -71,7 +74,7 @@ app.get('/', (req, res) => {
 
 // Railway 健康檢查
 app.get('/health', (req, res) => {
-  res.json({ ok: true, status: 'running', version: '6.3.3' });
+  res.json({ ok: true, status: 'running', version: '6.3.4' });
 });
 
 // 讀取數據庫

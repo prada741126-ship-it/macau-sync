@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v6.3.3</title>
+<title>澳門洗碼報表 v6.3.4</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1613,6 +1613,8 @@ tbody tr:hover {
     <span class="sb-icon">◀</span>
     <span class="sb-label">折疊選單</span>
   </div>
+  <!-- 版本號（便於確認是否為最新版） -->
+  <div class="sb-version" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:rgba(212,175,55,0.4);letter-spacing:1px;">v6.3.4</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
@@ -3793,7 +3795,7 @@ function doQuery() {
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     var totalW = 0, totalD = 0, totalCD = 0;
     for (var i = 0; i < __fundWithdrawals.length; i++) {
-      var r = _fundWithdrawals[i];
+      var r = __fundWithdrawals[i];
       if (r.type === "deposit") { totalD += (r.amount || 0); }
       else if (r.type === "cash_deposit") { totalCD += (r.amount || 0); }
       else { totalW += (r.amount || 0); }
