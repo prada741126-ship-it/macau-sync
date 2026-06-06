@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v6.3.2</title>
+<title>澳門洗碼報表 v6.3.3</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3792,7 +3792,7 @@ function doQuery() {
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     var totalW = 0, totalD = 0, totalCD = 0;
-    for (var i = 0; i < _fundWithdrawals.length; i++) {
+    for (var i = 0; i < __fundWithdrawals.length; i++) {
       var r = _fundWithdrawals[i];
       if (r.type === "deposit") { totalD += (r.amount || 0); }
       else if (r.type === "cash_deposit") { totalCD += (r.amount || 0); }

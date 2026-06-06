@@ -71,7 +71,7 @@ app.get('/', (req, res) => {
 
 // Railway 健康檢查
 app.get('/health', (req, res) => {
-  res.json({ ok: true, status: 'running', version: '6.3.2' });
+  res.json({ ok: true, status: 'running', version: '6.3.3' });
 });
 
 // 讀取數據庫
@@ -85,7 +85,7 @@ function readDB() {
 }
 
 // 按 ID 合併陣列（保留伺服器上客戶端沒有的資料，防止刪除被還原）
-// 策略：existing 先放入 Map，incoming 按 ID 覆寫/新增；空陣列不下載（不覆寫）
+// 策略：existing 先放入 Map；incoming 合併時，若 existing 已有 deleted:true 則保留刪除標記
 function mergeById(existing, incoming) {
   if (!incoming || !Array.isArray(incoming) || incoming.length === 0) {
     return existing || [];
@@ -100,11 +100,19 @@ function mergeById(existing, incoming) {
       }
     }
   }
-  // 用客戶端資料合併（相同 ID 以客戶端為準，支援 deleted 標記）
+  // 用客戶端資料合併（相同 ID 以客戶端為準，但保留 deleted:true）
   for (var i = 0; i < incoming.length; i++) {
     var item = incoming[i];
     if (item && item.id !== undefined) {
-      map.set(item.id, item);
+      var existingItem = map.get(item.id);
+      // 關鍵：如果伺服器已有 deleted:true，且客戶端未標記刪除，保留刪除狀態
+      // 防止舊設備上傳舊資料覆寫刪除標記
+      if (existingItem && existingItem.deleted && !item.deleted) {
+        // 保留現有資料（含 deleted:true），不讓舊資料覆寫
+        // （不執行 map.set，保留 existingItem）
+      } else {
+        map.set(item.id, item);
+      }
     }
   }
   // 依插入順序轉回陣列（Map 保留插入順序）
