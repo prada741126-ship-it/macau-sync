@@ -2617,6 +2617,35 @@ function closeModal() {
   unlockBody();
 }
 
+function editTx(id) {
+  // 根據 ID 查找交易並填入表單進行編輯
+  var tx = null;
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].id === id) { tx = txs[i]; break; }
+  }
+  if (!tx) { showToast("找不到該筆交易", "warning"); return; }
+  editId = id;
+  document.getElementById("modal-title").textContent = "編輯交易";
+  populateAgentDropdown();
+  document.getElementById("f-date").value = tx.date || nowStr();
+  document.getElementById("f-dow").value = tx.dow || getDow(tx.date || nowStr());
+  document.getElementById("f-type").value = tx.type || "rolling";
+  toggleTypeFields();
+  document.getElementById("f-agent").value = tx.agent || "";
+  document.getElementById("f-client").value = tx.client || "";
+  document.getElementById("f-venue").value = tx.venue || "";
+  document.getElementById("f-vol").value = tx.volume || "";
+  document.getElementById("f-rate").value = tx.rate || "1.24";
+  document.getElementById("f-bonus").value = tx.bonus || "";
+  document.getElementById("f-drawn").value = tx.drawn || "0";
+  document.getElementById("f-cash").value = tx.cash || "";
+  document.getElementById("f-note").value = tx.note || "";
+  calc();
+  clearDraft(); // 編輯時清除草稿
+  document.getElementById("modal").classList.add("show");
+  lockBody();
+}
+
 function calc() {
   var vol = toNum(document.getElementById("f-vol").value);
   var rate = toNum(document.getElementById("f-rate").value);
@@ -3177,13 +3206,23 @@ function loadData(silent) {
 
 document.addEventListener("click", function(e) {
   var btn = e.target.closest("[data-del]");
-  if (!btn) return;
+  if (!btn) {
+    // 檢查是否為編輯按鈕
+    var editBtn = e.target.closest("[data-edit]");
+    if (editBtn) {
+      e.preventDefault();
+      var eid = parseInt(editBtn.getAttribute("data-edit"));
+      editTx(eid);
+    }
+    return;
+  }
   e.preventDefault();
   var id = parseInt(btn.getAttribute("data-del"));
   deleteTx(id);
 });
 
 function renderAll() {
+  try {
   var tbody = document.getElementById("all-body");
   tbody.innerHTML = "";
   var tbl = document.getElementById("all-table");
@@ -3242,11 +3281,12 @@ function renderAll() {
       "<td class='num'>" + drawnFmt + "</td>" +
       "<td class='num'>" + undrawnFmt + "</td>" +
       "<td>" + (t.note || "") + "</td>" +
-      "<td><button class='btn-red' data-del='" + t.id + "'>刪除</button></td>";
+      "<td><button class='btn' style='background:#3498db;color:#fff;padding:5px 10px;font-size:12px;border-radius:6px;border:none;cursor:pointer;' data-edit='" + t.id + "'>編輯</button> <button class='btn-red' data-del='" + t.id + "'>刪除</button></td>";
     tbody.appendChild(tr);
   }
   fillAgent();
   populateVenueDropdown();
+  } catch(e) { console.error('[renderAll] error:', e); }
 }
 
 function calcTotalWallet() {
@@ -3390,6 +3430,7 @@ function initSync() {
 }
 
 function renderSummary() {
+  try {
   var map = {};
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
@@ -3436,6 +3477,7 @@ function renderSummary() {
     "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(totalBonus) + "</div></div>" +
     "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領總額</div><div class='value'>" + fmt(totalFund) + "</div></div>";
   updateTotalWalletUI();
+  } catch(e) { console.error('[renderSummary] error:', e); }
 }
 
 function quickFilter(type, ev) {
@@ -5090,11 +5132,12 @@ function throttle(func, limit) {
 
 console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键帮助");
 
-  // 回到顶部按钮
+  // 回到顶部按钮 — 监听 #page-scroll 滚动容器
   var btt = document.getElementById("back-to-top");
-  if (btt) {
-    window.addEventListener("scroll", function() {
-      if (window.scrollY > 300) btt.style.display = "flex";
+  var ps = document.getElementById("page-scroll");
+  if (btt && ps) {
+    ps.addEventListener("scroll", function() {
+      if (ps.scrollTop > 300) btt.style.display = "flex";
       else btt.style.display = "none";
     });
   }
@@ -5398,12 +5441,57 @@ input:focus, select:focus, textarea:focus {
   0%, 100% { box-shadow: 0 2px 12px rgba(212,175,55,0.25); }
   50% { box-shadow: 0 2px 22px rgba(212,175,55,0.55); }
 }
-/* 手机版调整到左下角 */
+/* 手机版回到顶部调整 */
 @media (max-width: 700px) {
   #back-to-top { bottom: 18px; right: 18px; width: 38px; height: 38px; font-size: 16px; }
 }
+
+/* ========== P1 表格横向滚动优化（手机版） ========== */
+@media (max-width: 700px) {
+  /* 表格容器添加横向滚动 */
+  #page-all > table, #page-query > table, #page-summary > table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+  /* 保持 table 内部布局 */
+  #page-all > table > thead,
+  #page-all > table > tbody,
+  #page-query > table > thead,
+  #page-query > table > tbody,
+  #page-summary > table > thead,
+  #page-summary > table > tbody {
+    display: table;
+    width: 100%;
+    min-width: 650px;
+  }
+  /* 手机版表格行内边距紧凑 */
+  #all-table td, #page-query table td,
+  #summary-table td, .room-table td {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
+  #all-table th, #page-query table th,
+  #summary-table th, .room-table th {
+    padding: 6px 8px !important;
+    font-size: 10px !important;
+  }
+  /* 手机版表格滚动条美化 */
+  #page-all > table::-webkit-scrollbar,
+  #page-query > table::-webkit-scrollbar,
+  #page-summary > table::-webkit-scrollbar {
+    height: 4px;
+  }
+  #page-all > table::-webkit-scrollbar-thumb,
+  #page-query > table::-webkit-scrollbar-thumb,
+  #page-summary > table::-webkit-scrollbar-thumb {
+    background: rgba(212,175,55,0.2);
+    border-radius: 2px;
+  }
+}
 </style>
 
-  <div id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">▲</div>
+  <div id="back-to-top" onclick="document.getElementById('page-scroll').scrollTo({top:0,behavior:'smooth'})" title="回到頂部">▲</div>
 </body>
 </html>
