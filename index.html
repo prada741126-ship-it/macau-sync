@@ -38,7 +38,7 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
-body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", serif; background: var(--bg-page); color: var(--text-main); display: flex; overflow: hidden; height:100%; }
+body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", serif; background: var(--bg-page); color: var(--text-main); display: flex; overflow: hidden; }
 .container { max-width: 1600px; margin: 0 auto; }
 h1 { color: #D4AF37; text-align: center; margin-bottom: 12px; font-size: 28px; letter-spacing: 4px; font-weight: 700; text-shadow: 0 2px 20px rgba(212,175,55,0.4), 0 0 40px rgba(212,175,55,0.15); padding: 10px 0; border-bottom: 2px solid rgba(212,175,55,0.3); display: inline-block; width: 100%; }
 .month-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 10px 20px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(20,15,5,0.92), rgba(12,8,4,0.95)); border-radius: 14px; border: 1px solid rgba(212,175,55,0.25); flex-wrap: wrap; }
@@ -126,32 +126,14 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .page > .toolbar > button[style*="#f0f0f0"]:hover { background: rgba(50,50,60,0.9) !important; color: #D4AF37 !important; }
 .page > .toolbar > button[style*="#9b59b6"] { background: linear-gradient(135deg, #8e44ad, #732d91) !important; color: white !important; }
 /* 密码保护遮罩 — 中国风设计 */
-html { margin:0; padding:0; width:100%; height:100%; }
 #pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a1210 0%, #0a0606 60%, #000000 100%); z-index:9999; display:flex; align-items:center; justify-content:center; }
-#pw-overlay::before {
-  content:""; position:absolute; top:0; left:0; width:100%; height:100%;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M20,100 Q40,80 60,100 Q80,120 100,100 Q120,80 140,100 Q160,120 180,100' stroke='rgba(212,175,55,0.05)' fill='none' stroke-width='1'/%3E%3C/svg%3E");
-  background-repeat:repeat; opacity:1; pointer-events:none; z-index:0;
-}
 #pw-box {
-  background: linear-gradient(180deg, rgba(20,14,6,0.97) 0%, rgba(14,9,3,0.98) 50%, rgba(10,6,2,0.99) 100%);
-  border:2px solid rgba(212,175,55,0.35); border-radius:18px;
-  padding:40px 36px; text-align:center; max-width:440px; width:92%;
-  position:relative; overflow:hidden; z-index:1;
-  box-shadow:0 0 100px rgba(212,175,55,0.12),0 0 200px rgba(180,30,30,0.08),inset 0 1px 0 rgba(212,175,55,0.08);
+  background: linear-gradient(180deg, rgba(20,14,6,0.95) 0%, rgba(14,9,3,0.97) 50%, rgba(10,6,2,0.98) 100%);
+  border:1px solid rgba(212,175,55,0.2); border-radius:16px;
+  padding:36px 32px; text-align:center; max-width:420px; width:92%;
+  position:relative; overflow:hidden;
+  box-shadow:0 0 60px rgba(212,175,55,0.08),0 0 120px rgba(180,30,30,0.06),inset 0 1px 0 rgba(212,175,55,0.05);
 }
-/* 中式回纹四角装饰 */
-#pw-box::before {
-  content:""; position:absolute; top:6px; left:6px; right:6px; bottom:6px;
-  border:1px solid rgba(212,175,55,0.12); border-radius:14px;
-  pointer-events:none; z-index:0;
-}
-#pw-box .pw-corners { position:absolute; inset:0; pointer-events:none; z-index:2; }
-#pw-box .pw-corner { position:absolute; width:28px; height:28px; border-color:rgba(212,175,55,0.55); border-style:solid; }
-#pw-box .pw-corner.tl { top:8px; left:8px; border-width:2px 0 0 2px; border-radius:8px 0 0 0; }
-#pw-box .pw-corner.tr { top:8px; right:8px; border-width:2px 2px 0 0; border-radius:0 8px 0 0; }
-#pw-box .pw-corner.bl { bottom:8px; left:8px; border-width:0 0 2px 2px; border-radius:0 0 0 8px; }
-#pw-box .pw-corner.br { bottom:8px; right:8px; border-width:0 2px 2px 0; border-radius:0 0 8px 0; }
 #pw-box .pw-corners { position:absolute; inset:0; pointer-events:none; }
 #pw-box .pw-corner { position:absolute; width:24px; height:24px; border-color:rgba(212,175,55,0.4); border-style:solid; }
 #pw-box .pw-corner.tl { top:10px; left:10px; border-width:2px 0 0 2px; border-radius:6px 0 0 0; }
@@ -190,19 +172,13 @@ html { margin:0; padding:0; width:100%; height:100%; }
 #pw-box .pw-toggle { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:rgba(212,175,55,0.4); font-size:16px; cursor:pointer; padding:4px 8px; }
 #pw-box .pw-toggle:hover { color:rgba(212,175,55,0.8); }
 #pw-box .pw-btn {
-  width:100%; padding:16px; border:2px solid rgba(255,215,0,0.5); border-radius:8px; margin-top:8px;
-  background:linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #8B0000 100%);
-  color:#FFD700; font-size:18px; font-weight:900; letter-spacing:8px;
-  cursor:pointer; font-family:"KaiTi","STKaiti",serif;
-  box-shadow:0 4px 24px rgba(139,0,0,0.5),0 0 48px rgba(255,215,0,0.12),inset 0 1px 0 rgba(255,215,0,0.2);
-  text-shadow:0 0 12px rgba(255,215,0,0.4);
-  transition:all 0.3s;
+  width:100%; padding:14px; border:none; border-radius:10px; margin-top:6px;
+  background:linear-gradient(135deg, #8b1a1a 0%, #a82020 50%, #7b1515 100%);
+  color:#f0d060; font-size:16px; font-weight:700; letter-spacing:6px;
+  cursor:pointer; border:1px solid rgba(212,175,55,0.15);
+  box-shadow:0 4px 20px rgba(180,30,30,0.3); transition:all 0.25s;
 }
-#pw-box .pw-btn:hover {
-  box-shadow:0 6px 32px rgba(139,0,0,0.6),0 0 64px rgba(255,215,0,0.18),inset 0 1px 0 rgba(255,215,0,0.3);
-  transform:translateY(-2px);
-  text-shadow:0 0 20px rgba(255,215,0,0.6);
-}
+#pw-box .pw-btn:hover { box-shadow:0 6px 28px rgba(200,40,40,0.4),0 0 36px rgba(212,175,55,0.08); transform:translateY(-1px); }
 
 /* ============================================================
    SIDEBAR
@@ -360,9 +336,7 @@ html { margin:0; padding:0; width:100%; height:100%; }
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M20,100 Q40,80 60,100 Q80,120 100,100 Q120,80 140,100 Q160,120 180,100' stroke='rgba(212,175,55,0.02)' fill='none' stroke-width='1'/%3E%3C/svg%3E") repeat,
-    linear-gradient(180deg, rgba(5,5,12,0.85) 0%, rgba(8,5,20,0.90) 50%, rgba(5,5,12,0.87) 100%);
+  background: linear-gradient(180deg, rgba(5,5,12,0.82) 0%, rgba(8,5,20,0.88) 50%, rgba(5,5,12,0.85) 100%), url('bg_logo.png') center/cover no-repeat fixed;
   background-color: #05050c;
 }
 
@@ -640,6 +614,24 @@ html { margin:0; padding:0; width:100%; height:100%; }
 @keyframes countUp { 0%{transform:translateY(100%);opacity:0}100%{transform:translateY(0);opacity:1} }
 .count-anim { animation: countUp .4s ease-out; display: inline-block; }
 
+/* ===== v6.2 背景粒子動畫 — 金沙·螢火蟲·星光 ===== */
+#pw-particles { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+#bg-particles { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:0.35; }
+@keyframes breatheGlow {
+  0%, 100% { filter:drop-shadow(0 2px 6px rgba(212,175,55,0.4)) drop-shadow(0 0 20px rgba(212,175,55,0.05)); }
+  50% { filter:drop-shadow(0 2px 10px rgba(212,175,55,0.65)) drop-shadow(0 0 35px rgba(212,175,55,0.15)); }
+}
+#pw-box .pw-emblem-text { animation:breatheGlow 3s ease-in-out infinite; }
+@keyframes borderShimmer {
+  0% { border-color: rgba(212,175,55,0.25); box-shadow:0 0 100px rgba(212,175,55,0.08),0 0 200px rgba(180,30,30,0.05),inset 0 1px 0 rgba(212,175,55,0.05); }
+  50% { border-color: rgba(212,175,55,0.45); box-shadow:0 0 120px rgba(212,175,55,0.14),0 0 220px rgba(180,30,30,0.1),inset 0 1px 0 rgba(212,175,55,0.12); }
+  100% { border-color: rgba(212,175,55,0.25); box-shadow:0 0 100px rgba(212,175,55,0.08),0 0 200px rgba(180,30,30,0.05),inset 0 1px 0 rgba(212,175,55,0.05); }
+}
+#pw-box { animation:borderShimmer 4s ease-in-out infinite; }
+@keyframes cloudDrift { 0% { background-position:0 0; } 100% { background-position:200px 100px; } }
+#pw-overlay::before { animation:cloudDrift 60s linear infinite; }
+#main-content { animation:cloudDrift 90s linear infinite; background-size:200px 200px, auto; }
+
 /* 桌面版：房務系統填滿剩餘空間
 @media (min-width: 701px) {
   #page-room.active {
@@ -663,9 +655,8 @@ html { margin:0; padding:0; width:100%; height:100%; }
   #page-room .room-table td { padding: 9px 10px; }
 }
 
-#rm-modal-bg { display: none !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
-#rm-modal-bg.active { display: flex !important; }
-#rm-modal-bg:not(.active) > * { visibility: hidden; }
+#rm-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
+#rm-modal-bg.active { display: flex; }
 .rm-modal { background: rgba(18,15,8,0.98); border: 1px solid rgba(212,175,55,0.15); border-radius: 14px; padding: 20px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
 .rm-modal h2 { color: var(--gold); font-size: 16px; margin-bottom: 16px; }
 .rm-form-group { margin-bottom: 12px; }
@@ -694,8 +685,6 @@ html { margin:0; padding:0; width:100%; height:100%; }
 @keyframes notifPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .notif-count { display: inline-block; background: var(--red); color: #fff; font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 8px; margin-left: auto; flex-shrink: 0; padding: 0 4px; }
 
-/* 全局預設隱藏 sidebar-overlay，避免手機及桌面版阻擋點擊 */
-#sidebar-overlay { display: none; }
 .decorative-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.15), transparent); margin: 6px 0; }
 .hover-lift { transition: all 0.25s ease; }
 .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(212,175,55,0.08); }
@@ -755,7 +744,7 @@ html { margin:0; padding:0; width:100%; height:100%; }
   .kpi-card-new .kpi-value { font-size: 22px; }
   .kpi-card-new .kpi-label { font-size: 10px; }
 
-  /* 側邊欄遮罩層 */
+  /* 側邊欄遮罩層 — v6.2 pointer-events 修復避免非啟用時阻擋點擊 */
   #sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
   #sidebar-overlay.active { opacity: 1; pointer-events: auto; }
 
@@ -1511,83 +1500,6 @@ tbody tr:hover {
 }
 .count-animate { animation: countUp 0.4s ease forwards; }
 
-/* ===== 中国风增强——主页面精致霸气 ===== */
-/* 侧边栏暗色祥云纹 */
-#sidebar::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cpath d='M10,50 Q20,40 30,50 Q40,60 50,50 Q60,40 70,50 Q80,60 90,50' stroke='rgba(212,175,55,0.03)' fill='none' stroke-width='0.5'/%3E%3C/svg%3E"); background-repeat:repeat; opacity:1; pointer-events:none; z-index:0; }
-
-/* 顶栏中式分隔线 */
-#topbar { border-bottom:2px solid rgba(212,175,55,0.2); box-shadow:0 2px 20px rgba(0,0,0,0.3); }
-
-/* 卡片中式边框 */
-.card { border:1px solid rgba(212,175,55,0.25); box-shadow:0 20px 60px rgba(0,0,0,0.7),inset 0 1px 0 rgba(212,175,55,0.12); }
-
-/* KPI 卡片金色光晕 */
-.kpi-card { border:1px solid rgba(212,175,55,0.25); box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 40px rgba(212,175,55,0.05); }
-.kpi-card:hover { box-shadow:0 8px 30px rgba(0,0,0,0.6),0 0 60px rgba(212,175,55,0.1); transform:translateY(-3px); }
-
-/* 表格中式分隔线 */
-th { border-bottom:2px solid rgba(212,175,55,0.25); }
-
-/* 模态框中式边框 */
-.modal { border:1px solid rgba(212,175,55,0.3); box-shadow:0 30px 80px rgba(0,0,0,0.8),inset 0 1px 0 rgba(212,175,55,0.12); }
-
-/* 页面标题中式下划线 */
-h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(212,175,55,0.5),0 0 40px rgba(212,175,55,0.2); }
-
-/* 滚动条金色 */
-#page-scroll::-webkit-scrollbar-thumb { background:linear-gradient(180deg,rgba(212,175,55,0.3),rgba(212,175,55,0.15)); border-radius:3px; }
-#page-scroll::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,rgba(212,175,55,0.5),rgba(212,175,55,0.3)); }
-
-/* ===== 背景动画点缀 ===== */
-
-/* 登入页粒子画布 */
-#pw-particles { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
-
-/* 主页面粒子画布 */
-#bg-particles { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:0.35; }
-
-/* 博盈徽章呼吸发光 */
-@keyframes breatheGlow {
-  0%, 100% { filter:drop-shadow(0 2px 6px rgba(212,175,55,0.4)) drop-shadow(0 0 20px rgba(212,175,55,0.05)); }
-  50% { filter:drop-shadow(0 2px 10px rgba(212,175,55,0.65)) drop-shadow(0 0 35px rgba(212,175,55,0.15)); }
-}
-#pw-box .pw-emblem-text { animation:breatheGlow 3s ease-in-out infinite; }
-
-/* 登入框边框流光 */
-@keyframes borderShimmer {
-  0% { border-color: rgba(212,175,55,0.25); box-shadow:0 0 100px rgba(212,175,55,0.08),0 0 200px rgba(180,30,30,0.05),inset 0 1px 0 rgba(212,175,55,0.05); }
-  50% { border-color: rgba(212,175,55,0.45); box-shadow:0 0 120px rgba(212,175,55,0.14),0 0 220px rgba(180,30,30,0.1),inset 0 1px 0 rgba(212,175,55,0.12); }
-  100% { border-color: rgba(212,175,55,0.25); box-shadow:0 0 100px rgba(212,175,55,0.08),0 0 200px rgba(180,30,30,0.05),inset 0 1px 0 rgba(212,175,55,0.05); }
-}
-#pw-box { animation:borderShimmer 4s ease-in-out infinite; }
-
-/* 云纹缓慢漂移 */
-@keyframes cloudDrift {
-  0% { background-position:0 0; }
-  100% { background-position:200px 100px; }
-}
-#pw-overlay::before { animation:cloudDrift 60s linear infinite; }
-#main-content { 
-  animation:cloudDrift 90s linear infinite;
-  background-size:200px 200px, auto;
-}
-
-/* 卡片微微发亮 */
-@keyframes cardGlow {
-  0%, 100% { box-shadow:0 20px 60px rgba(0,0,0,0.7),inset 0 1px 0 rgba(212,175,55,0.08); }
-  50% { box-shadow:0 20px 60px rgba(0,0,0,0.7),inset 0 1px 0 rgba(212,175,55,0.18),0 0 40px rgba(212,175,55,0.04); }
-}
-.card { animation:cardGlow 5s ease-in-out infinite; }
-
-/* KPI 卡片流光 */
-@keyframes kpiShine {
-  0% { box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 40px rgba(212,175,55,0.03); }
-  50% { box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 60px rgba(212,175,55,0.08); }
-  100% { box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 40px rgba(212,175,55,0.03); }
-}
-.kpi-card { animation:kpiShine 4s ease-in-out infinite; }
-.kpi-card:hover { animation:none; }
-
 </style>
 </head>
 <body>
@@ -1913,7 +1825,7 @@ h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(2
     <div class="room-controls">
       <select class="rm-select" id="rm-filter-agent"><option value="">全部代理</option></select>
       <input class="rm-input" type="month" id="rm-filter-month" onchange="RM.updateQuota()">
-      <button class="btn btn-gold" id="rm-add-btn" onclick="rmOpenModal()">＋ 新增訂房</button>
+      <button class="btn btn-gold" onclick="rmOpenModal()">＋ 新增訂房</button>
       <button class="btn btn-ghost" onclick="rmExportCSV()">匯出</button>
       <button class="btn btn-ghost" onclick="document.getElementById('rm-file-input').click()">匯入</button>
       <input type="file" id="rm-file-input" accept=".csv" style="display:none" onchange="rmImportCSV(event)">
@@ -2064,7 +1976,7 @@ h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(2
 </div>
 
 <!-- 房務系統 Modal -->
-  <div id="rm-modal-bg" style="display:none;">
+  <div id="rm-modal-bg">
   <div class="rm-modal">
     <h2 id="rm-modal-title">新增訂房</h2>
     <div class="rm-form-row">
@@ -2460,22 +2372,6 @@ function resetSession() {
   }, SESSION_TIMEOUT);
 }
 
-// 確保所有模態框完全關閉（防止殘留可見元素）
-function ensureAllModalsClosed() {
-  var modals = document.querySelectorAll(
-    '#rm-modal-bg, #agent-mgr-modal, #agent-wallet-modal, #shortcut-help-modal, ' +
-    '#kb-help-bg, #modal, .modal-bg'
-  );
-  for (var i = 0; i < modals.length; i++) {
-    modals[i].classList.remove('active', 'show');
-    // ⚠️ 不再清成 ''，避免把 inline display:none 洗掉
-    modals[i].style.display = 'none';
-  }
-  // 額外確保 rm-modal-bg 沒有 active 類
-  var rmBg = document.getElementById('rm-modal-bg');
-  if (rmBg) { rmBg.classList.remove('active'); rmBg.style.display = 'none'; }
-}
-
 function checkPw() {
   if (pwLockTimer > 0) return;
   var v = document.getElementById("pw-input").value;
@@ -2489,8 +2385,6 @@ function checkPw() {
     setSessionPw(v);
     sessionStorage.setItem("macau_auth", "1");
     document.getElementById("pw-overlay").style.display = "none";
-    // 確保所有模態框都關閉（防止任何意外殘留元素）
-    ensureAllModalsClosed();
     resetSession();
     showToast("登入成功", "success");
   } else {
@@ -4479,23 +4373,17 @@ var RM = {
     }
   },
   openModal: function(id) {
-    try {
     this.populateAgentDropdown();
-    } catch(e) { alert('[openModal 錯誤] populateAgentDropdown:\n' + e.message); return; }
-    try {
     this.populateDateSelects();
-    } catch(e) { alert('[openModal 錯誤] populateDateSelects:\n' + e.message); return; }
     this.editingId = id || null;
-    try {
     document.getElementById("rm-modal-title").textContent = id ? "編輯訂房" : "新增訂房";
-    } catch(e) { alert('[openModal 錯誤] setTitle:\n' + e.message); return; }
     if (id) {
       var b = this.bookings.find(function(x){ return x.id===id; });
-      if (!b) { alert('[openModal] 找不到 id=' + id + ' 的訂房資料'); return; }
-      try {
+      if (!b) return;
       document.getElementById("rm-f-agent").value = b.agent;
       document.getElementById("rm-f-client").value = b.client;
       document.getElementById("rm-f-hotel").value = b.hotel;
+      // 填入月日選擇方塊（不含年）
       var ciParts = (b.checkIn || b.date || "").split("-");
       if (ciParts.length >= 3) { document.getElementById("rm-f-checkin-mm").value = ciParts[1]; document.getElementById("rm-f-checkin-dd").value = ciParts[2]; }
       var coParts = (b.checkOut || "").split("-");
@@ -4505,6 +4393,7 @@ var RM = {
       document.getElementById("rm-f-total").value = b.totalCost;
       document.getElementById("rm-f-status").value = b.status;
       document.getElementById("rm-f-note").value = b.note||"";
+      // 恢復門檻（若舊資料無 threshold 則用酒店預設）
       var th = b.threshold || 0;
       if (!th) {
         var ho = document.getElementById("rm-f-hotel");
@@ -4512,9 +4401,7 @@ var RM = {
         th = parseInt(o.getAttribute("data-threshold"))||70;
       }
       this._editingThreshold = th;
-      } catch(e) { alert('[openModal 錯誤] 填入資料:\n' + e.message); return; }
     } else {
-      try {
       document.getElementById("rm-f-agent").value = "";
       document.getElementById("rm-f-client").value = "";
       document.getElementById("rm-f-hotel").value = "";
@@ -4527,13 +4414,8 @@ var RM = {
       document.getElementById("rm-f-total").value = "";
       document.getElementById("rm-f-status").value = "免費";
       document.getElementById("rm-f-note").value = "";
-      } catch(e) { alert('[openModal 錯誤] 重設表單:\n' + e.message); return; }
     }
-    try {
-    alert('[openModal] 即將顯示彈窗，目前 display=' + window.getComputedStyle(document.getElementById("rm-modal-bg")).display);
     document.getElementById("rm-modal-bg").classList.add("active");
-    alert('[openModal] 已加入 active 類，現在 display=' + window.getComputedStyle(document.getElementById("rm-modal-bg")).display);
-    } catch(e) { alert('[openModal 錯誤] 顯示彈窗:\n' + e.message); return; }
   },
   closeModal: function() {
     document.getElementById("rm-modal-bg").classList.remove("active");
@@ -4806,26 +4688,7 @@ var RM = {
 };
 
 // 全域函式（供 HTML onclick 呼叫）
-function rmOpenModal(id){
-  // 除錯：用 alert 確認函式是否被呼叫到
-  try {
-    // 先直接操作 DOM 測試能否顯示
-    var bg = document.getElementById('rm-modal-bg');
-    if (!bg) { alert('錯誤：找不到 rm-modal-bg 元素！'); return; }
-    alert('[1] rmOpenModal 已觸發！RM 類型=' + typeof RM + '\nrm-modal-bg 目前 display=' + window.getComputedStyle(bg).display);
-    if (typeof RM === 'undefined') {
-      alert('[2] RM 物件未定義！嘗試直接顯示彈窗...');
-      bg.classList.add('active');
-      bg.style.display = 'flex';
-      alert('[3] 已直接設定 display:flex，現在 display=' + window.getComputedStyle(bg).display);
-      return;
-    }
-    if (!RM.openModal) { alert('[錯誤] RM.openModal 不存在！'); return; }
-    RM.openModal(id || null);
-  } catch(e) {
-    alert('[rmOpenModal 發生錯誤]\n' + e.message + '\n\n請截圖回報！');
-  }
-}
+function rmOpenModal(id){ RM.openModal(id||null); }
 function rmCloseModal(){ RM.closeModal(); }
 function rmUpdatePrice(){ RM.updatePrice(); }
 function rmCalcNights(){ RM.calcNights(); }
@@ -4844,14 +4707,11 @@ RM.init();
 document.addEventListener('DOMContentLoaded', function() {
   function initMobileSidebar() {
     var sb = document.getElementById('sidebar');
-    var overlay = document.getElementById('sidebar-overlay');
     if (!sb) return;
     if (window.innerWidth <= 700) {
       sb.classList.add('mobile-hidden');
-      if (overlay) { overlay.classList.remove('active'); overlay.style.display = 'none'; }
     } else {
       sb.classList.remove('mobile-hidden');
-      if (overlay) { overlay.style.display = 'none'; }
     }
   }
   initMobileSidebar();
@@ -5077,7 +4937,7 @@ function throttle(func, limit) {
 })();
 
 // ═══════════════════════════════════════════════════
-// 背景粒子动画系统 v6.1 — 金沙·萤火虫·星光
+// 背景粒子动画系统 v6.2 — 金沙·萤火虫·星光（从 v6.0_base 重建）
 // ═══════════════════════════════════════════════════
 (function() {
   var loginCanvas = document.getElementById('pw-particles');
@@ -5099,29 +4959,13 @@ function throttle(func, limit) {
     resize(loginCanvas);
     var w = loginCanvas.width, h = loginCanvas.height;
     for (var i = 0; i < 55; i++) {
-      loginParticles.push({
-        x: Math.random()*w, y: Math.random()*h, r: 0.5+Math.random()*1.5,
-        speed: 0.2+Math.random()*0.5, opacity: 0.2+Math.random()*0.5,
-        wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.01+Math.random()*0.03,
-        type: 'dust'
-      });
+      loginParticles.push({ x: Math.random()*w, y: Math.random()*h, r: 0.5+Math.random()*1.5, speed: 0.2+Math.random()*0.5, opacity: 0.2+Math.random()*0.5, wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.01+Math.random()*0.03, type: 'dust' });
     }
     for (var i = 0; i < 14; i++) {
-      loginParticles.push({
-        x: Math.random()*w, y: Math.random()*h, r: 2+Math.random()*3,
-        speed: 0.25+Math.random()*0.35, opacity: 0.3+Math.random()*0.4,
-        wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.02+Math.random()*0.04,
-        glowPulse: Math.random()*Math.PI*2, type: 'firefly'
-      });
+      loginParticles.push({ x: Math.random()*w, y: Math.random()*h, r: 2+Math.random()*3, speed: 0.25+Math.random()*0.35, opacity: 0.3+Math.random()*0.4, wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.02+Math.random()*0.04, glowPulse: Math.random()*Math.PI*2, type: 'firefly' });
     }
     for (var i = 0; i < 6; i++) {
-      loginParticles.push({
-        x: Math.random()*w, y: Math.random()*h, r: 1.5,
-        speed: 0.8+Math.random()*1.2, opacity: 0,
-        wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.08+Math.random()*0.1,
-        sparkTimer: Math.random()*200, sparkInterval: 150+Math.random()*250,
-        type: 'sparkle'
-      });
+      loginParticles.push({ x: Math.random()*w, y: Math.random()*h, r: 1.5, speed: 0.8+Math.random()*1.2, opacity: 0, wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.08+Math.random()*0.1, sparkTimer: Math.random()*200, sparkInterval: 150+Math.random()*250, type: 'sparkle' });
     }
   }
 
@@ -5130,20 +4974,10 @@ function throttle(func, limit) {
     resize(mainCanvas);
     var w = mainCanvas.width, h = mainCanvas.height;
     for (var i = 0; i < 8; i++) {
-      mainParticles.push({
-        x: Math.random()*w, y: Math.random()*h, r: 0.3+Math.random()*0.4,
-        speed: 0.04+Math.random()*0.12, opacity: 0.015+Math.random()*0.025,
-        wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.003+Math.random()*0.008,
-        type: 'dust'
-      });
+      mainParticles.push({ x: Math.random()*w, y: Math.random()*h, r: 0.3+Math.random()*0.4, speed: 0.04+Math.random()*0.12, opacity: 0.015+Math.random()*0.025, wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.003+Math.random()*0.008, type: 'dust' });
     }
     for (var i = 0; i < 2; i++) {
-      mainParticles.push({
-        x: Math.random()*w, y: Math.random()*h, r: 0.8+Math.random()*1.2,
-        speed: 0.06+Math.random()*0.12, opacity: 0.02+Math.random()*0.03,
-        wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.005+Math.random()*0.01,
-        glowPulse: Math.random()*Math.PI*2, type: 'firefly'
-      });
+      mainParticles.push({ x: Math.random()*w, y: Math.random()*h, r: 0.8+Math.random()*1.2, speed: 0.06+Math.random()*0.12, opacity: 0.02+Math.random()*0.03, wobble: Math.random()*Math.PI*2, wobbleSpeed: 0.005+Math.random()*0.01, glowPulse: Math.random()*Math.PI*2, type: 'firefly' });
     }
   }
 
@@ -5164,18 +4998,14 @@ function throttle(func, limit) {
       ctx.fillStyle = 'rgba(255,240,200,'+(alpha*1.2)+')'; ctx.fill();
     } else if (p.type === 'sparkle') {
       p.sparkTimer++;
-      if (p.sparkTimer > p.sparkInterval) {
-        p.sparkTimer = 0; p.sparkInterval = 100+Math.random()*280;
-        p.opacity = 0.5+Math.random()*0.5;
-      }
+      if (p.sparkTimer > p.sparkInterval) { p.sparkTimer = 0; p.sparkInterval = 100+Math.random()*280; p.opacity = 0.5+Math.random()*0.5; }
       if (p.opacity > 0.005) {
         ctx.save(); ctx.translate(p.x, p.y);
         ctx.strokeStyle = 'rgba(255,240,180,'+p.opacity+')'; ctx.lineWidth = 0.8;
         var s = 2.5;
         ctx.beginPath(); ctx.moveTo(-s,0); ctx.lineTo(s,0); ctx.moveTo(0,-s); ctx.lineTo(0,s); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(-s*0.55,s*0.55); ctx.lineTo(s*0.55,-s*0.55); ctx.moveTo(-s*0.55,-s*0.55); ctx.lineTo(s*0.55,s*0.55); ctx.stroke();
-        ctx.restore();
-        p.opacity -= 0.007;
+        ctx.restore(); p.opacity -= 0.007;
       }
     }
   }
@@ -5212,28 +5042,19 @@ function throttle(func, limit) {
     resize(loginCanvas);
     var ctx = loginCtx, w = loginCanvas.width, h = loginCanvas.height;
     ctx.clearRect(0, 0, w, h);
-
-    // Firefly connection lines
     var ff = [];
-    for (var i = 0; i < loginParticles.length; i++) {
-      if (loginParticles[i].type === 'firefly') ff.push(loginParticles[i]);
-    }
+    for (var i = 0; i < loginParticles.length; i++) { if (loginParticles[i].type === 'firefly') ff.push(loginParticles[i]); }
     for (var i = 0; i < ff.length; i++) {
       for (var j = i+1; j < ff.length; j++) {
         var dx = ff[i].x-ff[j].x, dy = ff[i].y-ff[j].y;
         var dist = Math.sqrt(dx*dx+dy*dy);
         if (dist < 160) {
           ctx.beginPath(); ctx.moveTo(ff[i].x, ff[i].y); ctx.lineTo(ff[j].x, ff[j].y);
-          ctx.strokeStyle = 'rgba(212,175,55,'+(0.06*(1-dist/160))+')';
-          ctx.lineWidth = 0.5; ctx.stroke();
+          ctx.strokeStyle = 'rgba(212,175,55,'+(0.06*(1-dist/160))+')'; ctx.lineWidth = 0.5; ctx.stroke();
         }
       }
     }
-
-    for (var i = 0; i < loginParticles.length; i++) {
-      drawLP(ctx, loginParticles[i]);
-      updP(loginParticles[i], loginCanvas);
-    }
+    for (var i = 0; i < loginParticles.length; i++) { drawLP(ctx, loginParticles[i]); updP(loginParticles[i], loginCanvas); }
     loginAnimId = requestAnimationFrame(animLogin);
   }
 
@@ -5242,10 +5063,7 @@ function throttle(func, limit) {
     resize(mainCanvas);
     var ctx = mainCtx, w = mainCanvas.width, h = mainCanvas.height;
     ctx.clearRect(0, 0, w, h);
-    for (var i = 0; i < mainParticles.length; i++) {
-      drawMP(ctx, mainParticles[i]);
-      updP(mainParticles[i], mainCanvas);
-    }
+    for (var i = 0; i < mainParticles.length; i++) { drawMP(ctx, mainParticles[i]); updP(mainParticles[i], mainCanvas); }
     mainAnimId = requestAnimationFrame(animMain);
   }
 
@@ -5274,14 +5092,11 @@ function throttle(func, limit) {
       _cpw();
       setTimeout(function() {
         var ov = document.getElementById('pw-overlay');
-        if (ov && (ov.style.display==='none' || ov.style.visibility==='hidden')) {
-          startMain();
-        }
+        if (ov && (ov.style.display==='none' || ov.style.visibility==='hidden')) startMain();
       }, 150);
     };
   }
 
-  // Watch pw-overlay for attribute changes
   var ob = new MutationObserver(function(ms) {
     ms.forEach(function(m) {
       if (m.target.id==='pw-overlay' && m.type==='attributes' && m.attributeName==='style') {
@@ -5293,15 +5108,13 @@ function throttle(func, limit) {
   var ov = document.getElementById('pw-overlay');
   if (ov) ob.observe(ov, {attributes:true, attributeFilter:['style','class']});
 
-  // Handle resize
   window.addEventListener('resize', function() {
     if (loginCanvas.style.display !== 'none') createLoginParticles();
     if (mainCanvas.style.display !== 'none') createMainParticles();
   });
 
-  // Start
   startLogin();
-  console.log("[v6.1] 背景粒子动画已加载：金沙·萤火虫·星光·连线");
+  console.log("[v6.2] 背景粒子动画已加载");
 })();
 
 console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键帮助");
@@ -5350,42 +5163,9 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
 </div>
 </div>
 
-<!-- 背景粒子画布 -->
+<!-- 背景粒子画布 v6.2 -->
 <canvas id="pw-particles"></canvas>
 <canvas id="bg-particles" style="display:none;"></canvas>
-
-<!-- ===== 緊急修復：獨立綁定「新增訂房」按鈕 ===== -->
-<script>
-window.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    var btn = document.getElementById('rm-add-btn');
-    if (btn) {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var bg = document.getElementById('rm-modal-bg');
-        if (!bg) { alert('找不到 rm-modal-bg'); return; }
-        bg.classList.add('active');
-        alert('✅ 彈窗已顯示！');
-      });
-      btn.addEventListener('touchend', function(e) { e.preventDefault(); btn.click(); });
-      // 確保 onclick 也有效
-      btn.onclick = function() {
-        var bg = document.getElementById('rm-modal-bg');
-        if (!bg) { alert('找不到 rm-modal-bg'); return; }
-        bg.classList.add('active');
-        bg.style.display = 'flex';
-      };
-    } else {
-      // 按鈕不存在，檢查 DOM
-      var allBtns = document.querySelectorAll('button');
-      for (var i = 0; i < Math.min(allBtns.length, 5); i++) {
-        console.log('Button[' + i + ']: ' + allBtns[i].textContent + ' id=' + allBtns[i].id);
-      }
-    }
-  }, 500);
-});
-</script>
 
 </body>
 </html>
