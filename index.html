@@ -1590,6 +1590,7 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 <div class="modal-scroll">
 <div class="modal">
   <h3 id="modal-title">新增交易</h3>
+  <div id="draft-indicator" style="display:none;text-align:center;margin-bottom:10px;padding:5px 10px;background:rgba(243,156,18,0.15);border:1px solid rgba(243,156,18,0.3);border-radius:6px;font-size:11px;color:#f39c12;transition:opacity 0.3s;">📝 草稿已自動儲存</div>
   <div class="form-row">
     <div class="form-group" style="flex:1;"><label>交易類型</label><select id="f-type" onchange="toggleTypeFields()"><option value="rolling">洗碼交易</option><option value="cash">現金寄放</option></select></div>
   </div>
@@ -2231,9 +2232,42 @@ function validateMonthDate(dateStr, label) {
 function openModal() {
   editId = null;
   document.getElementById("modal-title").textContent = "新增交易";
+  populateAgentDropdown();
+  // 檢查是否有未完成的草稿
+  var draft = loadDraft();
+  if (draft && !draft.editId) {
+    // 有草稿且不是編輯模式，詢問是否恢復
+    var restore = confirm("偵測到未完成的草稿（" + new Date(draft.ts).toLocaleTimeString("zh-TW") + "），是否恢復？");
+    if (restore) {
+      document.getElementById("f-date").value = draft.date || nowStr();
+      document.getElementById("f-dow").value = getDow(draft.date || nowStr());
+      document.getElementById("f-type").value = draft.type || "rolling";
+      toggleTypeFields();
+      document.getElementById("f-agent").value = draft.agent || "";
+      document.getElementById("f-client").value = draft.client || "";
+      document.getElementById("f-venue").value = draft.venue || "";
+      document.getElementById("f-vol").value = draft.vol || "";
+      document.getElementById("f-rate").value = draft.rate || "1.24";
+      document.getElementById("f-bonus").value = draft.bonus || "";
+      document.getElementById("f-drawn").value = draft.drawn || "0";
+      document.getElementById("f-cash").value = draft.cash || "";
+      document.getElementById("f-note").value = draft.note || "";
+      calc();
+      clearDraft();
+    } else {
+      clearDraft();
+      _resetFormFields();
+    }
+  } else {
+    clearDraft();
+    _resetFormFields();
+  }
+  document.getElementById("modal").classList.add("show");
+  lockBody();
+}
+function _resetFormFields() {
   document.getElementById("f-date").value = nowStr();
   document.getElementById("f-dow").value = getDow(nowStr());
-  populateAgentDropdown();
   document.getElementById("f-type").value = "rolling";
   toggleTypeFields();
   document.getElementById("f-client").value = "";
@@ -2247,11 +2281,10 @@ function openModal() {
   document.getElementById("f-undrawn").value = "";
   document.getElementById("f-cash").value = "";
   document.getElementById("f-note").value = "";
-  document.getElementById("modal").classList.add("show");
-  lockBody();
 }
 
 function closeModal() {
+  saveDraft();  // 關閉前儲存草稿
   document.getElementById("modal").classList.remove("show");
   unlockBody();
 }
@@ -2346,6 +2379,7 @@ function saveForm() {
   }
   saveData(true);
   closeModal();  // 先關閉彈窗，確保一定執行
+  clearDraft();  // 清除草稿（儲存成功後不再需要）
   showToast(editId ? "已更新！" : "已新增！","success");
   editId = null;
   // 後台重新渲染（即使報錯也不影響彈窗關閉）
@@ -2353,6 +2387,73 @@ function saveForm() {
   try { renderOverview(); } catch(e) { console.error("renderOverview error:", e); }
   try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); }
 }
+
+// ===== 自動儲存草稿功能 =====
+var _draftTimer = null;
+
+function saveDraft() {
+  var d = {
+    date: document.getElementById("f-date").value,
+    type: document.getElementById("f-type").value,
+    agent: document.getElementById("f-agent").value,
+    client: document.getElementById("f-client").value,
+    venue: document.getElementById("f-venue").value,
+    vol: document.getElementById("f-vol").value,
+    rate: document.getElementById("f-rate").value,
+    bonus: document.getElementById("f-bonus").value,
+    drawn: document.getElementById("f-drawn").value,
+    cash: document.getElementById("f-cash").value,
+    note: document.getElementById("f-note").value,
+    editId: editId,
+    ts: Date.now()
+  };
+  // 只有表單有內容時才儲存
+  var hasContent = d.agent || d.client || d.vol || d.cash || d.note;
+  if (hasContent) {
+    localStorage.setItem("macau_draft", JSON.stringify(d));
+    var el = document.getElementById("draft-indicator");
+    if (el) { el.style.display = "block"; el.style.opacity = "1"; }
+  }
+}
+
+function loadDraft() {
+  var raw = localStorage.getItem("macau_draft");
+  if (!raw) return null;
+  try {
+    var d = JSON.parse(raw);
+    // 超過 2 小時的草稿視為過期
+    if (Date.now() - d.ts > 7200000) { clearDraft(); return null; }
+    return d;
+  } catch(e) { clearDraft(); return null; }
+}
+
+function clearDraft() {
+  localStorage.removeItem("macau_draft");
+  var el = document.getElementById("draft-indicator");
+  if (el) { el.style.display = "none"; el.style.opacity = "0"; }
+}
+
+// 監聽表單欄位變更，自動儲存草稿（防抖 2 秒）
+function _setupDraftAutoSave() {
+  var fields = ["f-date","f-type","f-agent","f-client","f-venue","f-vol","f-rate","f-bonus","f-drawn","f-cash","f-note"];
+  for (var i = 0; i < fields.length; i++) {
+    var el = document.getElementById(fields[i]);
+    if (el) {
+      el.addEventListener("input", function() {
+        clearTimeout(_draftTimer);
+        _draftTimer = setTimeout(saveDraft, 2000);
+      });
+      el.addEventListener("change", function() {
+        clearTimeout(_draftTimer);
+        _draftTimer = setTimeout(saveDraft, 2000);
+      });
+    }
+  }
+}
+// 頁面載入後設定草稿自動儲存監聽
+document.addEventListener("DOMContentLoaded", function() {
+  _setupDraftAutoSave();
+});
 
 function openFundModal() {
   document.getElementById("fund-date").value = nowStr();
