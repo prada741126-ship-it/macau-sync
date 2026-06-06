@@ -3427,7 +3427,14 @@ function syncDownload() {
       if (!d || d.ok === false) {
         throw new Error(d ? d.error : '未知錯誤');
       }
-      txs = d.txs || txs;
+      // 合併 txs（按 ID 合併，保留本地尚未上傳的資料，防止空陣列覆蓋）
+      if (d.txs !== undefined) {
+        var txMap = {};
+        for (var i = 0; i < txs.length; i++) txMap[txs[i].id] = txs[i];
+        for (var i = 0; i < d.txs.length; i++) txMap[d.txs[i].id] = d.txs[i];
+        txs = [];
+        for (var tid in txMap) txs.push(txMap[tid]);
+      }
       // 永久移除 deleted:true 資料（軟刪除標記留在伺服器，本地只保留有效資料）
       (function() {
         var fresh = [];
@@ -3436,19 +3443,28 @@ function syncDownload() {
         }
         txs = fresh;
       })();
-      agentList = d.agentList || agentList;
-      agentWallets = d.agentWallets || agentWallets;
-      fundWithdrawals = d.fundWithdrawals || fundWithdrawals;
+      // agentList：只在上傳成功後才取代（避免空資料覆蓋本地資料）
+      if (d.agentList !== undefined && d.agentList.length > 0) agentList = d.agentList;
+      // agentWallets：只在上傳成功後才取代
+      if (d.agentWallets !== undefined && Object.keys(d.agentWallets).length > 0) agentWallets = d.agentWallets;
+      // fundWithdrawals：只在上傳成功後才取代
+      if (d.fundWithdrawals !== undefined && d.fundWithdrawals.length > 0) fundWithdrawals = d.fundWithdrawals;
       if (d.workingMonth) workingMonth = d.workingMonth;
       if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
-      // 還原 RM 數據（只有伺服器有資料時才覆寫，避免空陣列覆蓋本地資料）
-      if (d.rm_bookings && d.rm_bookings.length > 0 && typeof RM !== 'undefined') {
-        RM.bookings = d.rm_bookings;
+      // 還原 RM 數據（合併策略，保留本地尚未上傳的資料）
+      if (d.rm_bookings !== undefined && typeof RM !== 'undefined') {
+        var rmMap = {};
+        for (var ri = 0; ri < RM.bookings.length; ri++) rmMap[RM.bookings[ri].id] = RM.bookings[ri];
+        for (var ri = 0; ri < d.rm_bookings.length; ri++) rmMap[d.rm_bookings[ri].id] = d.rm_bookings[ri];
+        RM.bookings = [];
+        for (var rid in rmMap) RM.bookings.push(rmMap[rid]);
+        // 過濾 deleted:true（軟刪除標記留在伺服器）
+        RM.bookings = RM.bookings.filter(function(b) { return !b.deleted; });
         try { localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings)); } catch(e) {}
         if (d.rm_last_id && RM.lastId < d.rm_last_id) RM.lastId = d.rm_last_id;
         try { localStorage.setItem("rm_last_id", RM.lastId.toString()); } catch(e) {}
         try { RM.render(); RM.updateQuota(); } catch(e) { console.error('RM sync refresh error:', e); }
-        console.log('[Sync ↓] RM 數據已還原，共 ' + d.rm_bookings.length + ' 筆');
+        console.log('[Sync ↓] RM 數據已還原（合併），共 ' + RM.bookings.length + ' 筆');
       } else if (typeof RM !== 'undefined') {
         // 伺服器傳回空陣列或無資料時，保留本地資料
         console.log('[Sync ↓] 伺服器 rm_bookings 為空，保留本地資料（共 ' + RM.bookings.length + ' 筆）');
@@ -3492,14 +3508,16 @@ function initSync() {
   }).catch(function() {
     console.log('[Sync] 首次同步失敗，將在 5 秒後重試');
   });
-  // 定期同步（每 5 秒，使用增量檢查減少流量）
+  // 定期同步（每 5 秒，先上傳、完成後才下載，避免競態）
   setInterval(function() {
-    // 先上傳本地變更
-    if (_syncDirty) {
-      syncUpload();
-    }
-    // 再檢查伺服器是否有新數據
-    syncDownload();
+    // 先上傳本地變更，並等待完成後才下載
+    var uploadPromise = _syncDirty ? syncUpload() : Promise.resolve();
+    uploadPromise.then(function() {
+      return syncDownload();
+    }).catch(function() {
+      // 上傳失敗也執行下載
+      return syncDownload();
+    });
   }, 5000);
 }
 
@@ -3708,7 +3726,7 @@ function doQuery() {
     for (var i = 0; i < _txs.length; i++) {
       var fv = _txs[i].fund || 0;
       totalFund += fv;
-      if (fv > 0) allFundTxs.push({ date: txs[i].date, desc: (txs[i].agent||"") + " " + (txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: txs[i].id });
+      if (fv > 0) allFundTxs.push({ date: _txs[i].date, desc: (_txs[i].agent||"") + " " + (_txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: _txs[i].id });
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     var totalW = 0, totalD = 0, totalCD = 0;
@@ -4249,6 +4267,7 @@ function renderOverview() {
   try {
     // 過濾已刪除項目（deleted:true 不下載時顯示）
     var _txs = txs.filter(function(t) { return !t.deleted; });
+    var _rmBookings = (typeof RM !== 'undefined' && RM.bookings) ? RM.bookings.filter(function(b) { return !b.deleted; }) : [];
     // --- KPI 卡片 ---
     var now = workingMonth || nowStr().slice(0,7);
     var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
@@ -4281,15 +4300,15 @@ function renderOverview() {
   var roomMonth=now.slice(0,7);
   var agentsWithRolling = {};
   for (var kk=0;kk<_txs.length;kk++){ var tr=_txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
-  if (typeof RM!=="undefined"&&RM.bookings){
-    for (var k=0;k<RM.bookings.length;k++){
-      var b=RM.bookings[k];
+  if (_rmBookings.length > 0){
+    for (var k=0;k<_rmBookings.length;k++){
+      var b=_rmBookings[k];
       if (!b.date||b.date.slice(0,7)!==roomMonth) continue;
       if (b.status==="免費") rmUsedRolling += (b.nights||0) * (b.threshold||70);
     }
   }
   // 免費一晚計數：只計有洗碼記錄的代理
-  var rmFreeCount = typeof RM!=="undefined" ? RM.bookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免費"&&agentsWithRolling[x.agent];}).length : 0;
+  var rmFreeCount = typeof RM!=="undefined" ? _rmBookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免費"&&agentsWithRolling[x.agent];}).length : 0;
   grid.innerHTML=''+
     '<div class="kpi-card-new gold"><div class="kpi-label">本月洗碼量</div><div class="kpi-value">'+fmt(totalVol)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>'+
     '<div class="kpi-card-new green"><div class="kpi-label">剩餘轉碼</div><div class="kpi-value">'+fmt(totalVol-rmUsedRolling)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div></div>'+
@@ -4834,22 +4853,25 @@ var RM = {
     var monthEl = document.getElementById("rm-filter-month");
     if (!monthEl) return;
     var month = monthEl.value || this.nowStr().substring(0,7);
+    // 過濾已刪除項目
+    var _txs = txs.filter(function(t) { return !t.deleted; });
+    var _bookings = this.bookings.filter(function(b) { return !b.deleted; });
     var totalRolling = 0, now = month || this.nowStr().slice(0,7);
-    for (var i = 0; i < txs.length; i++) { if (txs[i].date && txs[i].date.slice(0,7) === now && txs[i].type !== "cash") { totalRolling += (txs[i].volume || 0); } }
+    for (var i = 0; i < _txs.length; i++) { if (_txs[i].date && _txs[i].date.slice(0,7) === now && _txs[i].type !== "cash") { totalRolling += (_txs[i].volume || 0); } }
     var avgThreshold = 70;
     var totalQuota = Math.floor(totalRolling / avgThreshold);
     var usedQuota = 0;
     // 已使用免費額度：只計有洗碼記錄的代理的免費房晚
     var rmAgtRolling = {};
-    for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&tr.date.slice(0,7)===now&&tr.type!=="cash"&&tr.agent){ rmAgtRolling[tr.agent]=true; } }
-    for (var i=0; i<this.bookings.length; i++)
-      if (this.bookings[i].month===month && this.bookings[i].status==="免費" && rmAgtRolling[this.bookings[i].agent])
-        usedQuota += (this.bookings[i].nights||0);
+    for (var kk=0;kk<_txs.length;kk++){ var tr=_txs[kk]; if (tr.date&&tr.date.slice(0,7)===now&&tr.type!=="cash"&&tr.agent){ rmAgtRolling[tr.agent]=true; } }
+    for (var i=0; i<_bookings.length; i++)
+      if (_bookings[i].month===month && _bookings[i].status==="免費" && rmAgtRolling[_bookings[i].agent])
+        usedQuota += (_bookings[i].nights||0);
     // 已使用轉碼數（所有免費房晚 × 門檻）
     var rmUsedRolling = 0;
-    for (var j=0; j<this.bookings.length; j++)
-      if (this.bookings[j].month===month && this.bookings[j].status==="免費")
-        rmUsedRolling += (this.bookings[j].nights||0) * (this.bookings[j].threshold||70);
+    for (var j=0; j<_bookings.length; j++)
+      if (_bookings[j].month===month && _bookings[j].status==="免費")
+        rmUsedRolling += (_bookings[j].nights||0) * (_bookings[j].threshold||70);
     // 額度使用率 = 已用轉碼數 / 總洗碼量 × 100%
     var pct = totalRolling>0 ? Math.min(100, Math.round(rmUsedRolling/totalRolling*100)) : 0;
 
@@ -4871,8 +4893,8 @@ var RM = {
     if (pctEl) pctEl.textContent = pct+"%";
     // 更新統計摘要
     var statTotal = 0;
-    for (var si = 0; si < this.bookings.length; si++) {
-      if (this.bookings[si].month === month) {
+    for (var si = 0; si < _bookings.length; si++) {
+      if (_bookings[si].month === month) {
         statTotal++;
       }
     }
@@ -4885,8 +4907,8 @@ var RM = {
       var daysInMonth = new Date(parseInt(ym.slice(0,4)), parseInt(ym.slice(5,7)), 0).getDate();
       var dayCounts = {};
       for (var di = 1; di <= daysInMonth; di++) dayCounts[di] = 0;
-      for (var bi = 0; bi < this.bookings.length; bi++) {
-        var b = this.bookings[bi];
+      for (var bi = 0; bi < _bookings.length; bi++) {
+        var b = _bookings[bi];
         if (b.month !== month) continue;
         var parts = (b.checkIn || "").split("-");
         var day = parseInt(parts[1]) || 0;
