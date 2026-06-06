@@ -7,6 +7,12 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>澳門洗碼報表 v5.7</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0c0c12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="洗碼報表">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230c0c12'/><text x='96' y='100' text-anchor='middle' font-size='80' font-weight='bold' font-family='serif' fill='%23D4AF37'>博</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -2512,10 +2518,18 @@ function _setupDraftAutoSave() {
     }
   }
 }
-// 頁面載入後設定草稿自動儲存監聽 + 自動備份檢查
+// 頁面載入後設定草稿自動儲存監聽 + 自動備份檢查 + PWA 註冊
 document.addEventListener("DOMContentLoaded", function() {
   _setupDraftAutoSave();
   _autoBackupCheck();
+  // 註冊 Service Worker（PWA 支援）
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").then(function(reg) {
+      console.log("PWA: Service Worker 已註冊", reg.scope);
+    }).catch(function(err) {
+      console.log("PWA: Service Worker 註冊失敗", err);
+    });
+  }
 });
 
 // ===== 7 天自動備份功能 =====

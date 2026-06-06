@@ -1,0 +1,24 @@
+{
+  "name": "澳門洗碼報表",
+  "short_name": "洗碼報表",
+  "description": "博盈國際會 - 澳門洗碼報表管理系統",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0c0c12",
+  "theme_color": "#0c0c12",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230c0c12'/><text x='96' y='100' text-anchor='middle' font-size='80' font-weight='bold' font-family='serif' fill='%23D4AF37'>博盈</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='48' fill='%230c0c12'/><text x='256' y='270' text-anchor='middle' font-size='220' font-weight='bold' font-family='serif' fill='%23D4AF37'>博盈</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
