@@ -4755,27 +4755,32 @@ var _MAX_UNDO = 10;
   deleteTx = function(id) {
     if (!confirm("确定删除此笔交易？")) return;
     showLoading("删除中…");
-    var deleted = null, delIndex = -1;
-    for (var i = 0; i < txs.length; i++) {
-      if (txs[i].id === id) { deleted = txs[i]; delIndex = i; break; }
+    try {
+      var deleted = null, delIndex = -1;
+      for (var i = 0; i < txs.length; i++) {
+        if (txs[i].id === id) { deleted = txs[i]; delIndex = i; break; }
+      }
+      if (deleted) {
+        _undoStack.push({ tx: JSON.parse(JSON.stringify(deleted)), index: delIndex });
+        if (_undoStack.length > _MAX_UNDO) _undoStack.shift();
+      }
+      var newTxs = [];
+      for (var i = 0; i < txs.length; i++) {
+        if (txs[i].id !== id) newTxs.push(txs[i]);
+      }
+      txs = newTxs;
+      saveData(true);
+      renderAll();
+      renderOverview();
+      renderSummary();
+      updateTotalWalletUI();
+      if (deleted) showUndoToast();
+    } catch(e) {
+      console.error("[deleteTx] error:", e);
+      showToast("删除失败：" + e.message, "error");
+    } finally {
+      setTimeout(hideLoading, 300);
     }
-    if (deleted) {
-      _undoStack.push({ tx: JSON.parse(JSON.stringify(deleted)), index: delIndex });
-      if (_undoStack.length > _MAX_UNDO) _undoStack.shift();
-    }
-    var newTxs = [];
-    for (var i = 0; i < txs.length; i++) {
-      if (txs[i].id !== id) newTxs.push(txs[i]);
-    }
-    txs = newTxs;
-    saveData(true);
-    renderAll();
-    renderOverview();
-    renderSummary();
-    updateTotalWalletUI();
-    if (deleted) showUndoToast();
-    _origDelete = true;
-    setTimeout(hideLoading, 300);
   };
 
   // 增强撤销Toast
