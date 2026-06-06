@@ -2064,7 +2064,7 @@ h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(2
 </div>
 
 <!-- 房務系統 Modal -->
-  <div id="rm-modal-bg">
+  <div id="rm-modal-bg" style="display:none;">
   <div class="rm-modal">
     <h2 id="rm-modal-title">新增訂房</h2>
     <div class="rm-form-row">
@@ -2468,11 +2468,12 @@ function ensureAllModalsClosed() {
   );
   for (var i = 0; i < modals.length; i++) {
     modals[i].classList.remove('active', 'show');
-    modals[i].style.display = '';
+    // ⚠️ 不再清成 ''，避免把 inline display:none 洗掉
+    modals[i].style.display = 'none';
   }
   // 額外確保 rm-modal-bg 沒有 active 類
   var rmBg = document.getElementById('rm-modal-bg');
-  if (rmBg) { rmBg.classList.remove('active'); rmBg.style.display = ''; }
+  if (rmBg) { rmBg.classList.remove('active'); rmBg.style.display = 'none'; }
 }
 
 function checkPw() {
