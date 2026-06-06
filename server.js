@@ -126,6 +126,42 @@ app.post('/api/save', (req, res) => {
   }
 });
 
+// ===== 舊版 /api/sync/* 端點（與前端相容）=====
+app.post('/api/sync/upload', (req, res) => {
+  try {
+    const body = req.body;
+    const db = readDB();
+    if (body.txs !== undefined) db.txs = body.txs;
+    if (body.fundWithdrawals !== undefined) db.fundWithdrawals = body.fundWithdrawals;
+    if (body.agentWallets !== undefined) db.agentWallets = body.agentWallets;
+    if (body.config !== undefined) db.config = body.config;
+    if (body.agentList !== undefined) db.agentList = body.agentList;
+    if (body.archives !== undefined) db.archives = body.archives;
+    if (body.workingMonth !== undefined) {
+      if (!db.config) db.config = {};
+      db.config.workingMonth = body.workingMonth;
+    }
+    writeDB(db);
+    res.json({ ok: true, lastModified: db.lastModified });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.get('/api/sync/download', (req, res) => {
+  const db = readDB();
+  res.json({
+    ok: true,
+    txs: db.txs || [],
+    fundWithdrawals: db.fundWithdrawals || [],
+    agentWallets: db.agentWallets || {},
+    agentList: db.agentList || [],
+    workingMonth: db.config ? db.config.workingMonth : '',
+    archives: db.archives || {},
+    lastModified: db.lastModified || 0
+  });
+});
+
 app.listen(PORT, HOST, () => {
   console.log('[START] Sync server running on http://' + HOST + ':' + PORT);
 });

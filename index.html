@@ -1697,7 +1697,7 @@ tbody tr:hover {
     <div class="kpi-grid" id="ov-kpi-grid"></div>
     <!-- 滿寬每日洗碼量 -->
     <div class="chart-full">
-      <div class="chart-title">每日洗碼量（萬）— 本月趨勢</div>
+      <div class="chart-title">每日洗碼量（10萬）— 本月趨勢</div>
       <div style="position:relative;height:200px;"><canvas id="ov-trend-chart"></canvas></div>
       <div class="sparkline-wide" id="ov-sparkline" style="display:none;"></div>
       <div class="spark-labels-wide" id="ov-sparklabels" style="display:none;"></div>
@@ -1706,7 +1706,7 @@ tbody tr:hover {
     <div class="ov-two-col">
       <div class="ov-panel">
         <div class="ov-panel-head"><span>🏆</span> 代理洗碼排行 Top 10</div>
-        <div class="ov-panel-body" id="ov-agent-rank" style="position:relative;min-height:200px;">
+        <div class="ov-panel-body" id="ov-agent-rank" style="position:relative;height:200px;">
           <canvas id="ov-rank-chart"></canvas>
         </div>
       </div>
@@ -2132,8 +2132,8 @@ var SYNC_API = (function() {
   if (window.location.protocol === 'file:') return 'http://192.168.18.157:3000';
   var h = window.location.hostname;
   if (h.match(/^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/)) return 'http://' + h + ':3000';
-  if (h.indexOf('codebuddy.work') >= 0) return 'https://macau-sync.onrender.com';
-  return 'https://macau-sync.onrender.com';
+  // 生產環境：使用當前站點作為同步端點（server.js 已內建 /api/sync/*）
+  return window.location.origin;
 })();
 
 // ===== 核心工具函数（v4.3 修復）=====
@@ -3355,7 +3355,7 @@ function closeCurrentMonth() {
 
 // ===== 同步功能 =====
 function syncUpload() {
-  if (!SYNC_API) return;
+  if (!SYNC_API) return Promise.reject('未配置同步伺服器');
   var payload = {
     password: SYNC_PASSWORD,
     txs: txs,
@@ -3366,7 +3366,7 @@ function syncUpload() {
     archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
     timestamp: Date.now()
   };
-  fetch(SYNC_API + '/api/sync/upload', {
+  return fetch(SYNC_API + '/api/sync/upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-sync-password': SYNC_PASSWORD || '' },
     body: JSON.stringify(payload)
@@ -3375,23 +3375,24 @@ function syncUpload() {
       return r.json();
     }).then(function(resp) {
     console.log('[Sync ↑] 上傳成功', resp);
+    return resp;
   }).catch(function(err) {
     console.error('[Sync ↑] 上傳失敗', err);
+    throw err;
   });
 }
 
 function syncDownload() {
-  if (!SYNC_API) return;
+  if (!SYNC_API) return Promise.reject('未配置同步伺服器');
   var url = SYNC_API + '/api/sync/download?password=' + encodeURIComponent(SYNC_PASSWORD);
-  fetch(url, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
+  return fetch(url, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     })
     .then(function(data) {
       if (!data || data.ok === false) {
-        console.log('[Sync ↓] 下載失敗：', data ? data.error : '未知錯誤');
-        return;
+        throw new Error(data ? data.error : '未知錯誤');
       }
       txs = data.txs || txs;
       agentList = data.agentList || agentList;
@@ -3404,19 +3405,25 @@ function syncDownload() {
       renderOverview();
       renderSummary();
       console.log('[Sync ↓] 下載並合併完成，共', data.txs ? data.txs.length : 0, '筆');
+      return data;
     }).catch(function(err) {
       console.error('[Sync ↓] 下載失敗', err);
+      throw err;
     });
 }
 
 function manualSync() {
   if (!SYNC_API) { showToast('未配置同步伺服器', 'warning'); return; }
   showLoading('正在同步…');
-  syncUpload();
-  setTimeout(function() {
-    syncDownload();
-    setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 1200);
-  }, 800);
+  syncUpload().then(function() {
+    return syncDownload();
+  }).then(function() {
+    hideLoading();
+    showToast('同步完成', 'success');
+  }).catch(function(err) {
+    hideLoading();
+    showToast('同步失敗：' + (err.message || err), 'error');
+  });
 }
 
 function initSync() {
@@ -4240,7 +4247,7 @@ function renderOverview() {
   for (var d=0;d<daysInMonth;d++){
     var v=daily[d];
     var h=v>0?Math.max(2,Math.round(v/maxV*maxH)):2;
-    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(v)+'萬"><span>'+fmt(v)+'</span></div>';
+    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(v)+'萬 ('+fmt(v/10)+'×10萬)"><span>'+fmt(v/10)+'</span></div>';
     lblHTML+='<span>'+(d%3===0||d===0||d===daysInMonth-1?(d+1)+'日':'')+'</span>';
   }
   spark.innerHTML=sparkHTML;
@@ -4282,7 +4289,7 @@ function renderOverview() {
     var vpct=Math.round(vn.vol/maxVV*100);
     var vcol=venueColors[vi%venueColors.length];
     var shortName=vn.name.length>8?vn.name.slice(0,8)+'..':vn.name;
-    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬</div></div></div>';
+    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬 <span style="color:rgba(255,255,255,0.3);font-size:10px;">('+fmt(vn.vol/10)+'×10萬)</span></div></div></div>';
   }
   if (!venArr.length) venHTML='<div class="venue-empty">本月尚無數據</div>';
   document.getElementById("ov-venue-dist").innerHTML=venHTML;
@@ -4349,152 +4356,176 @@ function renderOverview() {
 // ===== Chart.js 趨勢圖 =====
 var _trendChartInst = null;
 function renderTrendChart(daily, monthLabel) {
-  var canvas = document.getElementById("ov-trend-chart");
-  var spark = document.getElementById("ov-sparkline");
-  var slbl = document.getElementById("ov-sparklabels");
-  if (!canvas) return;
-  // 檢查 Chart.js 是否可用
-  if (typeof Chart === "undefined") {
-    if (spark) spark.style.display = "";
-    if (slbl) slbl.style.display = "";
-    return;
-  }
-  // 隱藏舊版 sparkline
-  if (spark) spark.style.display = "none";
-  if (slbl) slbl.style.display = "none";
-
-  // 生成標籤（每 3 天顯示一次）
-  var labels = [];
-  for (var d = 0; d < daily.length; d++) {
-    labels.push((d + 1) % 3 === 0 || d === 0 || d === daily.length - 1 ? (d + 1) + "日" : "");
-  }
-  // 銷毀舊圖表
-  if (_trendChartInst) { _trendChartInst.destroy(); _trendChartInst = null; }
-  var ctx = canvas.getContext("2d");
-  var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, "rgba(212,175,55,0.3)");
-  gradient.addColorStop(1, "rgba(212,175,55,0.02)");
-  _trendChartInst = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "洗碼量（萬）",
-        data: daily,
-        borderColor: "#D4AF37",
-        backgroundColor: gradient,
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-        pointRadius: daily.map(function(v) { return v > 0 ? 3 : 0; }),
-        pointBackgroundColor: "#D4AF37",
-        pointBorderColor: "#1a1a2e",
-        pointBorderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "rgba(20,20,30,0.95)",
-          titleColor: "#D4AF37",
-          bodyColor: "#e0d0a0",
-          borderColor: "rgba(212,175,55,0.3)",
-          borderWidth: 1,
-          callbacks: {
-            title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
-            label: function(item) { return "洗碼量: " + fmt(item.raw) + " 萬"; }
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: { color: "#887755", font: { size: 10 }, maxRotation: 0 }
-        },
-        y: {
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: {
-            color: "#887755", font: { size: 10 },
-            callback: function(v) { return v >= 10000 ? (v/10000).toFixed(1) + "萬" : v; }
-          },
-          beginAtZero: true
-        }
-      },
-      interaction: { mode: "index", intersect: false }
+  try {
+    var canvas = document.getElementById("ov-trend-chart");
+    var spark = document.getElementById("ov-sparkline");
+    var slbl = document.getElementById("ov-sparklabels");
+    if (!canvas) return;
+    // 資料轉為 10 萬單位
+    var daily10 = daily.map(function(v) { return v / 10; });
+    var hasData = daily10.some(function(v) { return v > 0; });
+    // 檢查 Chart.js 是否可用
+    if (typeof Chart === "undefined" || !hasData) {
+      if (spark) spark.style.display = hasData ? "" : "none";
+      if (slbl) slbl.style.display = hasData ? "" : "none";
+      if (!hasData && canvas.parentElement) {
+        canvas.parentElement.innerHTML = '<canvas id="ov-trend-chart"></canvas><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(212,175,55,0.4);font-size:13px;">本月尚無洗碼數據</div>';
+      }
+      return;
     }
-  });
+    // 隱藏舊版 sparkline
+    if (spark) spark.style.display = "none";
+    if (slbl) slbl.style.display = "none";
+    // 清除可能存在的空數據提示
+    if (canvas.parentElement) {
+      var emptyMsg = canvas.parentElement.querySelector("div[style*='本月尚無']");
+      if (emptyMsg) emptyMsg.remove();
+    }
+
+    // 生成標籤（每 3 天顯示一次）
+    var labels = [];
+    for (var d = 0; d < daily10.length; d++) {
+      labels.push((d + 1) % 3 === 0 || d === 0 || d === daily10.length - 1 ? (d + 1) + "日" : "");
+    }
+    // 銷毀舊圖表
+    if (_trendChartInst) { _trendChartInst.destroy(); _trendChartInst = null; }
+    var ctx = canvas.getContext("2d");
+    var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, "rgba(212,175,55,0.3)");
+    gradient.addColorStop(1, "rgba(212,175,55,0.02)");
+    _trendChartInst = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "洗碼量（10萬）",
+          data: daily10,
+          borderColor: "#D4AF37",
+          backgroundColor: gradient,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: daily10.map(function(v) { return v > 0 ? 3 : 0; }),
+          pointBackgroundColor: "#D4AF37",
+          pointBorderColor: "#1a1a2e",
+          pointBorderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(20,20,30,0.95)",
+            titleColor: "#D4AF37",
+            bodyColor: "#e0d0a0",
+            borderColor: "rgba(212,175,55,0.3)",
+            borderWidth: 1,
+            callbacks: {
+              title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
+              label: function(item) { return "洗碼量: " + fmt(item.raw * 10) + " 萬 (" + fmt(item.raw) + "×10萬)"; }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: "rgba(255,255,255,0.05)" },
+            ticks: { color: "#887755", font: { size: 10 }, maxRotation: 0 }
+          },
+          y: {
+            grid: { color: "rgba(255,255,255,0.05)" },
+            ticks: {
+              color: "#887755", font: { size: 10 },
+              callback: function(v) { return fmt(v); }
+            },
+            beginAtZero: true
+          }
+        },
+        interaction: { mode: "index", intersect: false }
+      }
+    });
+  } catch(e) { console.error('[renderTrendChart] error:', e); }
 }
 
 // ===== Chart.js 代理排行圖 =====
 var _rankChartInst = null;
 function renderRankChart(agtArr) {
-  var canvas = document.getElementById("ov-rank-chart");
-  if (!canvas) return;
-  if (typeof Chart === "undefined") {
+  try {
+    var canvas = document.getElementById("ov-rank-chart");
     var panel = document.getElementById("ov-agent-rank");
-    if (!agtArr.length) { if (panel) panel.innerHTML = '<div class="rank-empty">本月尚無交易</div>'; return; }
-    var html = '';
-    var rankColors = ['#d4af37','#a0a0a0','#cd7f32','rgba(255,255,255,0.4)','rgba(255,255,255,0.3)'];
-    var maxV = agtArr[0].vol;
-    for (var r = 0; r < agtArr.length; r++) {
-      var ag = agtArr[r];
-      var pct = Math.round(ag.vol / maxV * 100);
-      html += '<div class="rank-row"><div class="rank-num">'+(r+1)+'</div><div class="rank-name">'+ag.name+'</div><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+(rankColors[r]||rankColors[4])+',rgba(212,175,55,0.3));"></div></div><div class="rank-val">'+fmt(ag.vol)+'萬</div></div></div>';
+    if (!canvas || !panel) return;
+    if (!agtArr.length) {
+      panel.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(212,175,55,0.4);font-size:13px;">本月尚無交易</div>';
+      return;
     }
-    if (panel) panel.innerHTML = html;
-    return;
-  }
-  if (_rankChartInst) { _rankChartInst.destroy(); _rankChartInst = null; }
-  var labels = [], data = [];
-  for (var i = agtArr.length - 1; i >= 0; i--) {
-    labels.push(agtArr[i].name);
-    data.push(agtArr[i].vol);
-  }
-  var ctx = canvas.getContext("2d");
-  _rankChartInst = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "洗碼量（萬）",
-        data: data,
-        backgroundColor: data.map(function(v, idx) {
-          var colors = ["rgba(212,175,55,0.6)","rgba(160,160,160,0.5)","rgba(205,127,50,0.5)","rgba(255,255,255,0.25)","rgba(255,255,255,0.2)"];
-          var i = data.length - 1 - idx;
-          return colors[i] || "rgba(255,255,255,0.15)";
-        }),
-        borderColor: data.map(function(v, idx) {
-          var colors = ["#d4af37","#a0a0a0","#cd7f32","rgba(255,255,255,0.4)","rgba(255,255,255,0.3)"];
-          var i = data.length - 1 - idx;
-          return colors[i] || "rgba(255,255,255,0.2)";
-        }),
-        borderWidth: 1,
-        borderRadius: 4
-      }]
-    },
-    options: {
-      indexAxis: "y",
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "rgba(20,20,30,0.95)",
-          bodyColor: "#e0d0a0",
-          borderColor: "rgba(212,175,55,0.3)",
-          borderWidth: 1,
-          callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw) + " 萬"; } }
-        }
-      },
-      scales: {
-        x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#887755", font: { size: 9 } }, beginAtZero: true },
-        y: { grid: { display: false }, ticks: { color: "#e0d0a0", font: { size: 11 } } }
+    // 還原 canvas（若先前被空數據提示覆蓋）
+    if (!panel.querySelector("#ov-rank-chart")) {
+      panel.innerHTML = '<canvas id="ov-rank-chart"></canvas>';
+      canvas = document.getElementById("ov-rank-chart");
+    }
+    // Chart.js 不可用时降級為 HTML 條形圖
+    if (typeof Chart === "undefined") {
+      var html = '';
+      var rankColors = ['#d4af37','#a0a0a0','#cd7f32','rgba(255,255,255,0.4)','rgba(255,255,255,0.3)'];
+      var maxV = agtArr[0].vol;
+      for (var r = 0; r < agtArr.length; r++) {
+        var ag = agtArr[r];
+        var pct = Math.round(ag.vol / maxV * 100);
+        html += '<div class="rank-row"><div class="rank-num">'+(r+1)+'</div><div class="rank-name">'+ag.name+'</div><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+(rankColors[r]||rankColors[4])+',rgba(212,175,55,0.3));"></div></div><div class="rank-val">'+fmt(ag.vol)+'萬</div></div></div>';
       }
+      panel.innerHTML = html;
+      return;
     }
-  });
+    if (_rankChartInst) { _rankChartInst.destroy(); _rankChartInst = null; }
+    var labels = [], data = [];
+    for (var i = agtArr.length - 1; i >= 0; i--) {
+      labels.push(agtArr[i].name);
+      data.push(agtArr[i].vol / 10); // 轉為 10 萬單位
+    }
+    var ctx = canvas.getContext("2d");
+    _rankChartInst = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "洗碼量（10萬）",
+          data: data,
+          backgroundColor: data.map(function(v, idx) {
+            var colors = ["rgba(212,175,55,0.6)","rgba(160,160,160,0.5)","rgba(205,127,50,0.5)","rgba(255,255,255,0.25)","rgba(255,255,255,0.2)"];
+            var i = data.length - 1 - idx;
+            return colors[i] || "rgba(255,255,255,0.15)";
+          }),
+          borderColor: data.map(function(v, idx) {
+            var colors = ["#d4af37","#a0a0a0","#cd7f32","rgba(255,255,255,0.4)","rgba(255,255,255,0.3)"];
+            var i = data.length - 1 - idx;
+            return colors[i] || "rgba(255,255,255,0.2)";
+          }),
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(20,20,30,0.95)",
+            bodyColor: "#e0d0a0",
+            borderColor: "rgba(212,175,55,0.3)",
+            borderWidth: 1,
+            callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw * 10) + " 萬 (" + fmt(item.raw) + "×10萬)"; } }
+          }
+        },
+        scales: {
+          x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#887755", font: { size: 9 }, callback: function(v){ return fmt(v); } }, beginAtZero: true },
+          y: { grid: { display: false }, ticks: { color: "#e0d0a0", font: { size: 11 } } }
+        }
+      }
+    });
+  } catch(e) { console.error('[renderRankChart] error:', e); }
 }
 
 // ===== 房務系統 JS =====
