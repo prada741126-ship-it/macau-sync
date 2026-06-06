@@ -38,7 +38,7 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
-body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", serif; background: var(--bg-page); color: var(--text-main); display: flex; overflow: hidden; }
+body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", serif; background: var(--bg-page); color: var(--text-main); display: flex; overflow: hidden; height:100%; }
 .container { max-width: 1600px; margin: 0 auto; }
 h1 { color: #D4AF37; text-align: center; margin-bottom: 12px; font-size: 28px; letter-spacing: 4px; font-weight: 700; text-shadow: 0 2px 20px rgba(212,175,55,0.4), 0 0 40px rgba(212,175,55,0.15); padding: 10px 0; border-bottom: 2px solid rgba(212,175,55,0.3); display: inline-block; width: 100%; }
 .month-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 10px 20px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(20,15,5,0.92), rgba(12,8,4,0.95)); border-radius: 14px; border: 1px solid rgba(212,175,55,0.25); flex-wrap: wrap; }
@@ -126,7 +126,8 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .page > .toolbar > button[style*="#f0f0f0"]:hover { background: rgba(50,50,60,0.9) !important; color: #D4AF37 !important; }
 .page > .toolbar > button[style*="#9b59b6"] { background: linear-gradient(135deg, #8e44ad, #732d91) !important; color: white !important; }
 /* 密码保护遮罩 — 中国风设计 */
-#pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a1210 0%, #0a0606 60%, #000000 100%); z-index:9999; display:flex; align-items:center; justify-content:center; position:relative; }
+html { margin:0; padding:0; width:100%; height:100%; }
+#pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a1210 0%, #0a0606 60%, #000000 100%); z-index:9999; display:flex; align-items:center; justify-content:center; }
 #pw-overlay::before {
   content:""; position:absolute; top:0; left:0; width:100%; height:100%;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M20,100 Q40,80 60,100 Q80,120 100,100 Q120,80 140,100 Q160,120 180,100' stroke='rgba(212,175,55,0.05)' fill='none' stroke-width='1'/%3E%3C/svg%3E");
@@ -662,8 +663,9 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   #page-room .room-table td { padding: 9px 10px; }
 }
 
-#rm-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
-#rm-modal-bg.active { display: flex; }
+#rm-modal-bg { display: none !important; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
+#rm-modal-bg.active { display: flex !important; }
+#rm-modal-bg:not(.active) > * { visibility: hidden; }
 .rm-modal { background: rgba(18,15,8,0.98); border: 1px solid rgba(212,175,55,0.15); border-radius: 14px; padding: 20px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
 .rm-modal h2 { color: var(--gold); font-size: 16px; margin-bottom: 16px; }
 .rm-form-group { margin-bottom: 12px; }
@@ -2456,6 +2458,21 @@ function resetSession() {
   }, SESSION_TIMEOUT);
 }
 
+// 確保所有模態框完全關閉（防止殘留可見元素）
+function ensureAllModalsClosed() {
+  var modals = document.querySelectorAll(
+    '#rm-modal-bg, #agent-mgr-modal, #agent-wallet-modal, #shortcut-help-modal, ' +
+    '#kb-help-bg, #modal, .modal-bg'
+  );
+  for (var i = 0; i < modals.length; i++) {
+    modals[i].classList.remove('active', 'show');
+    modals[i].style.display = '';
+  }
+  // 額外確保 rm-modal-bg 沒有 active 類
+  var rmBg = document.getElementById('rm-modal-bg');
+  if (rmBg) { rmBg.classList.remove('active'); rmBg.style.display = ''; }
+}
+
 function checkPw() {
   if (pwLockTimer > 0) return;
   var v = document.getElementById("pw-input").value;
@@ -2469,6 +2486,8 @@ function checkPw() {
     setSessionPw(v);
     sessionStorage.setItem("macau_auth", "1");
     document.getElementById("pw-overlay").style.display = "none";
+    // 確保所有模態框都關閉（防止任何意外殘留元素）
+    ensureAllModalsClosed();
     resetSession();
     showToast("登入成功", "success");
   } else {
