@@ -4948,11 +4948,22 @@ RM.init();
 document.addEventListener('DOMContentLoaded', function() {
   function initMobileSidebar() {
     var sb = document.getElementById('sidebar');
-    if (!sb) return;
-    if (window.innerWidth <= 700) {
-      sb.classList.add('mobile-hidden');
-    } else {
-      sb.classList.remove('mobile-hidden');
+    var overlay = document.getElementById('sidebar-overlay');
+    if (sb) {
+      if (window.innerWidth <= 700) {
+        sb.classList.add('mobile-hidden');
+      } else {
+        sb.classList.remove('mobile-hidden');
+      }
+    }
+    // 初始化遮罩層狀態，防止手機版遮罩層阻擋按鈕點擊
+    if (overlay) {
+      if (window.innerWidth <= 700) {
+        overlay.style.display = 'none';
+        overlay.classList.remove('active');
+      } else {
+        overlay.style.display = '';
+      }
     }
   }
   initMobileSidebar();
