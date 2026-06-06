@@ -126,14 +126,31 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .page > .toolbar > button[style*="#f0f0f0"]:hover { background: rgba(50,50,60,0.9) !important; color: #D4AF37 !important; }
 .page > .toolbar > button[style*="#9b59b6"] { background: linear-gradient(135deg, #8e44ad, #732d91) !important; color: white !important; }
 /* 密码保护遮罩 — 中国风设计 */
-#pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a1210 0%, #0a0606 60%, #000000 100%); z-index:9999; display:flex; align-items:center; justify-content:center; }
-#pw-box {
-  background: linear-gradient(180deg, rgba(20,14,6,0.95) 0%, rgba(14,9,3,0.97) 50%, rgba(10,6,2,0.98) 100%);
-  border:1px solid rgba(212,175,55,0.2); border-radius:16px;
-  padding:36px 32px; text-align:center; max-width:420px; width:92%;
-  position:relative; overflow:hidden;
-  box-shadow:0 0 60px rgba(212,175,55,0.08),0 0 120px rgba(180,30,30,0.06),inset 0 1px 0 rgba(212,175,55,0.05);
+#pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a1210 0%, #0a0606 60%, #000000 100%); z-index:9999; display:flex; align-items:center; justify-content:center; position:relative; }
+#pw-overlay::before {
+  content:""; position:absolute; top:0; left:0; width:100%; height:100%;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M20,100 Q40,80 60,100 Q80,120 100,100 Q120,80 140,100 Q160,120 180,100' stroke='rgba(212,175,55,0.05)' fill='none' stroke-width='1'/%3E%3C/svg%3E");
+  background-repeat:repeat; opacity:1; pointer-events:none; z-index:0;
 }
+#pw-box {
+  background: linear-gradient(180deg, rgba(20,14,6,0.97) 0%, rgba(14,9,3,0.98) 50%, rgba(10,6,2,0.99) 100%);
+  border:2px solid rgba(212,175,55,0.35); border-radius:18px;
+  padding:40px 36px; text-align:center; max-width:440px; width:92%;
+  position:relative; overflow:hidden; z-index:1;
+  box-shadow:0 0 100px rgba(212,175,55,0.12),0 0 200px rgba(180,30,30,0.08),inset 0 1px 0 rgba(212,175,55,0.08);
+}
+/* 中式回纹四角装饰 */
+#pw-box::before {
+  content:""; position:absolute; top:6px; left:6px; right:6px; bottom:6px;
+  border:1px solid rgba(212,175,55,0.12); border-radius:14px;
+  pointer-events:none; z-index:0;
+}
+#pw-box .pw-corners { position:absolute; inset:0; pointer-events:none; z-index:2; }
+#pw-box .pw-corner { position:absolute; width:28px; height:28px; border-color:rgba(212,175,55,0.55); border-style:solid; }
+#pw-box .pw-corner.tl { top:8px; left:8px; border-width:2px 0 0 2px; border-radius:8px 0 0 0; }
+#pw-box .pw-corner.tr { top:8px; right:8px; border-width:2px 2px 0 0; border-radius:0 8px 0 0; }
+#pw-box .pw-corner.bl { bottom:8px; left:8px; border-width:0 0 2px 2px; border-radius:0 0 0 8px; }
+#pw-box .pw-corner.br { bottom:8px; right:8px; border-width:0 2px 2px 0; border-radius:0 0 8px 0; }
 #pw-box .pw-corners { position:absolute; inset:0; pointer-events:none; }
 #pw-box .pw-corner { position:absolute; width:24px; height:24px; border-color:rgba(212,175,55,0.4); border-style:solid; }
 #pw-box .pw-corner.tl { top:10px; left:10px; border-width:2px 0 0 2px; border-radius:6px 0 0 0; }
@@ -172,13 +189,19 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 #pw-box .pw-toggle { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:rgba(212,175,55,0.4); font-size:16px; cursor:pointer; padding:4px 8px; }
 #pw-box .pw-toggle:hover { color:rgba(212,175,55,0.8); }
 #pw-box .pw-btn {
-  width:100%; padding:14px; border:none; border-radius:10px; margin-top:6px;
-  background:linear-gradient(135deg, #8b1a1a 0%, #a82020 50%, #7b1515 100%);
-  color:#f0d060; font-size:16px; font-weight:700; letter-spacing:6px;
-  cursor:pointer; border:1px solid rgba(212,175,55,0.15);
-  box-shadow:0 4px 20px rgba(180,30,30,0.3); transition:all 0.25s;
+  width:100%; padding:16px; border:2px solid rgba(255,215,0,0.5); border-radius:8px; margin-top:8px;
+  background:linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #8B0000 100%);
+  color:#FFD700; font-size:18px; font-weight:900; letter-spacing:8px;
+  cursor:pointer; font-family:"KaiTi","STKaiti",serif;
+  box-shadow:0 4px 24px rgba(139,0,0,0.5),0 0 48px rgba(255,215,0,0.12),inset 0 1px 0 rgba(255,215,0,0.2);
+  text-shadow:0 0 12px rgba(255,215,0,0.4);
+  transition:all 0.3s;
 }
-#pw-box .pw-btn:hover { box-shadow:0 6px 28px rgba(200,40,40,0.4),0 0 36px rgba(212,175,55,0.08); transform:translateY(-1px); }
+#pw-box .pw-btn:hover {
+  box-shadow:0 6px 32px rgba(139,0,0,0.6),0 0 64px rgba(255,215,0,0.18),inset 0 1px 0 rgba(255,215,0,0.3);
+  transform:translateY(-2px);
+  text-shadow:0 0 20px rgba(255,215,0,0.6);
+}
 
 /* ============================================================
    SIDEBAR
@@ -336,7 +359,10 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
-  background: linear-gradient(180deg, rgba(5,5,12,0.82) 0%, rgba(8,5,20,0.88) 50%, rgba(5,5,12,0.85) 100%), url('bg_logo.png') center/cover no-repeat fixed;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cpath d='M20,100 Q40,80 60,100 Q80,120 100,100 Q120,80 140,100 Q160,120 180,100' stroke='rgba(212,175,55,0.02)' fill='none' stroke-width='1'/%3E%3C/svg%3E") repeat,
+    linear-gradient(180deg, rgba(5,5,12,0.85) 0%, rgba(8,5,20,0.90) 50%, rgba(5,5,12,0.87) 100%),
+    url('bg_logo.png') center/cover no-repeat fixed;
   background-color: #05050c;
 }
 
@@ -1481,6 +1507,33 @@ tbody tr:hover {
   to { opacity: 1; transform: translateY(0); }
 }
 .count-animate { animation: countUp 0.4s ease forwards; }
+
+/* ===== 中国风增强——主页面精致霸气 ===== */
+/* 侧边栏暗色祥云纹 */
+#sidebar::before { content:""; position:absolute; top:0; left:0; width:100%; height:100%; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cpath d='M10,50 Q20,40 30,50 Q40,60 50,50 Q60,40 70,50 Q80,60 90,50' stroke='rgba(212,175,55,0.03)' fill='none' stroke-width='0.5'/%3E%3C/svg%3E"); background-repeat:repeat; opacity:1; pointer-events:none; z-index:0; }
+
+/* 顶栏中式分隔线 */
+#topbar { border-bottom:2px solid rgba(212,175,55,0.2); box-shadow:0 2px 20px rgba(0,0,0,0.3); }
+
+/* 卡片中式边框 */
+.card { border:1px solid rgba(212,175,55,0.25); box-shadow:0 20px 60px rgba(0,0,0,0.7),inset 0 1px 0 rgba(212,175,55,0.12); }
+
+/* KPI 卡片金色光晕 */
+.kpi-card { border:1px solid rgba(212,175,55,0.25); box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 40px rgba(212,175,55,0.05); }
+.kpi-card:hover { box-shadow:0 8px 30px rgba(0,0,0,0.6),0 0 60px rgba(212,175,55,0.1); transform:translateY(-3px); }
+
+/* 表格中式分隔线 */
+th { border-bottom:2px solid rgba(212,175,55,0.25); }
+
+/* 模态框中式边框 */
+.modal { border:1px solid rgba(212,175,55,0.3); box-shadow:0 30px 80px rgba(0,0,0,0.8),inset 0 1px 0 rgba(212,175,55,0.12); }
+
+/* 页面标题中式下划线 */
+h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(212,175,55,0.5),0 0 40px rgba(212,175,55,0.2); }
+
+/* 滚动条金色 */
+#page-scroll::-webkit-scrollbar-thumb { background:linear-gradient(180deg,rgba(212,175,55,0.3),rgba(212,175,55,0.15)); border-radius:3px; }
+#page-scroll::-webkit-scrollbar-thumb:hover { background:linear-gradient(180deg,rgba(212,175,55,0.5),rgba(212,175,55,0.3)); }
 
 </style>
 </head>
