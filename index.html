@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v6.3.5</title>
+<title>澳門洗碼報表 v6.0</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,116 +18,75 @@
 <style>
 :root {
   --gold: #D4AF37;
-  --gold-light: #F0D78C;
   --gold-dim: #B8860B;
-  --gold-dark: #8B6914;
   --gold-faint: rgba(212,175,55,0.10);
-  --gold-border: rgba(212,175,55,0.25);
-  --crimson: #B22222;
-  --crimson-dark: #8B0000;
-  --crimson-light: #DC3545;
+  --gold-border: rgba(212,175,55,0.22);
   --sidebar-w: 200px;
   --sidebar-collapsed: 56px;
-  --bg-page: #080404;
-  --bg-sidebar: #0f0806;
-  --bg-card: rgba(18,10,6,0.96);
-  --bg-row-a: rgba(20,12,8,0.55);
-  --bg-row-b: rgba(26,16,10,0.45);
-  --text-main: #e8e0d0;
-  --text-muted: #8a7a65;
+  --bg-page: #06060e;
+  --bg-sidebar: #0c0c18;
+  --bg-card: rgba(13,13,22,0.97);
+  --bg-row-a: rgba(16,16,26,0.55);
+  --bg-row-b: rgba(20,20,32,0.45);
+  --text-main: #d4d4d4;
+  --text-muted: #888878;
   --green: #2ecc71;
   --red: #e74c3c;
   --blue: #3498db;
   --orange: #e67e22;
   --purple: #9b59b6;
 }
-
-/* ============================================================
-   中國風動畫關鍵幀
-   ============================================================ */
-@keyframes goldShimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-@keyframes borderGlowPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(212,175,55,0.15), 0 0 20px rgba(212,175,55,0.05); }
-  50% { box-shadow: 0 0 18px rgba(212,175,55,0.35), 0 0 40px rgba(212,175,55,0.12); }
-}
-@keyframes cardGlow {
-  0%, 100% { box-shadow: 0 2px 12px rgba(212,175,55,0.08), inset 0 1px 0 rgba(212,175,55,0.06); }
-  50% { box-shadow: 0 4px 24px rgba(212,175,55,0.18), inset 0 1px 0 rgba(212,175,55,0.12); }
-}
-@keyframes floatUp {
-  0% { transform: translateY(100vh) scale(0); opacity: 0; }
-  10% { opacity: 0.8; }
-  90% { opacity: 0.6; }
-  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-}
-@keyframes flameFlicker {
-  0%, 100% { opacity: 0.6; transform: translateY(0) scale(1); }
-  25% { opacity: 0.9; transform: translateY(-3px) scale(1.08); }
-  50% { opacity: 0.7; transform: translateY(-1px) scale(0.95); }
-  75% { opacity: 0.85; transform: translateY(-4px) scale(1.05); }
-}
-@keyframes sideGlow {
-  0%, 100% { border-color: rgba(212,175,55,0.15); }
-  50% { border-color: rgba(212,175,55,0.35); }
-}
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
-body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", "Noto Serif TC", serif; background: var(--bg-page); color: var(--text-main); display: flex; overflow: hidden; }
+body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", serif; background: var(--bg-page); color: var(--text-main); display: flex; overflow: hidden; }
 .container { max-width: 1600px; margin: 0 auto; }
-h1 { color: #D4AF37; text-align: center; margin-bottom: 12px; font-size: 28px; letter-spacing: 6px; font-weight: 700; text-shadow: 0 2px 20px rgba(212,175,55,0.5), 0 0 40px rgba(212,175,55,0.2), 0 0 80px rgba(180,30,30,0.15); padding: 10px 0; border-bottom: 2px solid rgba(212,175,55,0.35); display: inline-block; width: 100%; position:relative; }
-h1::after { content:""; position:absolute; bottom:-2px; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, rgba(212,175,55,0.7), transparent); animation: goldShimmer 4s linear infinite; background-size:200% 100%; }
-.month-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 10px 20px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(24,12,8,0.95), rgba(16,6,4,0.97)); border-radius: 14px; border: 1px solid rgba(212,175,55,0.3); flex-wrap: wrap; }
-.month-bar-label { color: #b09870; font-size: 13px; letter-spacing: 1px; }
-.month-bar-badge { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1206; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 2px; box-shadow: 0 0 20px rgba(212,175,55,0.4); animation: borderGlowPulse 4s ease-in-out infinite; }
+h1 { color: #D4AF37; text-align: center; margin-bottom: 12px; font-size: 28px; letter-spacing: 4px; font-weight: 700; text-shadow: 0 2px 20px rgba(212,175,55,0.4), 0 0 40px rgba(212,175,55,0.15); padding: 10px 0; border-bottom: 2px solid rgba(212,175,55,0.3); display: inline-block; width: 100%; }
+.month-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 10px 20px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(20,15,5,0.92), rgba(12,8,4,0.95)); border-radius: 14px; border: 1px solid rgba(212,175,55,0.25); flex-wrap: wrap; }
+.month-bar-label { color: #a09070; font-size: 13px; letter-spacing: 1px; }
+.month-bar-badge { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1a12; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 2px; box-shadow: 0 0 15px rgba(212,175,55,0.3); }
 .month-bar-status { color: #2ecc71; font-size: 11px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
 .month-bar-status::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 6px #2ecc71; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-.btn-close-month { background: linear-gradient(135deg, #B22222, #8B0000); color: white; padding: 8px 18px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 2px 10px rgba(178,34,34,0.3); transition: all 0.25s; }
-.btn-close-month:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(178,34,34,0.5); }
+.btn-close-month { background: linear-gradient(135deg, #8e44ad, #6c3483); color: white; padding: 8px 18px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; box-shadow: 0 2px 10px rgba(142,68,173,0.3); transition: all 0.25s; }
+.btn-close-month:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(142,68,173,0.5); }
 .month-bar-hint { color: #e67e22; font-size: 11px; letter-spacing: 0.5px; }
-.total-wallet { display: flex; align-items: center; gap: 8px; padding: 6px 18px; background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(184,134,11,0.1)); border-radius: 12px; border: 1px solid rgba(212,175,55,0.35); margin-left: 4px; }
-.total-wallet .tw-label { color: #b09870; font-size: 11px; letter-spacing: 0.5px; }
-.total-wallet .tw-value { color: #F0D78C; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 16px rgba(212,175,55,0.4); }
-.total-wallet-kpi { background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(26,18,10,0.96)) !important; border-color: rgba(212,175,55,0.45) !important; }
-.total-wallet-kpi .value { color: #F0D78C !important; font-size: 28px !important; text-shadow: 0 0 24px rgba(212,175,55,0.6) !important; }
-.card { background: rgba(18,10,6,0.96); backdrop-filter: blur(20px); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,175,55,0.12); overflow: hidden; border: 1px solid rgba(212,175,55,0.25); position:relative; }
-.card::before { content:""; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, rgba(212,175,55,0.35), transparent); animation: goldShimmer 5s linear infinite; background-size:200% 100%; z-index:1; pointer-events:none; }
-.tabs { display: flex; background: linear-gradient(180deg, rgba(24,12,8,0.95), rgba(16,8,4,0.97)); border-bottom: 1px solid rgba(212,175,55,0.18); padding: 8px 10px; gap: 4px; }
+.total-wallet { display: flex; align-items: center; gap: 8px; padding: 6px 18px; background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(184,134,11,0.08)); border-radius: 12px; border: 1px solid rgba(212,175,55,0.3); margin-left: 4px; }
+.total-wallet .tw-label { color: #a09070; font-size: 11px; letter-spacing: 0.5px; }
+.total-wallet .tw-value { color: #D4AF37; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 12px rgba(212,175,55,0.3); }
+.total-wallet-kpi { background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(26,18,10,0.95)) !important; border-color: rgba(212,175,55,0.4) !important; }
+.total-wallet-kpi .value { color: #D4AF37 !important; font-size: 28px !important; text-shadow: 0 0 20px rgba(212,175,55,0.5) !important; }
+.card { background: rgba(12,12,22,0.94); backdrop-filter: blur(20px); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,175,55,0.1); overflow: hidden; border: 1px solid rgba(212,175,55,0.2); }
+.tabs { display: flex; background: linear-gradient(180deg, rgba(20,15,5,0.9), rgba(15,10,5,0.95)); border-bottom: 1px solid rgba(212,175,55,0.15); padding: 8px 10px; gap: 4px; }
 .tab { padding: 11px 24px; cursor: pointer; font-weight: 600; color: #9a8b6e; border: none; border-radius: 10px; user-select: none; transition: all 0.3s ease; font-size: 14px; letter-spacing: 1px; }
-.tab:hover { background: rgba(212,175,55,0.1); color: #E8D5A0; }
-.tab.active { color: #1a1206; background: linear-gradient(135deg, #D4AF37, #C9A96E); box-shadow: 0 0 25px rgba(212,175,55,0.4); font-weight: 700; }
+.tab:hover { background: rgba(212,175,55,0.08); color: #D4AF37; }
+.tab.active { color: #1a1a12; background: linear-gradient(135deg, #D4AF37, #C9A96E); box-shadow: 0 0 20px rgba(212,175,55,0.3); font-weight: 700; }
 .page { display: none; padding: 20px; }
 .page.active { display: block; animation: pageIn 0.25s ease; }
 @keyframes pageIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 .toolbar { margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; align-items:center; }
-.search-box { padding:8px 14px; border:1px solid rgba(212,175,55,0.18); border-radius:10px; font-size:13px; background:rgba(14,8,4,0.85); color:#e8d5a0; width:200px; transition:all 0.3s; }
-.search-box:focus { border-color:#D4AF37; outline:none; box-shadow:0 0 0 3px rgba(212,175,55,0.1); width:260px; background:rgba(18,10,6,0.95); }
-.search-box::placeholder { color:#5a4a30; }
-.btn { padding: 8px 18px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.25s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.35); letter-spacing: 0.5px; position:relative; overflow:hidden; }
-.btn::after { content:""; position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.12); transition:all 0.5s; transform:translate(-50%,-50%); }
+.search-box { padding:9px 14px; border:1px solid rgba(212,175,55,0.2); border-radius:10px; font-size:13px; background:rgba(20,20,30,0.8); color:#e0d0a0; width:200px; transition:all 0.3s; }
+.search-box:focus { border-color:#D4AF37; outline:none; box-shadow:0 0 0 3px rgba(212,175,55,0.12); width:260px; }
+.search-box::placeholder { color:#666; }
+.btn { padding: 9px 20px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.25s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.3); letter-spacing: 0.5px; position:relative; overflow:hidden; }
+.btn::after { content:""; position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.15); transition:all 0.5s; transform:translate(-50%,-50%); }
 .btn:active::after { width:300px; height:300px; }
-.btn-primary { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1206; position:relative; overflow:hidden; }
-.btn-primary::after { content:""; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg, transparent 35%, rgba(255,255,255,0.15) 50%, transparent 65%); animation: goldShimmer 3s linear infinite; }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(212,175,55,0.55); }
-.btn-red { background: linear-gradient(135deg, #B22222, #8B0000); color: #e8d5a0; font-size: 12px; padding: 5px 12px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(178,34,34,0.45); }
-.btn-red:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(178,34,34,0.55); }
-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: 13px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.1); }
-th { background: linear-gradient(180deg, #1a1208, #120a06); color: #D4AF37; padding: 12px 12px; text-align: left; font-size: 12px; letter-spacing: 1px; font-weight: 600; border-bottom: 1px solid rgba(212,175,55,0.25); }
+.btn-primary { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1a12; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,175,55,0.5); }
+.btn-red { background: linear-gradient(135deg, #c0392b, #8B0000); color: #e0e0e0; font-size: 12px; padding: 5px 12px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 6px rgba(139,0,0,0.4); }
+.btn-red:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(192,57,43,0.5); }
+table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: 13px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.08); }
+th { background: linear-gradient(180deg, #1a1810, #12100a); color: #D4AF37; padding: 12px 12px; text-align: left; font-size: 12px; letter-spacing: 1px; font-weight: 600; border-bottom: 1px solid rgba(212,175,55,0.2); }
 th.sortable { cursor: pointer; user-select: none; transition: background 0.2s; }
-th.sortable:hover { background: linear-gradient(180deg, #251810, #1a1008); }
+th.sortable:hover { background: linear-gradient(180deg, #252015, #1a1510); }
 th.sortable::after { content: " ↕"; font-size:10px; opacity:0.4; }
 th.sort-asc::after { content: " ▲"; opacity:1; }
 th.sort-desc::after { content: " ▼"; opacity:1; }
-td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.035); color: #c8b890; }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #c8c8c8; }
 tr:last-child td { border-bottom: none; }
-tbody tr { background: rgba(20,16,8,0.5); transition: background 0.2s; }
-tbody tr:nth-child(even) { background: rgba(24,18,10,0.5); }
-tbody tr:hover { background: rgba(212,175,55,0.08); }
-.num { text-align: right; font-family: "Consolas", "Courier New", monospace; font-weight: 600; color: #e8d5a0; }
+tbody tr { background: rgba(16,16,28,0.5); transition: background 0.2s; }
+tbody tr:nth-child(even) { background: rgba(20,20,32,0.5); }
+tbody tr:hover { background: rgba(212,175,55,0.06); }
+.num { text-align: right; font-family: "Consolas", "Courier New", monospace; font-weight: 600; color: #e0d0a0; }
 .kpi-box { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
 .kpi-card { background: linear-gradient(135deg, rgba(26,18,10,0.95), rgba(18,12,8,0.95)); color: #e0d0a0; padding: 16px 24px; border-radius: 14px; min-width: 140px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.2); }
 .kpi-card .label { font-size: 11px; opacity: 0.7; letter-spacing: 0.5px; }
@@ -153,7 +112,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .modal-scroll { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 10px 10px 40px 10px; animation: slideUp 0.3s ease; }
 @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
-.modal { background: linear-gradient(180deg, rgba(24,14,8,0.98), rgba(16,8,4,0.99)); border-radius: 18px; padding: 28px; width: 520px; max-width: 95vw; margin: 0 auto; box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 60px rgba(212,175,55,0.08), inset 0 1px 0 rgba(212,175,55,0.12); border: 1px solid rgba(212,175,55,0.25); color: #d0d0d0; animation: borderGlowPulse 4s ease-in-out infinite; }
+.modal { background: linear-gradient(180deg, #1a1a1e, #121218); border-radius: 18px; padding: 28px; width: 520px; max-width: 95vw; margin: 0 auto; box-shadow: 0 30px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25); color: #d0d0d0; }
 .modal h3 { color: #D4AF37; font-size: 20px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid rgba(212,175,55,0.3); letter-spacing: 1px; }
 .form-row { display: flex; gap: 12px; margin-bottom: 14px; }
 .form-group { flex: 1; }
@@ -166,21 +125,14 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .page > .toolbar > button[style*="#f0f0f0"] { background: rgba(40,40,50,0.8) !important; color: #c0c0c0 !important; border: 1px solid rgba(212,175,55,0.1) !important; }
 .page > .toolbar > button[style*="#f0f0f0"]:hover { background: rgba(50,50,60,0.9) !important; color: #D4AF37 !important; }
 .page > .toolbar > button[style*="#9b59b6"] { background: linear-gradient(135deg, #8e44ad, #732d91) !important; color: white !important; }
-/* 密码保护遮罩 — 中国风强化 */
-#pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a0a08 0%, #0c0404 60%, #000000 100%); z-index:9999; display:flex; align-items:center; justify-content:center; }
-#pw-particles { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+/* 密码保护遮罩 — 中国风设计 */
+#pw-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:radial-gradient(ellipse at center, #1a1210 0%, #0a0606 60%, #000000 100%); z-index:9999; display:flex; align-items:center; justify-content:center; }
 #pw-box {
-  background: linear-gradient(180deg, rgba(24,14,6,0.97) 0%, rgba(16,8,2,0.98) 50%, rgba(10,4,0,0.99) 100%);
-  border:1px solid rgba(212,175,55,0.3); border-radius:16px;
+  background: linear-gradient(180deg, rgba(20,14,6,0.95) 0%, rgba(14,9,3,0.97) 50%, rgba(10,6,2,0.98) 100%);
+  border:1px solid rgba(212,175,55,0.2); border-radius:16px;
   padding:36px 32px; text-align:center; max-width:420px; width:92%;
-  position:relative; overflow:hidden; z-index:1;
-  box-shadow:0 0 80px rgba(212,175,55,0.1),0 0 160px rgba(140,20,20,0.08),inset 0 1px 0 rgba(212,175,55,0.08);
-  animation: borderGlowPulse 3s ease-in-out infinite;
-}
-#pw-box::before {
-  content:""; position:absolute; top:-80%; left:-80%; width:260%; height:260%;
-  background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.06) 0%, transparent 70%);
-  animation: goldShimmer 6s linear infinite; pointer-events:none; z-index:0;
+  position:relative; overflow:hidden;
+  box-shadow:0 0 60px rgba(212,175,55,0.08),0 0 120px rgba(180,30,30,0.06),inset 0 1px 0 rgba(212,175,55,0.05);
 }
 #pw-box .pw-corners { position:absolute; inset:0; pointer-events:none; }
 #pw-box .pw-corner { position:absolute; width:24px; height:24px; border-color:rgba(212,175,55,0.4); border-style:solid; }
@@ -222,18 +174,11 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 #pw-box .pw-btn {
   width:100%; padding:14px; border:none; border-radius:10px; margin-top:6px;
   background:linear-gradient(135deg, #8b1a1a 0%, #a82020 50%, #7b1515 100%);
-  background-size: 100% 100%;
   color:#f0d060; font-size:16px; font-weight:700; letter-spacing:6px;
   cursor:pointer; border:1px solid rgba(212,175,55,0.15);
   box-shadow:0 4px 20px rgba(180,30,30,0.3); transition:all 0.25s;
-  position:relative; overflow:hidden;
 }
-#pw-box .pw-btn::after {
-  content:""; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
-  background:linear-gradient(45deg, transparent 30%, rgba(255,215,0,0.08) 50%, transparent 70%);
-  animation: goldShimmer 3s linear infinite;
-}
-#pw-box .pw-btn:hover { box-shadow:0 6px 28px rgba(200,40,40,0.5),0 0 40px rgba(212,175,55,0.15); transform:translateY(-2px); }
+#pw-box .pw-btn:hover { box-shadow:0 6px 28px rgba(200,40,40,0.4),0 0 36px rgba(212,175,55,0.08); transform:translateY(-1px); }
 
 /* ============================================================
    SIDEBAR
@@ -241,9 +186,8 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 #sidebar {
   width: var(--sidebar-w);
   min-width: var(--sidebar-w);
-  background: linear-gradient(180deg, rgba(20,10,6,0.98), rgba(14,6,2,0.99));
-  border-right: 1px solid rgba(212,175,55,0.15);
-  animation: sideGlow 4s ease-in-out infinite;
+  background: var(--bg-sidebar);
+  border-right: 1px solid rgba(212,175,55,0.12);
   display: flex;
   flex-direction: column;
   transition: width 0.25s ease, min-width 0.25s ease;
@@ -260,7 +204,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   white-space: nowrap;
   overflow: hidden;
   flex-shrink: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.06) 0%, transparent 70%);
 }
 .sb-logo-title {
   color: var(--gold);
@@ -268,7 +211,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   font-weight: 700;
   letter-spacing: 2px;
   display: block;
-  text-shadow: 0 0 12px rgba(212,175,55,0.4);
 }
 .sb-logo-sub {
   color: var(--text-muted);
@@ -311,7 +253,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   gap: 10px;
   padding: 11px 16px;
   cursor: pointer;
-  color: #8a7a60;
+  color: #7a6a50;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -320,10 +262,10 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   position: relative;
   letter-spacing: 0.3px;
 }
-.sb-item:hover { color: var(--gold); background: rgba(212,175,55,0.12); }
+.sb-item:hover { color: var(--gold); background: var(--gold-faint); }
 .sb-item.active {
   color: var(--gold);
-  background: rgba(212,175,55,0.1);
+  background: rgba(212,175,55,0.08);
   border-left-color: var(--gold);
 }
 .sb-icon { font-size: 16px; min-width: 20px; text-align: center; flex-shrink: 0; }
@@ -394,12 +336,8 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
-  background: 
-    radial-gradient(ellipse at 20% 50%, rgba(212,175,55,0.015) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 50%, rgba(180,30,30,0.012) 0%, transparent 50%),
-    linear-gradient(180deg, rgba(8,4,4,0.85) 0%, rgba(12,6,8,0.9) 50%, rgba(8,4,4,0.88) 100%),
-    url('bg_logo.png') center/cover no-repeat fixed;
-  background-color: #060406;
+  background: linear-gradient(180deg, rgba(5,5,12,0.82) 0%, rgba(8,5,20,0.88) 50%, rgba(5,5,12,0.85) 100%), url('bg_logo.png') center/cover no-repeat fixed;
+  background-color: #05050c;
 }
 
 /* TOPBAR */
@@ -413,9 +351,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   border-bottom: 1px solid rgba(212,175,55,0.15);
   gap: 12px;
   flex-shrink: 0;
-  position: relative;
 }
-#topbar::after { content:""; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent); animation: goldShimmer 5s linear infinite; background-size:200% 100%; }
 .topbar-toggle {
   font-size: 18px;
   cursor: pointer;
@@ -551,18 +487,18 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
    ============================================================ */
 .rm-dashboard {
   margin-bottom: 12px;
-  background: linear-gradient(135deg, rgba(20,12,6,0.97) 0%, rgba(26,16,10,0.95) 100%);
-  border: 1px solid rgba(212,175,55,0.18); border-radius: 14px; overflow: hidden;
+  background: linear-gradient(135deg, rgba(16,14,8,0.95) 0%, rgba(20,16,8,0.92) 100%);
+  border: 1px solid rgba(212,175,55,0.12); border-radius: 14px; overflow: hidden;
 }
 .rm-dash-main { padding: 18px 20px 14px; }
 /* KPI 橫向卡片列 */
 .rm-dash-hero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
 .rm-hero-card {
-  background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px; padding: 14px 16px; position: relative; overflow: hidden;
   transition: all 0.25s;
 }
-.rm-hero-card:hover { background: rgba(255,255,255,0.055); border-color: rgba(212,175,55,0.25); }
+.rm-hero-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(212,175,55,0.2); }
 .rm-hero-card::before {
   content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   border-radius: 10px 10px 0 0;
@@ -603,7 +539,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 }
 .rm-stat-item {
   flex: 1; min-width: 80px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
   border-radius: 10px; padding: 10px 14px;
   display: flex; align-items: center; gap: 8px;
   transition: all 0.2s;
@@ -617,7 +553,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 
 /* 每日訂房長條圖 */
 .rm-chart-wrap {
-  background: rgba(20,14,8,0.85); border: 1px solid rgba(212,175,55,0.1);
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
   border-radius: 10px; padding: 12px 16px 10px; margin-bottom: 12px;
 }
 .rm-chart-title { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
@@ -678,7 +614,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 @keyframes countUp { 0%{transform:translateY(100%);opacity:0}100%{transform:translateY(0);opacity:1} }
 .count-anim { animation: countUp .4s ease-out; display: inline-block; }
 
-/* 桌面版：房務系統填滿剩餘空間 */
+/* 桌面版：房務系統填滿剩餘空間
 @media (min-width: 701px) {
   #page-room.active {
     display: flex;
@@ -790,9 +726,9 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   .kpi-card-new .kpi-value { font-size: 22px; }
   .kpi-card-new .kpi-label { font-size: 10px; }
 
-  /* 側邊欄遮罩層 — 修正非啟用時阻擋手機點擊 */
-  #sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
-  #sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+  /* 側邊欄遮罩層 */
+  #sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 199; opacity: 0; transition: opacity 0.25s ease; }
+  #sidebar-overlay.active { opacity: 1; }
 
   /* 表單元素模化 */
   .form-row { flex-direction: column; gap: 6px; margin-bottom: 8px; }
@@ -837,10 +773,9 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px;
 }
 .kpi-card-new {
-  background: rgba(22,14,8,0.96);
-  border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; padding: 16px 20px;
+  background: rgba(18,15,8,0.92);
+  border: 1px solid var(--gold-border); border-radius: 14px; padding: 16px 20px;
   position: relative; overflow: hidden; transition: all 0.25s;
-  animation: cardGlow 4s ease-in-out infinite;
 }
 .kpi-card-new:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
 .kpi-card-new::before {
@@ -892,6 +827,17 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   flex: 1; min-width: 0; max-width: 24px;
   text-align: center; font-size: 7px; color: rgba(255,255,255,0.12);
 }
+/* 總覽頁房務迷你儀表板 */
+.ov-room-mini { display: flex; flex-direction: column; gap: 6px; }
+.ov-room-hero { display: flex; gap: 14px; align-items: baseline; }
+.ov-room-num { font-size: 20px; font-weight: 800; font-family: "Consolas", monospace; color: var(--gold); line-height: 1; }
+.ov-room-num span { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.25); margin-left: 1px; }
+.ov-room-bar-wrap { display: flex; align-items: center; gap: 6px; }
+.ov-room-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; }
+.ov-room-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; background: linear-gradient(90deg, #27ae60, #2ecc71); }
+.ov-room-bar-fill.warn { background: linear-gradient(90deg, #f39c12, #e67e22); }
+.ov-room-bar-fill.danger { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+.ov-room-bar-pct { font-size: 10px; font-family: monospace; color: var(--gold); min-width: 24px; text-align: right; }
 /* 近期動態 Timeline */
 .timeline-box {
   background: rgba(12,12,22,0.95); border: 1px solid rgba(255,255,255,0.06);
@@ -983,6 +929,17 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .venue-val { font-size: 10px; color: var(--text-muted); font-family: monospace; min-width: 36px; text-align: right; }
 .venue-empty { text-align: center; padding: 20px; color: rgba(255,255,255,0.15); font-size: 12px; }
 
+/* 總覽頁 — 房務儀表板滿寬 */
+.ov-room-wide {
+  background: rgba(14,12,5,0.9); border: 1px solid rgba(212,175,55,0.1);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 20px;
+}
+.ov-room-wide .ov-room-hero { gap: 24px; }
+.ov-room-wide .ov-room-num { font-size: 26px; }
+.ov-room-wide .ov-room-bar-wrap { flex: 1; max-width: 320px; }
+.ov-room-wide .ov-room-bar-track { height: 8px; }
+
 /* ===== 桌面端大氣佈局 ===== */
 @media (min-width: 1024px) {
   #page-scroll { padding: 24px 32px; }
@@ -1003,6 +960,9 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   .ov-panel { border-radius: 14px; }
   .ov-panel-head { padding: 12px 16px; font-size: 14px; }
   .ov-panel-body { padding: 10px 14px; }
+  .ov-room-wide { padding: 18px 22px; border-radius: 14px; }
+  .ov-room-wide .ov-room-num { font-size: 32px; }
+  .ov-room-wide .ov-room-bar-track { height: 10px; }
   .timeline-box { border-radius: 14px; }
   .timeline-title { padding: 12px 18px; font-size: 14px; }
   .timeline-item { padding: 10px 18px; }
@@ -1017,10 +977,12 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 @media (max-width: 700px) {
   .charts-row { grid-template-columns: 1fr; }
   .ov-two-col { grid-template-columns: 1fr; }
+  .ov-room-wide { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .ov-room-wide .ov-room-bar-wrap { max-width: none; width: 100%; }
 
   /* ===== 手機版全局優化 ===== */
   /* 防止內容溢出 */
-  body { overflow-x: auto; }
+  body { overflow-x: hidden; }
 
   /* 頂部標題列優化 */
   #topbar { padding: 0 10px; height: 48px; gap: 6px; }
@@ -1192,29 +1154,27 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .toast {
   padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600;
   color: #fff; letter-spacing: 0.5px; cursor: pointer;
-  pointer-events: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 16px rgba(212,175,55,0.1);
+  pointer-events: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   animation: toastIn 0.3s ease;
   min-width: 200px; text-align: center;
-  border: 1px solid rgba(212,175,55,0.2);
 }
 @keyframes toastIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
-.toast-success { background: linear-gradient(135deg, #1a4a1a, #27ae60); }
-.toast-warning { background: linear-gradient(135deg, #8B6914, #D4AF37); color:#1a1206 !important; }
-.toast-error   { background: linear-gradient(135deg, #8B0000, #B22222); }
-.toast-info    { background: linear-gradient(135deg, #1a2a4a, #3498db); }
+.toast-success { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+.toast-warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
+.toast-error   { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+.toast-info    { background: linear-gradient(135deg, #2980b9, #3498db); }
 
 /* 全域載入動畫 */
 #loading-overlay {
   display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.7); z-index: 99999; justify-content: center; align-items: center;
-  flex-direction: column; gap: 16px; backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center;
+  flex-direction: column; gap: 16px;
 }
 #loading-overlay.show { display: flex; }
 .loading-spinner {
-  width: 56px; height: 56px; border: 3px solid rgba(212,175,55,0.08);
+  width: 48px; height: 48px; border: 3px solid rgba(212,175,55,0.15);
   border-top: 3px solid #D4AF37; border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  box-shadow: 0 0 30px rgba(212,175,55,0.2);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text {
@@ -1239,7 +1199,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 @media (max-width: 700px) {
   /* 頁面容器：消除多層 padding 造成的寬度損失 */
   .page { padding: 6px 4px; }
-  #page-scroll { overflow-x: auto; }
+  #page-scroll { overflow-x: hidden; }
 
   /* 月份列：強制靠左對齊以利換行，防止單行過寬 */
   .month-bar { justify-content: flex-start; }
@@ -1531,7 +1491,6 @@ tbody tr:hover {
 
 <!-- 密码保护遮罩 — 中国风 -->
 <div id="pw-overlay">
-  <canvas id="pw-particles"></canvas>
   <div id="pw-box">
     <div class="pw-corners">
       <div class="pw-corner tl"></div><div class="pw-corner tr"></div>
@@ -1613,8 +1572,6 @@ tbody tr:hover {
     <span class="sb-icon">◀</span>
     <span class="sb-label">折疊選單</span>
   </div>
-  <!-- 版本號（便於確認是否為最新版） -->
-  <div class="sb-version" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:rgba(212,175,55,0.4);letter-spacing:1px;">v6.3.5</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
@@ -1672,7 +1629,7 @@ tbody tr:hover {
     <div class="kpi-grid" id="ov-kpi-grid"></div>
     <!-- 滿寬每日洗碼量 -->
     <div class="chart-full">
-      <div class="chart-title">每日洗碼量（100萬）— 本月趨勢</div>
+      <div class="chart-title">每日洗碼量（萬）— 本月趨勢</div>
       <div style="position:relative;height:200px;"><canvas id="ov-trend-chart"></canvas></div>
       <div class="sparkline-wide" id="ov-sparkline" style="display:none;"></div>
       <div class="spark-labels-wide" id="ov-sparklabels" style="display:none;"></div>
@@ -1681,13 +1638,27 @@ tbody tr:hover {
     <div class="ov-two-col">
       <div class="ov-panel">
         <div class="ov-panel-head"><span>🏆</span> 代理洗碼排行 Top 10</div>
-        <div class="ov-panel-body" id="ov-agent-rank" style="position:relative;height:200px;">
+        <div class="ov-panel-body" id="ov-agent-rank" style="position:relative;min-height:200px;">
           <canvas id="ov-rank-chart"></canvas>
         </div>
       </div>
       <div class="ov-panel">
         <div class="ov-panel-head"><span>📍</span> 場地洗碼分佈</div>
         <div class="ov-panel-body" id="ov-venue-dist"></div>
+      </div>
+    </div>
+    <!-- 房務額度儀表板（滿寬） -->
+    <div class="ov-room-wide">
+      <div class="chart-title" style="margin-bottom:0;">免費房間額度</div>
+      <div class="ov-room-hero">
+        <div class="ov-room-num" id="ov-rm-rolling">0<span>萬</span></div>
+        <div class="ov-room-num" id="ov-rm-used">0<span>晚</span></div>
+      </div>
+      <div class="ov-room-bar-wrap">
+        <div class="ov-room-bar-track">
+          <div class="ov-room-bar-fill" id="ov-rm-progress" style="width:0%;"></div>
+        </div>
+        <div class="ov-room-bar-pct" id="ov-rm-pct">0%</div>
       </div>
     </div>
     <!-- 近期動態 -->
@@ -2077,7 +2048,6 @@ tbody tr:hover {
 <script>
 var txs = [];
 var fundWithdrawals = [];
-var deletedIds = []; // 刪除 ID 清單（同步用，防止已刪除資料被還原）
 var agentWallets = {};
 var editId = null;
 var nextId = 1;
@@ -2094,8 +2064,8 @@ var SYNC_API = (function() {
   if (window.location.protocol === 'file:') return 'http://192.168.18.157:3000';
   var h = window.location.hostname;
   if (h.match(/^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/)) return 'http://' + h + ':3000';
-  // 生產環境：使用當前站點作為同步端點（server.js 已內建 /api/sync/*）
-  return window.location.origin;
+  if (h.indexOf('codebuddy.work') >= 0) return 'https://macau-sync.onrender.com';
+  return 'https://macau-sync.onrender.com';
 })();
 
 // ===== 核心工具函数（v4.3 修復）=====
@@ -2208,12 +2178,10 @@ function unlockBody() { document.documentElement.style.overflow = ""; document.b
 // ===== Toast 通知系統 =====
 function showToast(msg, type) {
   type = type || "info";
-  var icons = { success: "✅ ", warning: "⚠️ ", error: "❌ ", info: "ℹ️ " };
-  var icon = icons[type] || "ℹ️ ";
   var container = document.getElementById("toast-container");
   var el = document.createElement("div");
   el.className = "toast toast-" + type;
-  el.textContent = icon + msg;
+  el.textContent = msg;
   el.onclick = function() { el.remove(); };
   container.appendChild(el);
   setTimeout(function() { if (el.parentNode) el.remove(); }, 3000);
@@ -2303,39 +2271,22 @@ var lastDeleted = null;
 function deleteTx(id) {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
-  // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
-  var deleted = null, idx = -1;
+  // 保存副本供撤銷
   for (var i = 0; i < txs.length; i++) {
-    if (txs[i].id === id) { deleted = txs[i]; idx = i; break; }
+    if (txs[i].id === id) { lastDeleted = txs[i]; break; }
   }
-  if (idx < 0) { hideLoading(); return; }
-  txs.splice(idx, 1);              // 從陣列移除
-  deletedIds.push(id);              // 記錄已刪除 ID
-  lastDeleted = deleted;
-  // 存到 localStorage（不含已刪除項目；deletedIds 另存）
+  var newTxs = [];
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].id !== id) newTxs.push(txs[i]);
+  }
+  txs = newTxs;
   saveData(true);
-  // 儲存 deletedIds
-  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
-  // 標記髒資料，確保上傳
-  if (typeof markSyncDirty === 'function') markSyncDirty();
-  // 立即上傳，上傳成功後再渲染
-  var p = (typeof syncUpload === 'function') ? syncUpload() : Promise.resolve({skipped:true});
-  p.then(function() {
-    renderAll();
-    renderOverview();
-    renderSummary();
-    updateTotalWalletUI();
-    if (lastDeleted) showUndoToast();
-    hideLoading();
-  }).catch(function() {
-    renderAll();
-    renderOverview();
-    renderSummary();
-    updateTotalWalletUI();
-    if (lastDeleted) showUndoToast();
-    hideLoading();
-    if (typeof showToast === 'function') showToast("刪除成功，但同步失敗", "warning");
-  });
+  renderAll();
+  renderOverview();
+  renderSummary();
+  updateTotalWalletUI();
+  if (lastDeleted) showUndoToast();
+  setTimeout(hideLoading, 300);
 }
 function showUndoToast() {
   var container = document.getElementById("toast-container");
@@ -2354,19 +2305,14 @@ function showUndoToast() {
 }
 function undoDelete() {
   if (!lastDeleted) return;
-  // 撤銷刪除：從 deletedIds 移除 ID，並將資料重新插入陣列
-  var did = lastDeleted.id;
-  var di = deletedIds.indexOf(did);
-  if (di >= 0) deletedIds.splice(di, 1);
   txs.push(lastDeleted);
-  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
-  lastDeleted = null;
   saveData(true);
   renderAll();
   renderOverview();
   renderSummary();
   updateTotalWalletUI();
   showToast("已恢復交易！","success");
+  lastDeleted = null;
 }
 
 // ===== 月度管理 =====
@@ -2420,7 +2366,6 @@ function checkPw() {
     // ✅ 安全強化：密碼存在 sessionStorage（記憶體，關閉瀏覽器後清除）
     setSessionPw(v);
     sessionStorage.setItem("macau_auth", "1");
-    _stopLoginParticles();
     document.getElementById("pw-overlay").style.display = "none";
     resetSession();
     showToast("登入成功", "success");
@@ -2489,12 +2434,12 @@ function showPage(name, sidebarEl) {
     var titles = { overview:"總覽", all: "全部交易", query: "查詢", summary: "統計", room: "房務系統" };
     tt.textContent = titles[name] || name;
   }
-  // 觸發各頁面更新（加 try-catch 避免單一頁面錯誤導致頁面卡住）
-  if (name === "overview") { setTimeout(function(){ var tp=document.getElementById("page-overview"); if(tp&&tp.style.display==="block"){ try{ renderOverview(); }catch(e){ console.error("renderOverview error:",e); } } }, 50); }
-  if (name === "all") { try { renderAll(); } catch(e) { console.error("renderAll error:", e); } }
-  if (name === "summary") { try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); } }
-  if (name === "query") { try { fillAgent(); doQuery(); updateTotalWalletUI(); } catch(e) { console.error("query page error:", e); } }
-  if (name === "room") { try { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } } catch(e) { console.error("room page error:", e); } }
+  // 觸發各頁面更新
+  if (name === "overview") renderOverview();
+  if (name === "all") renderAll();
+  if (name === "summary") renderSummary();
+  if (name === "query") { fillAgent(); doQuery(); updateTotalWalletUI(); }
+  if (name === "room") { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } }
 }
 
 // ===== Sidebar toggle =====
@@ -2550,26 +2495,31 @@ function openModal() {
   editId = null;
   document.getElementById("modal-title").textContent = "新增交易";
   populateAgentDropdown();
-  // 檢查是否有未完成的草稿（自動恢復，不彈 confirm 打斷操作）
+  // 檢查是否有未完成的草稿
   var draft = loadDraft();
   if (draft && !draft.editId) {
-    // 靜默恢復草稿資料
-    document.getElementById("f-date").value = draft.date || nowStr();
-    document.getElementById("f-dow").value = getDow(draft.date || nowStr());
-    document.getElementById("f-type").value = draft.type || "rolling";
-    toggleTypeFields();
-    document.getElementById("f-agent").value = draft.agent || "";
-    document.getElementById("f-client").value = draft.client || "";
-    document.getElementById("f-venue").value = draft.venue || "";
-    document.getElementById("f-vol").value = draft.vol || "";
-    document.getElementById("f-rate").value = draft.rate || "1.24";
-    document.getElementById("f-bonus").value = draft.bonus || "";
-    document.getElementById("f-drawn").value = draft.drawn || "0";
-    document.getElementById("f-cash").value = draft.cash || "";
-    document.getElementById("f-note").value = draft.note || "";
-    calc();
-    clearDraft();
-    showToast("已恢復草稿，編輯後按儲存", "info");
+    // 有草稿且不是編輯模式，詢問是否恢復
+    var restore = confirm("偵測到未完成的草稿（" + new Date(draft.ts).toLocaleTimeString("zh-TW") + "），是否恢復？");
+    if (restore) {
+      document.getElementById("f-date").value = draft.date || nowStr();
+      document.getElementById("f-dow").value = getDow(draft.date || nowStr());
+      document.getElementById("f-type").value = draft.type || "rolling";
+      toggleTypeFields();
+      document.getElementById("f-agent").value = draft.agent || "";
+      document.getElementById("f-client").value = draft.client || "";
+      document.getElementById("f-venue").value = draft.venue || "";
+      document.getElementById("f-vol").value = draft.vol || "";
+      document.getElementById("f-rate").value = draft.rate || "1.24";
+      document.getElementById("f-bonus").value = draft.bonus || "";
+      document.getElementById("f-drawn").value = draft.drawn || "0";
+      document.getElementById("f-cash").value = draft.cash || "";
+      document.getElementById("f-note").value = draft.note || "";
+      calc();
+      clearDraft();
+    } else {
+      clearDraft();
+      _resetFormFields();
+    }
   } else {
     clearDraft();
     _resetFormFields();
@@ -2599,35 +2549,6 @@ function closeModal() {
   saveDraft();  // 關閉前儲存草稿
   document.getElementById("modal").classList.remove("show");
   unlockBody();
-}
-
-function editTx(id) {
-  // 根據 ID 查找交易並填入表單進行編輯
-  var tx = null;
-  for (var i = 0; i < txs.length; i++) {
-    if (txs[i].id === id) { tx = txs[i]; break; }
-  }
-  if (!tx) { showToast("找不到該筆交易", "warning"); return; }
-  editId = id;
-  document.getElementById("modal-title").textContent = "編輯交易";
-  populateAgentDropdown();
-  document.getElementById("f-date").value = tx.date || nowStr();
-  document.getElementById("f-dow").value = tx.dow || getDow(tx.date || nowStr());
-  document.getElementById("f-type").value = tx.type || "rolling";
-  toggleTypeFields();
-  document.getElementById("f-agent").value = tx.agent || "";
-  document.getElementById("f-client").value = tx.client || "";
-  document.getElementById("f-venue").value = tx.venue || "";
-  document.getElementById("f-vol").value = tx.volume || "";
-  document.getElementById("f-rate").value = tx.rate || "1.24";
-  document.getElementById("f-bonus").value = tx.bonus || "";
-  document.getElementById("f-drawn").value = tx.drawn || "0";
-  document.getElementById("f-cash").value = tx.cash || "";
-  document.getElementById("f-note").value = tx.note || "";
-  calc();
-  clearDraft(); // 編輯時清除草稿
-  document.getElementById("modal").classList.add("show");
-  lockBody();
 }
 
 function calc() {
@@ -2793,77 +2714,10 @@ function _setupDraftAutoSave() {
     }
   }
 }
-// 登入頁粒子動畫（中國風金塵 + 螢火蟲）
-var _pwParticlesAnimId = null, _pwParticles = [];
-function _startLoginParticles() {
-  try {
-    var cv = document.getElementById("pw-particles");
-    if (!cv) return;
-    cv.width = window.innerWidth;
-    cv.height = window.innerHeight;
-    var ctx = cv.getContext("2d");
-    if (!ctx) return;
-    _pwParticles = [];
-    // 金色塵埃
-    for (var i = 0; i < 40; i++) {
-      _pwParticles.push({
-        x: Math.random() * cv.width, y: Math.random() * cv.height,
-        r: Math.random() * 2 + 0.8,
-        speed: Math.random() * 0.4 + 0.1,
-        opacity: Math.random() * 0.45 + 0.1,
-        hue: Math.random() < 0.3 ? 25 + Math.random() * 10 : 38 + Math.random() * 12,
-        sway: Math.random() * 0.5 - 0.25
-      });
-    }
-    // 螢火蟲（較大較亮）
-    for (var i = 0; i < 8; i++) {
-      _pwParticles.push({
-        x: Math.random() * cv.width, y: Math.random() * cv.height,
-        r: Math.random() * 3 + 2,
-        speed: Math.random() * 0.25 + 0.05,
-        opacity: Math.random() * 0.7 + 0.2,
-        hue: 40 + Math.random() * 10,
-        sway: Math.random() * 0.8 - 0.4,
-        firefly: true
-      });
-    }
-    function _anim() {
-      if (!cv || !ctx) return;
-      ctx.clearRect(0, 0, cv.width, cv.height);
-      for (var i = 0; i < _pwParticles.length; i++) {
-        var p = _pwParticles[i];
-        p.y -= p.speed;
-        p.x += p.sway;
-        if (p.y < -20) { p.y = cv.height + 20; p.x = Math.random() * cv.width; }
-        if (p.x < -10) p.x = cv.width + 10;
-        if (p.x > cv.width + 10) p.x = -10;
-        var alpha = p.opacity;
-        if (p.firefly) alpha = p.opacity * (0.5 + 0.5 * Math.sin(Date.now() / 1500 + i));
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "hsla(" + p.hue + ", 80%, 70%, " + alpha + ")";
-        ctx.fill();
-        if (p.firefly) {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r * 2.5, 0, Math.PI * 2);
-          ctx.fillStyle = "hsla(" + p.hue + ", 80%, 70%, " + (alpha * 0.12) + ")";
-          ctx.fill();
-        }
-      }
-      _pwParticlesAnimId = requestAnimationFrame(_anim);
-    }
-    _anim();
-  } catch(e) { console.error("Login particles error:", e); }
-}
-function _stopLoginParticles() {
-  if (_pwParticlesAnimId) { cancelAnimationFrame(_pwParticlesAnimId); _pwParticlesAnimId = null; }
-  _pwParticles = [];
-}
 // 頁面載入後設定草稿自動儲存監聽 + 自動備份檢查 + PWA 註冊
 document.addEventListener("DOMContentLoaded", function() {
   _setupDraftAutoSave();
   _autoBackupCheck();
-  _startLoginParticles();
   // 註冊 Service Worker（PWA 支援）
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js").then(function(reg) {
@@ -2999,24 +2853,20 @@ function hideLoading() {
   if (el) el.classList.remove("show");
 }
 
-function calcFundBalance() {
-  var totalF = 0;
-  for (var i = 0; i < txs.length; i++) { totalF += (txs[i].fund || 0); }
-  var totalW = 0, totalD = 0, totalCD = 0;
-  for (var i = 0; i < fundWithdrawals.length; i++) {
-    if (fundWithdrawals[i].deleted) continue;
-    if (fundWithdrawals[i].type === "deposit") { totalD += (fundWithdrawals[i].amount || 0); }
-    else if (fundWithdrawals[i].type === "cash_deposit") { totalCD += (fundWithdrawals[i].amount || 0); }
-    else { totalW += (fundWithdrawals[i].amount || 0); }
-  }
-  return Math.max(0, totalF + totalD + totalCD - totalW);
-}
 function openFundModal() {
   document.getElementById("fund-date").value = nowStr();
   document.getElementById("fund-type").value = "withdraw";
   document.getElementById("fund-amount").value = "";
   document.getElementById("fund-note").value = "";
-  document.getElementById("fund-balance").value = fmt(calcFundBalance());
+  var totalF = 0;
+  for (var i = 0; i < txs.length; i++) { totalF += (txs[i].fund || 0); }
+  var totalW = 0, totalD = 0, totalCD = 0;
+  for (var i = 0; i < fundWithdrawals.length; i++) {
+    if (fundWithdrawals[i].type === "deposit") { totalD += (fundWithdrawals[i].amount || 0); }
+    else if (fundWithdrawals[i].type === "cash_deposit") { totalCD += (fundWithdrawals[i].amount || 0); }
+    else { totalW += (fundWithdrawals[i].amount || 0); }
+  }
+  document.getElementById("fund-balance").value = fmt(Math.max(0, totalF + totalD + totalCD - totalW));
   document.getElementById("fund-modal").classList.add("show");
   lockBody();
 }
@@ -3032,48 +2882,23 @@ function saveFundForm() {
   if (!date) { showToast("請選擇日期！","warning"); return; }
   if (!validateMonthDate(date, "公基金異動")) return;
   if (!amount) { showToast("請輸入金額！","warning"); return; }
-  // 檢查提領時不能超過可提領餘額
-  if (type === "withdraw") {
-    var testBal = calcFundBalance();
-    if (amount > testBal) { showToast("提領金額超過可提領餘額 " + fmt(testBal) + "！", "warning"); return; }
-  }
   fundWithdrawals.push({ id: fundNextId++, date: date, type: type, amount: amount, note: note });
   saveFundData(true);
   closeFundModal();
-  // 刷新所有頁面的基金餘額顯示
-  renderOverview();
-  renderSummary();
-  // 只在查詢頁面時刷新查詢明細
-  var qp = document.getElementById("page-query");
-  if (qp && qp.style.display !== "none") {
-    fillAgent(); doQuery();
-  }
+  doQuery();
   updateTotalWalletUI();
   showToast("已儲存！","success");
 }
 function deleteFund(id) {
   if (!confirm("確定刪除？")) return;
-  // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
-  var idx = -1;
-  for (var i = 0; i < fundWithdrawals.length; i++) {
-    if (fundWithdrawals[i].id === id) { idx = i; break; }
-  }
-  if (idx < 0) return;
-  var deleted = fundWithdrawals.splice(idx, 1)[0]; // 從陣列移除
-  deletedIds.push(id);                               // 記錄已刪除 ID
-  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
+  var newArr = [];
+  for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id !== id) newArr.push(fundWithdrawals[i]); }
+  fundWithdrawals = newArr;
   saveFundData(true);
-  // 刷新所有頁面的基金餘額顯示
-  renderOverview();
-  renderSummary();
-  var qp = document.getElementById("page-query");
-  if (qp && qp.style.display !== "none") {
-    fillAgent(); doQuery();
-  }
+  doQuery();
   updateTotalWalletUI();
 }
 function saveFundData(silent) {
-  markSyncDirty();
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
   if (typeof syncUpload === 'function') syncUpload();
 }
@@ -3124,19 +2949,13 @@ function saveAgentWalletForm() {
   if (!date) { showToast("請選擇日期！","warning"); return; }
   if (!validateMonthDate(date, "代理錢包異動")) return;
   if (!amount) { showToast("請輸入金額！","warning"); return; }
-  try {
-    if (!agentWallets[agent]) agentWallets[agent] = [];
-    agentWallets[agent].push({ id: agentWalletNextId++, date: date, type: type, amount: amount, note: note });
-    saveAgentWallets(true);
-    syncAgentDrawn(agent);
-    closeAgentWalletModal();
-    try { doQuery(); } catch(e2) { console.error("[saveAgentWalletForm] doQuery error:", e2); }
-    showToast("已儲存！","success");
-  } catch(e) {
-    console.error("[saveAgentWalletForm] error:", e);
-    showToast("儲存失敗：" + (e.message||e), "error");
-    try { closeAgentWalletModal(); } catch(e2) {}
-  }
+  if (!agentWallets[agent]) agentWallets[agent] = [];
+  agentWallets[agent].push({ id: agentWalletNextId++, date: date, type: type, amount: amount, note: note });
+  saveAgentWallets(true);
+  syncAgentDrawn(agent);
+  closeAgentWalletModal();
+  doQuery();
+  showToast("已儲存！","success");
 }
 function deleteAgentWallet(agent, id) {
   if (!confirm("確定刪除？")) return;
@@ -3149,7 +2968,6 @@ function deleteAgentWallet(agent, id) {
   doQuery();
 }
 function syncAgentDrawn(agent) {
-  try {
   var awArr = agentWallets[agent] || [];
   var awTotal = 0;
   for (var i = 0; i < awArr.length; i++) {
@@ -3160,13 +2978,9 @@ function syncAgentDrawn(agent) {
     if (txs[i].agent === agent) txs[i].drawn = awTotal;
   }
   saveData(true);
-  try { renderAll(); } catch(e1) { console.error("[syncAgentDrawn] renderAll error:", e1); }
-  try { renderOverview(); } catch(e2) { console.error("[syncAgentDrawn] renderOverview error:", e2); }
-  try { renderSummary(); } catch(e3) { console.error("[syncAgentDrawn] renderSummary error:", e3); }
-  } catch(e) {
-    console.error("[syncAgentDrawn] fatal error:", e);
-    showToast("同步代理提領失敗：" + (e.message||e), "error");
-  }
+  renderAll();
+  renderOverview();
+  renderSummary();
 }
 function saveAgentWallets(silent) {
   localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
@@ -3187,7 +3001,6 @@ function loadAgentWallets(silent) {
 
 function saveData(silent) {
   try {
-    markSyncDirty();  // 標記數據已變更，加速同步
     var encrypted = encryptData(txs);
     localStorage.setItem("macau_data", encrypted);
     if (typeof syncUpload === 'function') syncUpload();
@@ -3220,23 +3033,13 @@ function loadData(silent) {
 
 document.addEventListener("click", function(e) {
   var btn = e.target.closest("[data-del]");
-  if (!btn) {
-    // 檢查是否為編輯按鈕
-    var editBtn = e.target.closest("[data-edit]");
-    if (editBtn) {
-      e.preventDefault();
-      var eid = parseInt(editBtn.getAttribute("data-edit"));
-      editTx(eid);
-    }
-    return;
-  }
+  if (!btn) return;
   e.preventDefault();
   var id = parseInt(btn.getAttribute("data-del"));
   deleteTx(id);
 });
 
 function renderAll() {
-  try {
   var tbody = document.getElementById("all-body");
   tbody.innerHTML = "";
   var tbl = document.getElementById("all-table");
@@ -3257,8 +3060,6 @@ function renderAll() {
   }
   // 排序
   filtered = sortTxs(filtered.slice());
-  // 過濾已刪除項目（deleted:true 不下載時顯示）
-  filtered = filtered.filter(function(t) { return !t.deleted; });
   // ✅ 修正：先更新 KPI 卡片（即使沒有資料也要歸零）
   renderAllMiniKPI();
   if (!filtered.length) {
@@ -3297,28 +3098,25 @@ function renderAll() {
       "<td class='num'>" + drawnFmt + "</td>" +
       "<td class='num'>" + undrawnFmt + "</td>" +
       "<td>" + (t.note || "") + "</td>" +
-      "<td><button class='btn' style='background:#3498db;color:#fff;padding:5px 10px;font-size:12px;border-radius:6px;border:none;cursor:pointer;' data-edit='" + t.id + "'>編輯</button> <button class='btn-red' data-del='" + t.id + "'>刪除</button></td>";
+      "<td><button class='btn-red' data-del='" + t.id + "'>刪除</button></td>";
     tbody.appendChild(tr);
   }
   fillAgent();
   populateVenueDropdown();
-  } catch(e) { console.error('[renderAll] error:', e); }
 }
 
 function calcTotalWallet() {
   // 計算所有代理錢包餘額（v4.9 修復）
-  // 過濾已刪除項目
-  var activeTxs = txs.filter(function(t) { return !t.deleted; });
   var agentSet = {};
   var agentTxDrawn = {};  // 每位代理的 tx.drawn（因 syncAgentDrawn 全部設成一樣，只需取一次）
-  for (var i = 0; i < activeTxs.length; i++) {
-    var a = activeTxs[i].agent || "";
+  for (var i = 0; i < txs.length; i++) {
+    var a = txs[i].agent || "";
     if (!a) continue;
     if (!agentSet[a]) agentSet[a] = { bonus: 0, cash: 0 };
-    agentSet[a].bonus += (activeTxs[i].bonus || 0);
-    agentSet[a].cash += (activeTxs[i].cash || 0);
+    agentSet[a].bonus += (txs[i].bonus || 0);
+    agentSet[a].cash += (txs[i].cash || 0);
     // 記錄此代理的 drawn（因 syncAgentDrawn 設全部交易一樣，取第一次即可）
-    if (!agentTxDrawn[a] && activeTxs[i].drawn > 0) agentTxDrawn[a] = activeTxs[i].drawn;
+    if (!agentTxDrawn[a] && txs[i].drawn > 0) agentTxDrawn[a] = txs[i].drawn;
   }
   var totalAgent = 0;
   var agents = Object.keys(agentSet);
@@ -3338,7 +3136,16 @@ function calcTotalWallet() {
     totalAgent += bal;
   }
   // 計算公基金餘額
-  var fundBal = calcFundBalance();
+  var totalFund = 0;
+  for (var i = 0; i < txs.length; i++) { totalFund += (txs[i].fund || 0); }
+  var fwDep = 0, fwCDep = 0, fwWithdraw = 0;
+  for (var i = 0; i < fundWithdrawals.length; i++) {
+    var ft = fundWithdrawals[i].type;
+    if (ft === "deposit") fwDep += (fundWithdrawals[i].amount || 0);
+    else if (ft === "cash_deposit") fwCDep += (fundWithdrawals[i].amount || 0);
+    else fwWithdraw += (fundWithdrawals[i].amount || 0);
+  }
+  var fundBal = Math.max(0, totalFund + fwDep + fwCDep - fwWithdraw);
   return totalAgent + fundBal;
 }
 
@@ -3363,29 +3170,19 @@ function closeCurrentMonth() {
 }
 
 // ===== 同步功能 =====
-var _lastSyncModified = 0; // 紀錄上次同步時間戳，用於增量同步
-var _syncDirty = false;     // 標記數據是否有變更，避免無謂上傳
-function markSyncDirty() { _syncDirty = true; }
 function syncUpload() {
-  if (!SYNC_API) return Promise.reject('未配置同步伺服器');
-  // 若數據未變更且已上傳過，跳過上傳以加快速度
-  if (!_syncDirty && _lastSyncModified > 0) {
-    return Promise.resolve({ skipped: true });
-  }
+  if (!SYNC_API) return;
   var payload = {
     password: SYNC_PASSWORD,
-    deletedIds: deletedIds,  // 上傳已刪除 ID 清單
     txs: txs,
     agentList: agentList,
     agentWallets: agentWallets,
     fundWithdrawals: fundWithdrawals,
     workingMonth: workingMonth,
     archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
-    rm_bookings: (typeof RM !== 'undefined' && RM.bookings && RM.bookings.length > 0) ? RM.bookings : undefined,
-    rm_last_id: (typeof RM !== 'undefined' && RM.lastId && RM.lastId > 0) ? RM.lastId : undefined,
     timestamp: Date.now()
   };
-  return fetch(SYNC_API + '/api/sync/upload', {
+  fetch(SYNC_API + '/api/sync/upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-sync-password': SYNC_PASSWORD || '' },
     body: JSON.stringify(payload)
@@ -3393,207 +3190,65 @@ function syncUpload() {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     }).then(function(resp) {
-    _syncDirty = false; // 上傳成功，清除髒標記
-    // 上傳成功後同步更新時間戳，避免下一輪 poll 誤判為有變更
-    if (resp && resp.lastModified) _lastSyncModified = resp.lastModified;
     console.log('[Sync ↑] 上傳成功', resp);
-    return resp;
   }).catch(function(err) {
     console.error('[Sync ↑] 上傳失敗', err);
-    throw err;
   });
 }
 
 function syncDownload() {
-  if (!SYNC_API) return Promise.reject('未配置同步伺服器');
-  // 先透過 /api/poll 檢查伺服器數據是否有變更，有變更才下載
-  var pollUrl = SYNC_API + '/api/poll?since=' + _lastSyncModified;
-  return fetch(pollUrl, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
+  if (!SYNC_API) return;
+  var url = SYNC_API + '/api/sync/download?password=' + encodeURIComponent(SYNC_PASSWORD);
+  fetch(url, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     })
-    .then(function(pollResp) {
-      if (!pollResp || pollResp.ok === false) {
-        throw new Error(pollResp ? pollResp.error : '未知錯誤');
-      }
-      if (!pollResp.changed) {
-        console.log('[Sync ↓] 數據未變更，跳過下載');
-        return pollResp;
-      }
-      // 有變更：若 poll 回應已含數據則直接使用，否則下載全量
-      if (pollResp.data && pollResp.data.txs !== undefined) {
-        return pollResp;
-      }
-      var url = SYNC_API + '/api/sync/download';
-      return fetch(url, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
-        .then(function(r2) {
-          if (!r2.ok) throw new Error('HTTP ' + r2.status);
-          return r2.json();
-        });
-    })
     .then(function(data) {
-      if (data.changed === false) return data; // poll 回傳的未變更回應
-      // 處理 poll 回傳的 data 格式或 download 回傳的格式
-      var d = data.data || data;
-      if (!d || d.ok === false) {
-        throw new Error(d ? d.error : '未知錯誤');
+      if (!data || data.ok === false) {
+        console.log('[Sync ↓] 下載失敗：', data ? data.error : '未知錯誤');
+        return;
       }
-      // 處理伺服器下發的 deletedIds：合併並從本地陣列中移除
-      if (d.deletedIds && Array.isArray(d.deletedIds)) {
-        // 合併 deletedIds（保留本地和伺服器兩邊的 ID）
-        for (var di = 0; di < d.deletedIds.length; di++) {
-          var did = d.deletedIds[di];
-          if (deletedIds.indexOf(did) < 0) deletedIds.push(did);
-        }
-        // 將 deletedIds 存到 localStorage
-        try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
-        // 從 txs 中移除已被刪除的 ID
-        var txsFresh = [];
-        for (var i = 0; i < txs.length; i++) {
-          if (deletedIds.indexOf(txs[i].id) < 0) txsFresh.push(txs[i]);
-        }
-        txs = txsFresh;
-        // 從 fundWithdrawals 中移除
-        var fwFresh = [];
-        for (var i = 0; i < fundWithdrawals.length; i++) {
-          if (deletedIds.indexOf(fundWithdrawals[i].id) < 0) fwFresh.push(fundWithdrawals[i]);
-        }
-        fundWithdrawals = fwFresh;
-        // 從 RM.bookings 中移除
-        if (typeof RM !== 'undefined' && RM.bookings) {
-          var rmFresh = [];
-          for (var i = 0; i < RM.bookings.length; i++) {
-            if (deletedIds.indexOf(RM.bookings[i].id) < 0) rmFresh.push(RM.bookings[i]);
-          }
-          RM.bookings = rmFresh;
-        }
-        console.log('[Sync ↓] 已根據 deletedIds 清理本地資料，共 ' + deletedIds.length + ' 筆刪除紀錄');
-      }
-      // 合併 txs（按 ID 合併，不含已刪除的 ID）
-      if (d.txs !== undefined) {
-        var txMap = {};
-        for (var i = 0; i < txs.length; i++) txMap[txs[i].id] = txs[i];
-        for (var i = 0; i < d.txs.length; i++) {
-          var sItem = d.txs[i];
-          // 跳過已刪除的 ID
-          if (deletedIds.indexOf(sItem.id) >= 0) continue;
-          txMap[sItem.id] = sItem;
-        }
-        txs = [];
-        for (var tid in txMap) txs.push(txMap[tid]);
-      }
-      // agentList：只在上傳成功後才取代（避免空資料覆蓋本地資料）
-      if (d.agentList !== undefined && d.agentList.length > 0) agentList = d.agentList;
-      // agentWallets：只在上傳成功後才取代
-      if (d.agentWallets !== undefined && Object.keys(d.agentWallets).length > 0) agentWallets = d.agentWallets;
-      // 合併 fundWithdrawals（按 ID 合併，不含已刪除的 ID）
-      if (d.fundWithdrawals !== undefined) {
-        var fwMap = {};
-        for (var i = 0; i < fundWithdrawals.length; i++) fwMap[fundWithdrawals[i].id] = fundWithdrawals[i];
-        for (var i = 0; i < d.fundWithdrawals.length; i++) {
-          var sItem = d.fundWithdrawals[i];
-          if (deletedIds.indexOf(sItem.id) >= 0) continue; // 跳過已刪除的 ID
-          fwMap[sItem.id] = sItem;
-        }
-        fundWithdrawals = [];
-        for (var fid in fwMap) fundWithdrawals.push(fwMap[fid]);
-      }
-      if (d.workingMonth) workingMonth = d.workingMonth;
-      if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
-      // 還原 RM 數據（合併策略，保留本地尚未上傳的資料）
-      if (d.rm_bookings !== undefined && typeof RM !== 'undefined') {
-        var rmMap = {};
-        for (var ri = 0; ri < RM.bookings.length; ri++) rmMap[RM.bookings[ri].id] = RM.bookings[ri];
-        for (var ri = 0; ri < d.rm_bookings.length; ri++) {
-          var sItem = d.rm_bookings[ri];
-          var lItem = rmMap[sItem.id];
-          if (lItem && lItem.deleted) {
-            rmMap[sItem.id] = lItem;
-          } else if (sItem.deleted) {
-            rmMap[sItem.id] = sItem;
-          } else {
-            rmMap[sItem.id] = sItem;
-          }
-        }
-        RM.bookings = [];
-        for (var rid in rmMap) RM.bookings.push(rmMap[rid]);
-        try { localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings)); } catch(e) {}
-        if (d.rm_last_id && RM.lastId < d.rm_last_id) RM.lastId = d.rm_last_id;
-        try { localStorage.setItem("rm_last_id", RM.lastId.toString()); } catch(e) {}
-        try { RM.render(); RM.updateQuota(); } catch(e) { console.error('RM sync refresh error:', e); }
-        console.log('[Sync ↓] RM 數據已還原（合併），共 ' + RM.bookings.length + ' 筆');
-      } else if (typeof RM !== 'undefined') {
-        // 伺服器傳回空陣列或無資料時，保留本地資料
-        console.log('[Sync ↓] 伺服器 rm_bookings 為空，保留本地資料（共 ' + RM.bookings.length + ' 筆）');
-      }
-      _lastSyncModified = d.lastModified || data.lastModified || Date.now();
+      txs = data.txs || txs;
+      agentList = data.agentList || agentList;
+      agentWallets = data.agentWallets || agentWallets;
+      fundWithdrawals = data.fundWithdrawals || fundWithdrawals;
+      if (data.workingMonth) workingMonth = data.workingMonth;
+      if (data.archives) localStorage.setItem('macau_archives', JSON.stringify(data.archives));
       saveData(true);
       renderAll();
       renderOverview();
       renderSummary();
-      console.log('[Sync ↓] 下載並合併完成，共', d.txs ? d.txs.length : 0, '筆');
-      return data;
+      console.log('[Sync ↓] 下載並合併完成，共', data.txs ? data.txs.length : 0, '筆');
     }).catch(function(err) {
       console.error('[Sync ↓] 下載失敗', err);
-      throw err;
     });
 }
 
 function manualSync() {
   if (!SYNC_API) { showToast('未配置同步伺服器', 'warning'); return; }
   showLoading('正在同步…');
-  // 強制上傳並重設時間戳，確保下載最新全量
-  _syncDirty = true;
-  _lastSyncModified = 0;
-  syncUpload().then(function() {
-    return syncDownload();
-  }).then(function() {
-    hideLoading();
-    showToast('同步完成', 'success');
-  }).catch(function(err) {
-    hideLoading();
-    showToast('同步失敗：' + (err.message || err), 'error');
-  });
+  syncUpload();
+  setTimeout(function() {
+    syncDownload();
+    setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 1200);
+  }, 800);
 }
 
 function initSync() {
   if (!SYNC_API) { console.log('同步伺服器未配置'); return; }
-  console.log('同步伺服器：' + SYNC_API + '（增量同步已啟用，間隔 5 秒）');
-  // 載入本地 deletedIds（已刪除 ID 清單，用於跨設備同步刪除）
-  try {
-    var di = JSON.parse(localStorage.getItem("macau_deleted_ids"));
-    if (Array.isArray(di)) deletedIds = di;
-  } catch(e) { deletedIds = []; }
-  console.log('[Sync] 本地 deletedIds 載入：' + deletedIds.length + ' 筆');
-  // 立即執行一次同步（先上傳再下載）
-  var firstUpload = _syncDirty ? syncUpload() : Promise.resolve();
-  firstUpload.then(function() {
-    return syncDownload();
-  }).then(function() {
-    console.log('[Sync] 首次同步完成');
-  }).catch(function() {
-    console.log('[Sync] 首次同步失敗，將在 5 秒後重試');
-  });
-  // 定期同步（每 5 秒，先上傳、完成後才下載，避免競態）
+  console.log('同步伺服器：' + SYNC_API);
+  // 定期同步（每 30 秒）
   setInterval(function() {
-    // 先上傳本地變更，並等待完成後才下載
-    var uploadPromise = _syncDirty ? syncUpload() : Promise.resolve();
-    uploadPromise.then(function() {
-      return syncDownload();
-    }).catch(function() {
-      // 上傳失敗也執行下載
-      return syncDownload();
-    });
-  }, 5000);
+    if (typeof syncUpload === 'function') syncUpload();
+    if (typeof syncDownload === 'function') syncDownload();
+  }, 30000);
 }
 
 function renderSummary() {
-  try {
   var map = {};
-  var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
-  for (var i = 0; i < _txs.length; i++) {
-    var t = _txs[i];
+  for (var i = 0; i < txs.length; i++) {
+    var t = txs[i];
     var key = (t.agent || "未設定") + "|" + (t.venue || "");
     if (!map[key]) map[key] = { agent: t.agent || "未設定", venue: t.venue, vol: 0, bonus: 0, drawn: 0, cash: 0 };
     map[key].vol += toNum(t.volume) || 0;
@@ -3605,7 +3260,6 @@ function renderSummary() {
   tbody.innerHTML = "";
   var msgEl = document.getElementById("summary-msg");
   var tblEl = document.getElementById("summary-table");
-  var keys = Object.keys(map);
   if (!keys.length) {
     if (tblEl) tblEl.style.display = "none";
     if (msgEl) {
@@ -3618,6 +3272,7 @@ function renderSummary() {
   if (tblEl) tblEl.style.display = "table";
   if (msgEl) msgEl.style.display = "none";
   var totalBonus = 0, totalFund = 0;
+  var keys = Object.keys(map);
   for (var k = 0; k < keys.length; k++) {
     var c = map[keys[k]];
     var tr = document.createElement("tr");
@@ -3637,7 +3292,6 @@ function renderSummary() {
     "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(totalBonus) + "</div></div>" +
     "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領總額</div><div class='value'>" + fmt(totalFund) + "</div></div>";
   updateTotalWalletUI();
-  } catch(e) { console.error('[renderSummary] error:', e); }
 }
 
 function quickFilter(type, ev) {
@@ -3668,17 +3322,10 @@ function quickFilter(type, ev) {
 
 function fillAgent() {
   var sel = document.getElementById("q-agent");
-  var cur = sel ? sel.value : "";
   var h = "<option value=''>全部</option>";
   for (var j = 0; j < agentList.length; j++) { h += "<option value='" + agentList[j] + "'>" + agentList[j] + "</option>"; }
   h += "<option value='__FUND__'>公基金</option>";
   sel.innerHTML = h;
-  // 保留原本選擇
-  if (cur) {
-    for (var k = 0; k < sel.options.length; k++) {
-      if (sel.options[k].value === cur) { sel.value = cur; break; }
-    }
-  }
 }
 
 // ===== 進階篩選器 =====
@@ -3782,24 +3429,21 @@ function populateVenueDropdown() {
 }
 
 function doQuery() {
-  try {
-  var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
   if (!month) month = workingMonth || nowStr().slice(0, 7);
   // 公基金查询 - 分筆流水（含累計餘額）
   if (agent === "__FUND__") {
-    var __fundWithdrawals = fundWithdrawals.filter(function(f) { return !f.deleted; });
     var allFundTxs = [], preBalance = 0, totalFund = 0;
-    for (var i = 0; i < _txs.length; i++) {
-      var fv = _txs[i].fund || 0;
+    for (var i = 0; i < txs.length; i++) {
+      var fv = txs[i].fund || 0;
       totalFund += fv;
-      if (fv > 0) allFundTxs.push({ date: _txs[i].date, desc: (_txs[i].agent||"") + " " + (_txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: _txs[i].id });
+      if (fv > 0) allFundTxs.push({ date: txs[i].date, desc: (txs[i].agent||"") + " " + (txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: txs[i].id });
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     var totalW = 0, totalD = 0, totalCD = 0;
-    for (var i = 0; i < __fundWithdrawals.length; i++) {
-      var r = __fundWithdrawals[i];
+    for (var i = 0; i < fundWithdrawals.length; i++) {
+      var r = fundWithdrawals[i];
       if (r.type === "deposit") { totalD += (r.amount || 0); }
       else if (r.type === "cash_deposit") { totalCD += (r.amount || 0); }
       else { totalW += (r.amount || 0); }
@@ -3816,7 +3460,7 @@ function doQuery() {
         else preBalance -= e.amount;
       }
     }
-    var balance = calcFundBalance();
+    var balance = Math.max(0, totalFund + totalD + totalCD - totalW);
     var running = preBalance;
     document.getElementById("query-kpi").innerHTML =
       "<div class='kpi-card'><div class='label'>公基金總額</div><div class='value'>" + fmt(totalFund) + "</div></div>" +
@@ -3863,8 +3507,8 @@ function doQuery() {
   var dateTo = document.getElementById("q-date-to").value;
   var volMin = toNum(document.getElementById("q-vol-min").value) || 0;
   var volMax = toNum(document.getElementById("q-vol-max").value) || 0;
-  for (var i = 0; i < _txs.length; i++) {
-    var t = _txs[i];
+  for (var i = 0; i < txs.length; i++) {
+    var t = txs[i];
     if (t.date && t.date.indexOf(month) !== 0) continue;
     if (agent && t.agent !== agent) continue;
     if (venue && t.venue !== venue) continue;
@@ -3921,10 +3565,10 @@ function doQuery() {
     var awArr = agentWallets[agent] || [];
     // 計算全部碼糧總額（不分月份）含現金寄放
     var allBonus = 0, allCash = 0, allDrawn = 0;
-    for (var n = 0; n < _txs.length; n++) {
-      if (_txs[n].agent === agent) {
-        allBonus += (_txs[n].bonus || 0);
-        allCash += (_txs[n].cash || 0);
+    for (var n = 0; n < txs.length; n++) {
+      if (txs[n].agent === agent) {
+        allBonus += (txs[n].bonus || 0);
+        allCash += (txs[n].cash || 0);
       }
     }
     for (var p = 0; p < awArr.length; p++) {
@@ -3941,12 +3585,12 @@ function doQuery() {
     var awBalance = Math.max(0, allBonus + allCash + awDep + awCDep - allDrawn);
     // 建立合併流水：全部交易 + 錢包提領（含現金寄放）
     var allLedger = [];
-    for (var p = 0; p < _txs.length; p++) {
-      if (_txs[p].agent !== agent) continue;
-      var bv = _txs[p].bonus || 0;
-      var cv = _txs[p].cash || 0;
-      if (bv > 0) allLedger.push({ date: _txs[p].date, venue: _txs[p].venue||"", client: _txs[p].client||"", volume: toNum(_txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: _txs[p].id });
-      if (cv > 0) allLedger.push({ date: _txs[p].date, venue: "現金寄放", client: _txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: _txs[p].id });
+    for (var p = 0; p < txs.length; p++) {
+      if (txs[p].agent !== agent) continue;
+      var bv = txs[p].bonus || 0;
+      var cv = txs[p].cash || 0;
+      if (bv > 0) allLedger.push({ date: txs[p].date, venue: txs[p].venue||"", client: txs[p].client||"", volume: toNum(txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: txs[p].id });
+      if (cv > 0) allLedger.push({ date: txs[p].date, venue: "現金寄放", client: txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: txs[p].id });
     }
     for (var p = 0; p < awArr.length; p++) {
       var wt = awArr[p].type;
@@ -4029,12 +3673,7 @@ function doQuery() {
     totalRow.innerHTML = "<td></td><td style='color:#1a1a2e;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
     tbody.appendChild(totalRow);
   }
-  } catch(e) {
-    console.error('[doQuery] error:', e);
-    showToast('查詢失敗：' + (e.message||e), 'error');
-  }
 }
-
 
 function exportCSV() {
   var csv = "\uFEFF類型,日期,星期,代理,客戶,地點,洗碼量,碼佣率,佣金總額,代理碼糧,已提領,未提領,公基金,寄放金額,備註\n";
@@ -4332,16 +3971,12 @@ initSync();
 
 // ===== 總覽頁渲染 =====
 function renderOverview() {
-  try {
-    // 過濾已刪除項目（deleted:true 不下載時顯示）
-    var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
-    var _rmBookings = (typeof RM !== 'undefined' && RM.bookings) ? RM.bookings : []; // deleted:true 過濾已移除
-    // --- KPI 卡片 ---
-    var now = workingMonth || nowStr().slice(0,7);
-    var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
-    var agentSet = {};
-    for (var i=0;i<_txs.length;i++){
-    var t=_txs[i];
+  // --- KPI 卡片 ---
+  var now = workingMonth || nowStr().slice(0,7);
+  var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
+  var agentSet = {};
+  for (var i=0;i<txs.length;i++){
+    var t=txs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     if (t.type==="cash"){ totalCash+=(t.cash||0); }
     else { totalVol+=(t.volume||0); }
@@ -4355,12 +3990,10 @@ function renderOverview() {
   var fDep=0,fCD=0,fWit=0;
   for (var j=0;j<fundWithdrawals.length;j++){
     var f=fundWithdrawals[j];
-    // if (f.deleted) continue; // 已移除（改用 deletedIds 同步）
     if (!f.date||f.date.slice(0,7)!==now) continue;
     if (f.type==="deposit") fDep+=f.amount; else if (f.type==="cash_deposit") fCD+=f.amount; else fWit+=f.amount;
   }
-  // 公基金累计馀额（所有时间）
-  var fundBalance = calcFundBalance();
+  var fundNet = totalFund+fDep+fCD-fWit;
   var undrawnTotal = Math.max(0,totalBonus-totalDrawn);
 
   var grid=document.getElementById("ov-kpi-grid");
@@ -4368,21 +4001,21 @@ function renderOverview() {
   var rmUsedRolling=0;
   var roomMonth=now.slice(0,7);
   var agentsWithRolling = {};
-  for (var kk=0;kk<_txs.length;kk++){ var tr=_txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
-  if (_rmBookings.length > 0){
-    for (var k=0;k<_rmBookings.length;k++){
-      var b=_rmBookings[k];
+  for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
+  if (typeof RM!=="undefined"&&RM.bookings){
+    for (var k=0;k<RM.bookings.length;k++){
+      var b=RM.bookings[k];
       if (!b.date||b.date.slice(0,7)!==roomMonth) continue;
       if (b.status==="免費") rmUsedRolling += (b.nights||0) * (b.threshold||70);
     }
   }
   // 免費一晚計數：只計有洗碼記錄的代理
-  var rmFreeCount = typeof RM!=="undefined" ? _rmBookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免費"&&agentsWithRolling[x.agent];}).length : 0;
+  var rmFreeCount = typeof RM!=="undefined" ? RM.bookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免費"&&agentsWithRolling[x.agent];}).length : 0;
   grid.innerHTML=''+
     '<div class="kpi-card-new gold"><div class="kpi-label">本月洗碼量</div><div class="kpi-value">'+fmt(totalVol)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>'+
-    '<div class="kpi-card-new green"><div class="kpi-label">剩餘轉碼</div><div class="kpi-value">'+fmt(totalVol-rmUsedRolling)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div></div>'+
+    '<div class="kpi-card-new green"><div class="kpi-label">剩餘轉碼</div><div class="kpi-value">'+fmt(totalVol-rmUsedRolling)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+rmFreeCount+' 晚免費</div></div>'+
     '<div class="kpi-card-new red"><div class="kpi-label">未提領</div><div class="kpi-value">'+fmt(undrawnTotal)+'</div><div class="kpi-delta down">'+undrawnCount+' 筆待提</div></div>'+
-    '<div class="kpi-card-new blue"><div class="kpi-label">公基金</div><div class="kpi-value">'+fmt(fundBalance)+'</div><div class="kpi-delta">本月入帳 '+fmt(totalFund)+'</div></div>'+
+    '<div class="kpi-card-new blue"><div class="kpi-label">公基金</div><div class="kpi-value">'+fmt(fundNet)+'</div><div class="kpi-delta">本月入帳 '+fmt(totalFund)+'</div></div>'+
     '<div class="kpi-card-new orange"><div class="kpi-label">現金寄放</div><div class="kpi-value">'+fmt(totalCash)+'</div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>';
 
   // --- 每日洗碼量 Sparkline（滿寬，顯示全部天數）---
@@ -4391,8 +4024,8 @@ function renderOverview() {
   var daysInMonth=new Date(parseInt(now.slice(0,4)),parseInt(now.slice(5,7)),0).getDate();
   var daily=[];
   for (var d=1;d<=daysInMonth;d++) daily.push(0);
-  for (var i=0;i<_txs.length;i++){
-    var t=_txs[i];
+  for (var i=0;i<txs.length;i++){
+    var t=txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash") continue;
     var day=parseInt(t.date.slice(8,10))-1;
     if (day>=0&&day<daysInMonth) daily[day]+=(t.volume||0);
@@ -4404,7 +4037,7 @@ function renderOverview() {
   for (var d=0;d<daysInMonth;d++){
     var v=daily[d];
     var h=v>0?Math.max(2,Math.round(v/maxV*maxH)):2;
-    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(v)+'萬 ('+fmt(v/100)+'×100萬)"><span>'+fmt(v/100)+'</span></div>';
+    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(v)+'萬"><span>'+fmt(v)+'</span></div>';
     lblHTML+='<span>'+(d%3===0||d===0||d===daysInMonth-1?(d+1)+'日':'')+'</span>';
   }
   spark.innerHTML=sparkHTML;
@@ -4415,8 +4048,8 @@ function renderOverview() {
 
   // --- 代理洗碼排行 Top 10（Chart.js 長條圖）---
   var agtVol={};
-  for (var i=0;i<_txs.length;i++){
-    var t=_txs[i];
+  for (var i=0;i<txs.length;i++){
+    var t=txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.agent) continue;
     if (!agtVol[t.agent]) agtVol[t.agent]=0;
     agtVol[t.agent]+=(t.volume||0);
@@ -4430,8 +4063,8 @@ function renderOverview() {
   // --- 場地洗碼分佈 ---
   var venueColors = ['#d4af37','#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c','#f39c12'];
   var venVol={};
-  for (var i=0;i<_txs.length;i++){
-    var t=_txs[i];
+  for (var i=0;i<txs.length;i++){
+    var t=txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.venue) continue;
     if (!venVol[t.venue]) venVol[t.venue]=0;
     venVol[t.venue]+=(t.volume||0);
@@ -4446,24 +4079,49 @@ function renderOverview() {
     var vpct=Math.round(vn.vol/maxVV*100);
     var vcol=venueColors[vi%venueColors.length];
     var shortName=vn.name.length>8?vn.name.slice(0,8)+'..':vn.name;
-    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬 <span style="color:rgba(255,255,255,0.3);font-size:10px;">('+fmt(vn.vol/100)+'×100萬)</span></div></div></div>';
+    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬</div></div></div>';
   }
   if (!venArr.length) venHTML='<div class="venue-empty">本月尚無數據</div>';
   document.getElementById("ov-venue-dist").innerHTML=venHTML;
+
+  // --- 房務迷你儀表板 ---
+  var rmRolling=document.getElementById("ov-rm-rolling");
+  var rmUsed=document.getElementById("ov-rm-used");
+  var rmProg=document.getElementById("ov-rm-progress");
+  var rmPct=document.getElementById("ov-rm-pct");
+  if (rmRolling){
+    var rmTotalNights=0,rmFreeNights=0;
+    var roomMonth=nowStr().slice(0,7);
+    if (typeof RM!=="undefined"&&RM.bookings){
+      for (var k=0;k<RM.bookings.length;k++){
+        var b=RM.bookings[k];
+        if (!b.date||b.date.slice(0,7)!==roomMonth) continue;
+        rmTotalNights+=(b.nights||0);
+        if (b.status==="免費") rmFreeNights+=(b.nights||0);
+      }
+    }
+    rmRolling.innerHTML=fmt(totalVol)+'<span>萬</span>';
+    rmUsed.innerHTML=rmFreeNights+'<span>晚</span>';
+    // Use first agent's threshold (just for visual)
+    var quota=totalVol>0?Math.floor(totalVol/55):0; // rough estimate
+    var pct=quota>0?Math.min(100,Math.round(rmFreeNights/quota*100)):0;
+    rmProg.style.width=pct+'%';
+    rmProg.className='ov-room-bar-fill'+(pct>=80?'':' warn')+(pct>=90?' danger':'');
+    rmPct.textContent=pct+'%';
+  }
 
   // --- 近期動態 Timeline ---
   var timeline=document.getElementById("ov-timeline");
   var entries=[];
   // 交易紀錄
-  for (var i=0;i<_txs.length;i++){
-    var t=_txs[i];
+  for (var i=0;i<txs.length;i++){
+    var t=txs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     entries.push({date:t.date,type:t.type||"rolling",desc:(t.type==="cash"?t.agent+" 現金寄放":t.agent+" — "+t.client+(t.venue?" @ "+t.venue:"")),amount:t.type==="cash"?(t.cash||0):(t.bonus||0),extra:t.type==="cash"?"dep":"pos"});
   }
-  // 公基金異動（過濾已刪除）
+  // 公基金異動
   for (var j=0;j<fundWithdrawals.length;j++){
     var f=fundWithdrawals[j];
-    // if (f.deleted) continue; // 已移除（改用 deletedIds 同步）
     if (!f.date||f.date.slice(0,7)!==now) continue;
     var ftype=f.type==="withdraw"?"提領":(f.type==="cash_deposit"?"自存現金":"存入");
     entries.push({date:f.date,type:"fund",desc:"公基金 "+ftype+(f.note?" — "+f.note:""),amount:f.amount||0,extra:f.type==="withdraw"?"neg":"dep"});
@@ -4480,184 +4138,157 @@ function renderOverview() {
     tlHTML+='<div class="timeline-item"><div class="timeline-dot '+dotClass+'"></div><div class="timeline-content"><div class="timeline-desc">'+en.desc+'</div><div class="timeline-meta">'+en.date.slice(5)+'</div></div><div class="timeline-amount '+amtClass+'" style="color:'+color+'">'+prefix+fmt(en.amount)+'</div></div>';
   }
   timeline.innerHTML=tlHTML||'<div class="timeline-empty">尚無本月動態</div>';
-  } catch(e) {
-    console.error('[renderOverview] fatal error:', e);
-  }
 }
 
 // ===== Chart.js 趨勢圖 =====
 var _trendChartInst = null;
 function renderTrendChart(daily, monthLabel) {
-  try {
-    var canvas = document.getElementById("ov-trend-chart");
-    var spark = document.getElementById("ov-sparkline");
-    var slbl = document.getElementById("ov-sparklabels");
-    if (!canvas) return;
-    // 資料轉為 100 萬單位
-    var daily100 = daily.map(function(v) { return v / 100; });
-    var hasData = daily100.some(function(v) { return v > 0; });
-    // 檢查 Chart.js 是否可用
-    if (typeof Chart === "undefined" || !hasData) {
-      if (spark) spark.style.display = hasData ? "" : "none";
-      if (slbl) slbl.style.display = hasData ? "" : "none";
-      if (!hasData && canvas.parentElement) {
-        canvas.parentElement.innerHTML = '<canvas id="ov-trend-chart"></canvas><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(212,175,55,0.4);font-size:13px;">本月尚無洗碼數據</div>';
-      }
-      return;
-    }
-    // 隱藏舊版 sparkline
-    if (spark) spark.style.display = "none";
-    if (slbl) slbl.style.display = "none";
-    // 清除可能存在的空數據提示
-    if (canvas.parentElement) {
-      var emptyMsg = canvas.parentElement.querySelector("div[style*='本月尚無']");
-      if (emptyMsg) emptyMsg.remove();
-    }
+  var canvas = document.getElementById("ov-trend-chart");
+  var spark = document.getElementById("ov-sparkline");
+  var slbl = document.getElementById("ov-sparklabels");
+  if (!canvas) return;
+  // 檢查 Chart.js 是否可用
+  if (typeof Chart === "undefined") {
+    if (spark) spark.style.display = "";
+    if (slbl) slbl.style.display = "";
+    return;
+  }
+  // 隱藏舊版 sparkline
+  if (spark) spark.style.display = "none";
+  if (slbl) slbl.style.display = "none";
 
-    // 生成標籤（每 3 天顯示一次）
-    var labels = [];
-    for (var d = 0; d < daily100.length; d++) {
-      labels.push((d + 1) % 3 === 0 || d === 0 || d === daily100.length - 1 ? (d + 1) + "日" : "");
-    }
-    // 銷毀舊圖表
-    if (_trendChartInst) { _trendChartInst.destroy(); _trendChartInst = null; }
-    var ctx = canvas.getContext("2d");
-    var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-    gradient.addColorStop(0, "rgba(212,175,55,0.3)");
-    gradient.addColorStop(1, "rgba(212,175,55,0.02)");
-    _trendChartInst = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: [{
-          label: "洗碼量（100萬）",
-          data: daily100,
-          borderColor: "#D4AF37",
-          backgroundColor: gradient,
-          borderWidth: 2,
-          fill: true,
-          tension: 0.3,
-          pointRadius: daily100.map(function(v) { return v > 0 ? 3 : 0; }),
-          pointBackgroundColor: "#D4AF37",
-          pointBorderColor: "#1a1a2e",
-          pointBorderWidth: 1
-        }]
+  // 生成標籤（每 3 天顯示一次）
+  var labels = [];
+  for (var d = 0; d < daily.length; d++) {
+    labels.push((d + 1) % 3 === 0 || d === 0 || d === daily.length - 1 ? (d + 1) + "日" : "");
+  }
+  // 銷毀舊圖表
+  if (_trendChartInst) { _trendChartInst.destroy(); _trendChartInst = null; }
+  var ctx = canvas.getContext("2d");
+  var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, "rgba(212,175,55,0.3)");
+  gradient.addColorStop(1, "rgba(212,175,55,0.02)");
+  _trendChartInst = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "洗碼量（萬）",
+        data: daily,
+        borderColor: "#D4AF37",
+        backgroundColor: gradient,
+        borderWidth: 2,
+        fill: true,
+        tension: 0.3,
+        pointRadius: daily.map(function(v) { return v > 0 ? 3 : 0; }),
+        pointBackgroundColor: "#D4AF37",
+        pointBorderColor: "#1a1a2e",
+        pointBorderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "rgba(20,20,30,0.95)",
+          titleColor: "#D4AF37",
+          bodyColor: "#e0d0a0",
+          borderColor: "rgba(212,175,55,0.3)",
+          borderWidth: 1,
+          callbacks: {
+            title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
+            label: function(item) { return "洗碼量: " + fmt(item.raw) + " 萬"; }
+          }
+        }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: "rgba(20,20,30,0.95)",
-            titleColor: "#D4AF37",
-            bodyColor: "#e0d0a0",
-            borderColor: "rgba(212,175,55,0.3)",
-            borderWidth: 1,
-            callbacks: {
-              title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
-              label: function(item) { return "洗碼量: " + fmt(item.raw * 100) + " 萬 (" + fmt(item.raw) + "×100萬)"; }
-            }
-          }
+      scales: {
+        x: {
+          grid: { color: "rgba(255,255,255,0.05)" },
+          ticks: { color: "#887755", font: { size: 10 }, maxRotation: 0 }
         },
-        scales: {
-          x: {
-            grid: { color: "rgba(255,255,255,0.05)" },
-            ticks: { color: "#887755", font: { size: 10 }, maxRotation: 0 }
+        y: {
+          grid: { color: "rgba(255,255,255,0.05)" },
+          ticks: {
+            color: "#887755", font: { size: 10 },
+            callback: function(v) { return v >= 10000 ? (v/10000).toFixed(1) + "萬" : v; }
           },
-          y: {
-            grid: { color: "rgba(255,255,255,0.05)" },
-            ticks: {
-              color: "#887755", font: { size: 10 },
-              callback: function(v) { return fmt(v); }
-            },
-            beginAtZero: true
-          }
-        },
-        interaction: { mode: "index", intersect: false }
-      }
-    });
-  } catch(e) { console.error('[renderTrendChart] error:', e); }
+          beginAtZero: true
+        }
+      },
+      interaction: { mode: "index", intersect: false }
+    }
+  });
 }
 
 // ===== Chart.js 代理排行圖 =====
 var _rankChartInst = null;
 function renderRankChart(agtArr) {
-  try {
-    var canvas = document.getElementById("ov-rank-chart");
+  var canvas = document.getElementById("ov-rank-chart");
+  if (!canvas) return;
+  if (typeof Chart === "undefined") {
     var panel = document.getElementById("ov-agent-rank");
-    if (!canvas || !panel) return;
-    if (!agtArr.length) {
-      panel.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(212,175,55,0.4);font-size:13px;">本月尚無交易</div>';
-      return;
+    if (!agtArr.length) { if (panel) panel.innerHTML = '<div class="rank-empty">本月尚無交易</div>'; return; }
+    var html = '';
+    var rankColors = ['#d4af37','#a0a0a0','#cd7f32','rgba(255,255,255,0.4)','rgba(255,255,255,0.3)'];
+    var maxV = agtArr[0].vol;
+    for (var r = 0; r < agtArr.length; r++) {
+      var ag = agtArr[r];
+      var pct = Math.round(ag.vol / maxV * 100);
+      html += '<div class="rank-row"><div class="rank-num">'+(r+1)+'</div><div class="rank-name">'+ag.name+'</div><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+(rankColors[r]||rankColors[4])+',rgba(212,175,55,0.3));"></div></div><div class="rank-val">'+fmt(ag.vol)+'萬</div></div></div>';
     }
-    // 還原 canvas（若先前被空數據提示覆蓋）
-    if (!panel.querySelector("#ov-rank-chart")) {
-      panel.innerHTML = '<canvas id="ov-rank-chart"></canvas>';
-      canvas = document.getElementById("ov-rank-chart");
-    }
-    // Chart.js 不可用时降級為 HTML 條形圖
-    if (typeof Chart === "undefined") {
-      var html = '';
-      var rankColors = ['#d4af37','#a0a0a0','#cd7f32','rgba(255,255,255,0.4)','rgba(255,255,255,0.3)'];
-      var maxV = agtArr[0].vol;
-      for (var r = 0; r < agtArr.length; r++) {
-        var ag = agtArr[r];
-        var pct = Math.round(ag.vol / maxV * 100);
-        html += '<div class="rank-row"><div class="rank-num">'+(r+1)+'</div><div class="rank-name">'+ag.name+'</div><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+(rankColors[r]||rankColors[4])+',rgba(212,175,55,0.3));"></div></div><div class="rank-val">'+fmt(ag.vol)+'萬</div></div></div>';
-      }
-      panel.innerHTML = html;
-      return;
-    }
-    if (_rankChartInst) { _rankChartInst.destroy(); _rankChartInst = null; }
-    var labels = [], data = [];
-    for (var i = agtArr.length - 1; i >= 0; i--) {
-      labels.push(agtArr[i].name);
-      data.push(agtArr[i].vol / 100); // 轉為 100 萬單位
-    }
-    var ctx = canvas.getContext("2d");
-    _rankChartInst = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: labels,
-        datasets: [{
-          label: "洗碼量（100萬）",
-          data: data,
-          backgroundColor: data.map(function(v, idx) {
-            var colors = ["rgba(212,175,55,0.6)","rgba(160,160,160,0.5)","rgba(205,127,50,0.5)","rgba(255,255,255,0.25)","rgba(255,255,255,0.2)"];
-            var i = data.length - 1 - idx;
-            return colors[i] || "rgba(255,255,255,0.15)";
-          }),
-          borderColor: data.map(function(v, idx) {
-            var colors = ["#d4af37","#a0a0a0","#cd7f32","rgba(255,255,255,0.4)","rgba(255,255,255,0.3)"];
-            var i = data.length - 1 - idx;
-            return colors[i] || "rgba(255,255,255,0.2)";
-          }),
+    if (panel) panel.innerHTML = html;
+    return;
+  }
+  if (_rankChartInst) { _rankChartInst.destroy(); _rankChartInst = null; }
+  var labels = [], data = [];
+  for (var i = agtArr.length - 1; i >= 0; i--) {
+    labels.push(agtArr[i].name);
+    data.push(agtArr[i].vol);
+  }
+  var ctx = canvas.getContext("2d");
+  _rankChartInst = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "洗碼量（萬）",
+        data: data,
+        backgroundColor: data.map(function(v, idx) {
+          var colors = ["rgba(212,175,55,0.6)","rgba(160,160,160,0.5)","rgba(205,127,50,0.5)","rgba(255,255,255,0.25)","rgba(255,255,255,0.2)"];
+          var i = data.length - 1 - idx;
+          return colors[i] || "rgba(255,255,255,0.15)";
+        }),
+        borderColor: data.map(function(v, idx) {
+          var colors = ["#d4af37","#a0a0a0","#cd7f32","rgba(255,255,255,0.4)","rgba(255,255,255,0.3)"];
+          var i = data.length - 1 - idx;
+          return colors[i] || "rgba(255,255,255,0.2)";
+        }),
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "rgba(20,20,30,0.95)",
+          bodyColor: "#e0d0a0",
+          borderColor: "rgba(212,175,55,0.3)",
           borderWidth: 1,
-          borderRadius: 4
-        }]
-      },
-      options: {
-        indexAxis: "y",
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: "rgba(20,20,30,0.95)",
-            bodyColor: "#e0d0a0",
-            borderColor: "rgba(212,175,55,0.3)",
-            borderWidth: 1,
-            callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw * 100) + " 萬 (" + fmt(item.raw) + "×100萬)"; } }
-          }
-        },
-        scales: {
-          x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#887755", font: { size: 9 }, callback: function(v){ return fmt(v); } }, beginAtZero: true },
-          y: { grid: { display: false }, ticks: { color: "#e0d0a0", font: { size: 11 } } }
+          callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw) + " 萬"; } }
         }
+      },
+      scales: {
+        x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#887755", font: { size: 9 } }, beginAtZero: true },
+        y: { grid: { display: false }, ticks: { color: "#e0d0a0", font: { size: 11 } } }
       }
-    });
-  } catch(e) { console.error('[renderRankChart] error:', e); }
+    }
+  });
 }
 
 // ===== 房務系統 JS =====
@@ -4688,8 +4319,6 @@ var RM = {
   save: function() {
     localStorage.setItem("rm_bookings", JSON.stringify(this.bookings));
     localStorage.setItem("rm_last_id", this.lastId.toString());
-    if (typeof markSyncDirty === 'function') markSyncDirty();
-    if (typeof syncUpload === 'function') syncUpload();
   },
 
   populateAgentDropdown: function() {
@@ -4851,32 +4480,11 @@ var RM = {
   },
   delete: function(id) {
     if (!confirm("確定要刪除這筆訂房紀錄嗎？")) return;
-    // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
-    var idx = this.bookings.findIndex(function(x){ return x.id === id; });
-    if (idx < 0) return;
-    var deleted = this.bookings.splice(idx, 1)[0]; // 從陣列移除
-    deletedIds.push(id);                               // 記錄已刪除 ID
-    try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
-    // 存到 localStorage
-    try { localStorage.setItem("rm_bookings", JSON.stringify(this.bookings)); } catch(e) {}
-    try { localStorage.setItem("rm_last_id", this.lastId.toString()); } catch(e) {}
-    // 標記髒資料，確保上傳
-    if (typeof markSyncDirty === 'function') markSyncDirty();
-    // 立即上傳
-    var self = this;
-    showLoading("刪除中…");
-    var p = (typeof syncUpload === 'function') ? syncUpload() : Promise.resolve({skipped:true});
-    p.then(function() {
-      self.render();
-      self.updateQuota();
-      hideLoading();
-      if (typeof showToast === 'function') showToast("訂房已刪除","success");
-    }).catch(function() {
-      self.render();
-      self.updateQuota();
-      hideLoading();
-      if (typeof showToast === 'function') showToast("訂房已刪除，但同步失敗", "warning");
-    });
+    this.bookings = this.bookings.filter(function(x){ return x.id!==id; });
+    this.save();
+    this.render();
+    this.updateQuota();
+    showToast("訂房已刪除","success");
   },
 
   render: function() {
@@ -4888,7 +4496,6 @@ var RM = {
     var filtered = this.bookings.slice();
     if (month) filtered = filtered.filter(function(x){ return x.month===month; });
     if (agent) filtered = filtered.filter(function(x){ return x.agent===agent; });
-    // filtered = filtered.filter(function(x){ return !x.deleted; }); // 已移除（改用 deletedIds 同步）
     filtered.sort(function(a,b){ return b.id-a.id; });
     if (!filtered.length) {
       tbody.innerHTML = "";
@@ -4924,32 +4531,28 @@ var RM = {
     var monthEl = document.getElementById("rm-filter-month");
     if (!monthEl) return;
     var month = monthEl.value || this.nowStr().substring(0,7);
-    // 過濾已刪除項目
-    var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
-    var _bookings = this.bookings.filter(function(b) { return !b.deleted; });
     var totalRolling = 0, now = month || this.nowStr().slice(0,7);
-    for (var i = 0; i < _txs.length; i++) { if (_txs[i].date && _txs[i].date.slice(0,7) === now && _txs[i].type !== "cash") { totalRolling += (_txs[i].volume || 0); } }
+    for (var i = 0; i < txs.length; i++) { if (txs[i].date && txs[i].date.slice(0,7) === now && txs[i].type !== "cash") { totalRolling += (txs[i].volume || 0); } }
     var avgThreshold = 70;
     var totalQuota = Math.floor(totalRolling / avgThreshold);
     var usedQuota = 0;
     // 已使用免費額度：只計有洗碼記錄的代理的免費房晚
     var rmAgtRolling = {};
-    for (var kk=0;kk<_txs.length;kk++){ var tr=_txs[kk]; if (tr.date&&tr.date.slice(0,7)===now&&tr.type!=="cash"&&tr.agent){ rmAgtRolling[tr.agent]=true; } }
-    for (var i=0; i<_bookings.length; i++)
-      if (_bookings[i].month===month && _bookings[i].status==="免費" && rmAgtRolling[_bookings[i].agent])
-        usedQuota += (_bookings[i].nights||0);
-    // 已使用轉碼數（所有免費房晚 × 門檻）
-    var rmUsedRolling = 0;
-    for (var j=0; j<_bookings.length; j++)
-      if (_bookings[j].month===month && _bookings[j].status==="免費")
-        rmUsedRolling += (_bookings[j].nights||0) * (_bookings[j].threshold||70);
-    // 額度使用率 = 已用轉碼數 / 總洗碼量 × 100%
-    var pct = totalRolling>0 ? Math.min(100, Math.round(rmUsedRolling/totalRolling*100)) : 0;
+    for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&tr.date.slice(0,7)===now&&tr.type!=="cash"&&tr.agent){ rmAgtRolling[tr.agent]=true; } }
+    for (var i=0; i<this.bookings.length; i++)
+      if (this.bookings[i].month===month && this.bookings[i].status==="免費" && rmAgtRolling[this.bookings[i].agent])
+        usedQuota += (this.bookings[i].nights||0);
+    var pct = totalQuota>0 ? Math.min(100, Math.round(usedQuota/totalQuota*100)) : 0;
 
     var rollingEl = document.getElementById("rm-q-rolling");
     if (rollingEl) rollingEl.innerHTML = this.fmt(totalRolling)+"<span>萬</span>";
     var usedEl = document.getElementById("rm-q-used-hero");
-    if (usedEl) usedEl.innerHTML = this.fmt(rmUsedRolling)+"<span>萬</span>";
+    if (usedEl) usedEl.innerHTML = usedQuota+"<span>晚</span>";
+    // 已使用轉碼數（所有免費房晚 × 門檻）
+    var rmUsedRolling = 0;
+    for (var j=0; j<this.bookings.length; j++)
+      if (this.bookings[j].month===month && this.bookings[j].status==="免費")
+        rmUsedRolling += (this.bookings[j].nights||0) * (this.bookings[j].threshold||70);
     // 剩餘轉碼數 = 本月總洗碼量 - 已使用轉碼數（可為負數）
     var rmRemaining = totalRolling - rmUsedRolling;
     var rollingEl2 = document.getElementById("rm-q-used-rolling");
@@ -4964,8 +4567,8 @@ var RM = {
     if (pctEl) pctEl.textContent = pct+"%";
     // 更新統計摘要
     var statTotal = 0;
-    for (var si = 0; si < _bookings.length; si++) {
-      if (_bookings[si].month === month) {
+    for (var si = 0; si < this.bookings.length; si++) {
+      if (this.bookings[si].month === month) {
         statTotal++;
       }
     }
@@ -4978,8 +4581,8 @@ var RM = {
       var daysInMonth = new Date(parseInt(ym.slice(0,4)), parseInt(ym.slice(5,7)), 0).getDate();
       var dayCounts = {};
       for (var di = 1; di <= daysInMonth; di++) dayCounts[di] = 0;
-      for (var bi = 0; bi < _bookings.length; bi++) {
-        var b = _bookings[bi];
+      for (var bi = 0; bi < this.bookings.length; bi++) {
+        var b = this.bookings[bi];
         if (b.month !== month) continue;
         var parts = (b.checkIn || "").split("-");
         var day = parseInt(parts[1]) || 0;
@@ -5153,32 +4756,27 @@ var _MAX_UNDO = 10;
   deleteTx = function(id) {
     if (!confirm("确定删除此笔交易？")) return;
     showLoading("删除中…");
-    try {
-      var deleted = null, delIndex = -1;
-      for (var i = 0; i < txs.length; i++) {
-        if (txs[i].id === id) { deleted = txs[i]; delIndex = i; break; }
-      }
-      if (deleted) {
-        _undoStack.push({ tx: JSON.parse(JSON.stringify(deleted)), index: delIndex });
-        if (_undoStack.length > _MAX_UNDO) _undoStack.shift();
-      }
-      var newTxs = [];
-      for (var i = 0; i < txs.length; i++) {
-        if (txs[i].id !== id) newTxs.push(txs[i]);
-      }
-      txs = newTxs;
-      saveData(true);
-      renderAll();
-      renderOverview();
-      renderSummary();
-      updateTotalWalletUI();
-      if (deleted) showUndoToast();
-    } catch(e) {
-      console.error("[deleteTx] error:", e);
-      showToast("删除失败：" + e.message, "error");
-    } finally {
-      setTimeout(hideLoading, 300);
+    var deleted = null, delIndex = -1;
+    for (var i = 0; i < txs.length; i++) {
+      if (txs[i].id === id) { deleted = txs[i]; delIndex = i; break; }
     }
+    if (deleted) {
+      _undoStack.push({ tx: JSON.parse(JSON.stringify(deleted)), index: delIndex });
+      if (_undoStack.length > _MAX_UNDO) _undoStack.shift();
+    }
+    var newTxs = [];
+    for (var i = 0; i < txs.length; i++) {
+      if (txs[i].id !== id) newTxs.push(txs[i]);
+    }
+    txs = newTxs;
+    saveData(true);
+    renderAll();
+    renderOverview();
+    renderSummary();
+    updateTotalWalletUI();
+    if (deleted) showUndoToast();
+    _origDelete = true;
+    setTimeout(hideLoading, 300);
   };
 
   // 增强撤销Toast
@@ -5206,19 +4804,7 @@ var _MAX_UNDO = 10;
 function undoLastDelete() {
   if (_undoStack.length === 0) { showToast("无可撤销操作", "warning"); return; }
   var item = _undoStack.pop();
-  // item.tx 是深拷貝，根據 ID 查找並取消刪除標記
-  var foundIdx = -1;
-  for (var i = 0; i < txs.length; i++) {
-    if (txs[i].id === item.tx.id) { foundIdx = i; break; }
-  }
-  if (foundIdx >= 0) {
-    // 仍在陣列中，取消刪除標記
-    txs[foundIdx].deleted = false;
-  } else {
-    // 已被 syncDownload 移除，重新插入
-    item.tx.deleted = false;
-    txs.push(item.tx);
-  }
+  txs.splice(item.index, 0, item.tx);
   saveData(true);
   renderAll();
   renderOverview();
@@ -5334,15 +4920,6 @@ function throttle(func, limit) {
 
 console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键帮助");
 
-  // 回到顶部按钮 — 监听 #page-scroll 滚动容器
-  var btt = document.getElementById("back-to-top");
-  var ps = document.getElementById("page-scroll");
-  if (btt && ps) {
-    ps.addEventListener("scroll", function() {
-      if (ps.scrollTop > 300) btt.style.display = "flex";
-      else btt.style.display = "none";
-    });
-  }
 </script>
 
 <!-- 快捷鍵幫助面板 v6.0 按 ? 顯示 -->
@@ -5387,298 +4964,5 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
 </div>
 </div>
 
-
-<!-- ========== 总览页加强美化 v6.3-enhanced ========== -->
-<style>
-/* 快速操作按钮加强 */
-.quick-actions { gap: 12px; margin-bottom: 16px; }
-.qa-btn {
-  background: linear-gradient(135deg, rgba(26,18,10,0.92), rgba(18,10,6,0.96)) !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-  position: relative; overflow: hidden;
-  transition: all 0.3s ease;
-}
-.qa-btn::before {
-  content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.06), transparent);
-  transition: left 0.5s ease;
-}
-.qa-btn:hover::before { left: 100%; }
-.qa-btn:hover {
-  border-color: rgba(212,175,55,0.55) !important;
-  box-shadow: 0 4px 20px rgba(212,175,55,0.18);
-  transform: translateY(-2px);
-}
-.qa-btn-icon {
-  background: rgba(212,175,55,0.12) !important;
-  box-shadow: 0 0 20px rgba(212,175,55,0.15) !important;
-  transition: all 0.3s ease;
-}
-.qa-btn:hover .qa-btn-icon {
-  background: rgba(212,175,55,0.22) !important;
-  transform: scale(1.12);
-}
-
-/* KPI卡片加强 - 装饰性边角 + hover */
-.kpi-grid { gap: 12px; margin-bottom: 16px; }
-.kpi-card-new {
-  position: relative; overflow: hidden;
-  transition: all 0.3s ease;
-}
-.kpi-card-new::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, rgba(212,175,55,0.6), rgba(212,175,55,0.2), transparent);
-  border-radius: 14px 14px 0 0;
-}
-.kpi-card-new::after {
-  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
-}
-.kpi-card-new:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(212,175,55,0.35);
-}
-.kpi-label {
-  font-size: 11px !important;
-  color: rgba(212,175,55,0.6) !important;
-  letter-spacing: 1.2px !important;
-  margin-bottom: 6px !important;
-}
-.kpi-value {
-  font-size: 30px !important;
-  transition: all 0.3s ease;
-}
-.kpi-card-new:hover .kpi-value {
-  text-shadow: 0 0 24px rgba(212,175,55,0.55);
-}
-
-/* 图表容器加强 */
-.chart-full, .ov-panel, .chart-box {
-  background: rgba(18,10,6,0.92) !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-  position: relative; overflow: hidden;
-  transition: all 0.3s ease;
-}
-.chart-full::before, .ov-panel::before, .chart-box::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.45), transparent);
-}
-.chart-full:hover, .ov-panel:hover, .chart-box:hover {
-  border-color: rgba(212,175,55,0.38) !important;
-}
-.chart-title {
-  font-size: 11px !important;
-  letter-spacing: 1.5px !important;
-  color: rgba(212,175,55,0.65) !important;
-  text-transform: uppercase;
-  margin-bottom: 12px !important;
-}
-
-/* 时间线加强 */
-.timeline-box {
-  background: rgba(18,10,6,0.92) !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-  transition: all 0.3s ease;
-}
-.timeline-box:hover {
-  border-color: rgba(212,175,55,0.38) !important;
-}
-.timeline-dot {
-  box-shadow: 0 0 10px currentColor;
-  transition: all 0.3s ease;
-}
-.timeline-item:hover .timeline-dot { transform: scale(1.35); }
-.timeline-item {
-  transition: all 0.2s ease;
-}
-.timeline-item:hover { background: rgba(212,175,55,0.035); }
-
-/* 月份栏加强 */
-.month-bar {
-  background: linear-gradient(135deg, rgba(24,12,8,0.97), rgba(16,6,4,0.98)) !important;
-  border: 1px solid rgba(212,175,55,0.32) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.32);
-}
-
-/* 总钱包加强 */
-.total-wallet {
-  background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(184,134,11,0.13)) !important;
-  border: 1px solid rgba(212,175,55,0.42) !important;
-  box-shadow: 0 0 20px rgba(212,175,55,0.18);
-  transition: all 0.3s ease;
-}
-.total-wallet:hover {
-  border-color: rgba(212,175,55,0.65) !important;
-  box-shadow: 0 0 30px rgba(212,175,55,0.28);
-}
-
-/* 桌面版进一步优化 */
-@media (min-width: 1024px) {
-  .quick-actions { gap: 16px; margin-bottom: 18px; }
-  .qa-btn { padding: 16px 28px; font-size: 15px; border-radius: 14px; }
-  .qa-btn-icon { width: 36px; height: 36px; font-size: 18px; border-radius: 10px; }
-  .kpi-grid { gap: 16px; margin-bottom: 18px; }
-  .kpi-card-new { padding: 20px 26px; border-radius: 16px; }
-  .kpi-value { font-size: 34px !important; }
-  .kpi-label { font-size: 12px !important; letter-spacing: 1.5px !important; }
-  .chart-full, .ov-panel { padding: 18px 22px; border-radius: 16px; }
-  .timeline-box { padding: 0; border-radius: 16px; }
-  .timeline-title { padding: 12px 20px; font-size: 14px; }
-  .timeline-item { padding: 10px 20px; }
-  .month-bar { padding: 12px 24px; border-radius: 16px; }
-  .total-wallet { padding: 8px 22px; border-radius: 14px; }
-}
-
-/* 手机版优化 */
-@media (max-width: 700px) {
-  .quick-actions { gap: 8px; margin-bottom: 12px; }
-  .qa-btn { padding: 10px 14px; font-size: 12px; border-radius: 10px; }
-  .qa-btn-icon { width: 28px; height: 28px; font-size: 14px; border-radius: 8px; }
-  .kpi-grid { gap: 8px; margin-bottom: 12px; }
-  .kpi-card-new { padding: 12px 14px; border-radius: 12px; }
-  .kpi-value { font-size: 22px !important; }
-  .chart-full, .ov-panel { padding: 10px 12px; border-radius: 12px; }
-  .timeline-item { padding: 6px 12px; }
-}
-
-/* ========== P1 美化：全部交易页 ========== */
-/* 工具栏按钮统一中国风色系 */
-#page-all .toolbar .btn:not(.btn-primary) {
-  background: linear-gradient(135deg, rgba(26,18,10,0.92), rgba(18,10,6,0.96)) !important;
-  color: #c8b890 !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-  transition: all 0.25s ease;
-}
-#page-all .toolbar .btn:not(.btn-primary):hover {
-  border-color: rgba(212,175,55,0.55) !important;
-  color: #f0d060 !important;
-  box-shadow: 0 2px 12px rgba(212,175,55,0.12);
-}
-/* 表格斑马纹 + 行 hover 高亮 */
-#all-table tbody tr:nth-child(even) { background: rgba(212,175,55,0.03) !important; }
-#all-table tbody tr:nth-child(odd) { background: rgba(18,10,6,0.92) !important; }
-#all-table tbody tr:hover {
-  background: rgba(212,175,55,0.1) !important;
-  box-shadow: inset 3px 0 0 rgba(212,175,55,0.5);
-}
-/* 表头排序箭头 + hover */
-#all-table th.sortable { cursor: pointer; user-select: none; position: relative; }
-#all-table th.sortable:hover { color: #f0d060 !important; }
-#all-table th.sortable.sort-asc::after { content: " ▲"; font-size: 9px; color: #D4AF37; }
-#all-table th.sortable.sort-desc::after { content: " ▼"; font-size: 9px; color: #D4AF37; }
-/* 空状态引导 */
-#all-msg {
-  background: linear-gradient(180deg, rgba(212,175,55,0.04), transparent) !important;
-  border: 1px dashed rgba(212,175,55,0.2) !important;
-  border-radius: 12px !important;
-  padding: 40px 20px !important;
-  font-size: 14px !important;
-  color: rgba(212,175,55,0.5) !important;
-}
-#all-msg::before {
-  content: "📋"; display: block; font-size: 36px; margin-bottom: 10px;
-}
-/* 输入框金色 focus 发光（全局） */
-input:focus, select:focus, textarea:focus {
-  border-color: rgba(212,175,55,0.55) !important;
-  box-shadow: 0 0 0 3px rgba(212,175,55,0.1) !important;
-  outline: none;
-}
-/* ========== P1 美化：统计页 ========== */
-#summary-table th { position: relative; }
-#summary-table tbody tr:hover {
-  background: rgba(212,175,55,0.08) !important;
-}
-#summary-table tbody td:first-child {
-  color: #D4AF37 !important; font-weight: 600;
-}
-/* ========== P1 美化：查询页 ========== */
-#query-kpi .kpi-card {
-  background: rgba(22,14,8,0.96) !important;
-  border: 1px solid rgba(212,175,55,0.25) !important;
-  animation: cardGlow 4s ease-in-out infinite;
-}
-
-/* ========== P2 回到顶部按钮 ========== */
-#back-to-top {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  z-index: 9999;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(212,175,55,0.85), rgba(184,134,11,0.9));
-  color: #1a1206;
-  font-size: 18px;
-  border: 1px solid rgba(212,175,55,0.5);
-  box-shadow: 0 2px 12px rgba(212,175,55,0.25);
-  cursor: pointer;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  animation: backTopPulse 2.5s ease-in-out infinite;
-}
-#back-to-top:hover {
-  transform: scale(1.12);
-  box-shadow: 0 4px 20px rgba(212,175,55,0.45);
-}
-@keyframes backTopPulse {
-  0%, 100% { box-shadow: 0 2px 12px rgba(212,175,55,0.25); }
-  50% { box-shadow: 0 2px 22px rgba(212,175,55,0.55); }
-}
-/* 手机版回到顶部调整 */
-@media (max-width: 700px) {
-  #back-to-top { bottom: 18px; right: 18px; width: 38px; height: 38px; font-size: 16px; }
-}
-
-/* ========== P1 表格横向滚动优化（手机版） ========== */
-@media (max-width: 700px) {
-  /* 表格容器添加横向滚动 */
-  #page-all > table, #page-query > table, #page-summary > table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-  }
-  /* 保持 table 内部布局 */
-  #page-all > table > thead,
-  #page-all > table > tbody,
-  #page-query > table > thead,
-  #page-query > table > tbody,
-  #page-summary > table > thead,
-  #page-summary > table > tbody {
-    display: table;
-    width: 100%;
-    min-width: 650px;
-  }
-  /* 手机版表格行内边距紧凑 */
-  #all-table td, #page-query table td,
-  #summary-table td, .room-table td {
-    padding: 6px 8px !important;
-    font-size: 11px !important;
-  }
-  #all-table th, #page-query table th,
-  #summary-table th, .room-table th {
-    padding: 6px 8px !important;
-    font-size: 10px !important;
-  }
-  /* 手机版表格滚动条美化 */
-  #page-all > table::-webkit-scrollbar,
-  #page-query > table::-webkit-scrollbar,
-  #page-summary > table::-webkit-scrollbar {
-    height: 4px;
-  }
-  #page-all > table::-webkit-scrollbar-thumb,
-  #page-query > table::-webkit-scrollbar-thumb,
-  #page-summary > table::-webkit-scrollbar-thumb {
-    background: rgba(212,175,55,0.2);
-    border-radius: 2px;
-  }
-}
-</style>
-
-  <div id="back-to-top" onclick="document.getElementById('page-scroll').scrollTo({top:0,behavior:'smooth'})" title="回到頂部">▲</div>
 </body>
 </html>
