@@ -4417,9 +4417,13 @@ function renderTrendChart(daily, monthLabel) {
   for (var d = 0; d < daily.length; d++) {
     labels.push((d + 1) % 3 === 0 || d === 0 || d === daily.length - 1 ? (d + 1) + "日" : "");
   }
-  // 銷毀舊圖表
+  // 銷毀舊圖表（使用 Chart.getChart 確保正確釋放 canvas）
+  var existingChart = Chart.getChart ? Chart.getChart(canvas) : null;
+  if (existingChart) { existingChart.destroy(); }
   if (_trendChartInst) { _trendChartInst.destroy(); _trendChartInst = null; }
+  // 重置 canvas 以確保完全釋放
   var ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   var gradient = ctx.createLinearGradient(0, 0, 0, 200);
   gradient.addColorStop(0, "rgba(212,175,55,0.3)");
   gradient.addColorStop(1, "rgba(212,175,55,0.02)");
