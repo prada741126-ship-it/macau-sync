@@ -1488,8 +1488,11 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
       <input type="text" id="q-month" placeholder="2026-06" style="width:80px;padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
       <button class="btn btn-primary" onclick="doQuery()">查詢</button>
       <span class="time-filter">
+        <button onclick="quickFilter('this_week',event)">本週</button>
+        <button onclick="quickFilter('last_week',event)">上週</button>
         <button onclick="quickFilter('this_month',event)">本月</button>
         <button onclick="quickFilter('last_month',event)">上月</button>
+        <button onclick="quickFilter('this_quarter',event)">本季</button>
         <button onclick="quickFilter('this_year',event)">本年</button>
         <button onclick="quickFilter('all',event)">全部</button>
       </span>
@@ -2993,13 +2996,19 @@ function quickFilter(type, ev) {
   var utc8 = new Date(d.getTime() + 480*60000);
   var y = utc8.getUTCFullYear();
   var m = utc8.getUTCMonth() + 1;
+  var day = utc8.getUTCDate();
   var sm = m < 10 ? "0" + m : "" + m;
   var month;
-  if (type === "this_month") month = y + "-" + sm;
+  if (type === "this_week") month = y + "-" + sm;
+  else if (type === "last_week") {
+    if (day <= 7) { if (m === 1) { y--; m = 12; } else { m--; } }
+    month = y + "-" + (m < 10 ? "0" + m : "" + m);
+  } else if (type === "this_month") month = y + "-" + sm;
   else if (type === "last_month") {
     if (m === 1) { y--; m = 12; } else { m--; }
     month = y + "-" + (m < 10 ? "0" + m : "" + m);
-  } else if (type === "this_year") month = y.toString();
+  } else if (type === "this_quarter") month = y.toString();
+  else if (type === "this_year") month = y.toString();
   else month = "";
   document.getElementById("q-month").value = month;
   var btns = document.querySelectorAll(".time-filter button");
