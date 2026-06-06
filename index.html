@@ -2495,31 +2495,26 @@ function openModal() {
   editId = null;
   document.getElementById("modal-title").textContent = "新增交易";
   populateAgentDropdown();
-  // 檢查是否有未完成的草稿
+  // 檢查是否有未完成的草稿（自動恢復，不彈 confirm 打斷操作）
   var draft = loadDraft();
   if (draft && !draft.editId) {
-    // 有草稿且不是編輯模式，詢問是否恢復
-    var restore = confirm("偵測到未完成的草稿（" + new Date(draft.ts).toLocaleTimeString("zh-TW") + "），是否恢復？");
-    if (restore) {
-      document.getElementById("f-date").value = draft.date || nowStr();
-      document.getElementById("f-dow").value = getDow(draft.date || nowStr());
-      document.getElementById("f-type").value = draft.type || "rolling";
-      toggleTypeFields();
-      document.getElementById("f-agent").value = draft.agent || "";
-      document.getElementById("f-client").value = draft.client || "";
-      document.getElementById("f-venue").value = draft.venue || "";
-      document.getElementById("f-vol").value = draft.vol || "";
-      document.getElementById("f-rate").value = draft.rate || "1.24";
-      document.getElementById("f-bonus").value = draft.bonus || "";
-      document.getElementById("f-drawn").value = draft.drawn || "0";
-      document.getElementById("f-cash").value = draft.cash || "";
-      document.getElementById("f-note").value = draft.note || "";
-      calc();
-      clearDraft();
-    } else {
-      clearDraft();
-      _resetFormFields();
-    }
+    // 靜默恢復草稿資料
+    document.getElementById("f-date").value = draft.date || nowStr();
+    document.getElementById("f-dow").value = getDow(draft.date || nowStr());
+    document.getElementById("f-type").value = draft.type || "rolling";
+    toggleTypeFields();
+    document.getElementById("f-agent").value = draft.agent || "";
+    document.getElementById("f-client").value = draft.client || "";
+    document.getElementById("f-venue").value = draft.venue || "";
+    document.getElementById("f-vol").value = draft.vol || "";
+    document.getElementById("f-rate").value = draft.rate || "1.24";
+    document.getElementById("f-bonus").value = draft.bonus || "";
+    document.getElementById("f-drawn").value = draft.drawn || "0";
+    document.getElementById("f-cash").value = draft.cash || "";
+    document.getElementById("f-note").value = draft.note || "";
+    calc();
+    clearDraft();
+    showToast("已恢復草稿，編輯後按儲存", "info");
   } else {
     clearDraft();
     _resetFormFields();
