@@ -1371,6 +1371,7 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   <div id="topbar-title">總覽</div>
   <div id="topbar-actions">
     <button class="topbar-btn primary" onclick="openModal()">＋ 新增</button>
+    <button class="topbar-btn" onclick="showBackupModal()" title="備份管理">📦</button>
     <button class="topbar-btn" onclick="manualSync()">🔄 同步</button>
   </div>
   </div>
@@ -2450,10 +2451,123 @@ function _setupDraftAutoSave() {
     }
   }
 }
-// 頁面載入後設定草稿自動儲存監聽
+// 頁面載入後設定草稿自動儲存監聽 + 自動備份檢查
 document.addEventListener("DOMContentLoaded", function() {
   _setupDraftAutoSave();
+  _autoBackupCheck();
 });
+
+// ===== 7 天自動備份功能 =====
+function _autoBackupCheck() {
+  var today = nowStr();
+  var lastBackup = localStorage.getItem("macau_last_backup_date");
+  if (lastBackup === today) return; // 今天已備份
+  doBackup();
+  localStorage.setItem("macau_last_backup_date", today);
+  _cleanOldBackups();
+}
+
+function doBackup() {
+  var backupData = {};
+  var keys = ["macau_data","macau_fund_data","macau_agent_wallets","macau_agent_list","macau_config","macau_archives","macau_fundNextId","macau_working_month"];
+  for (var i = 0; i < keys.length; i++) {
+    var val = localStorage.getItem(keys[i]);
+    if (val !== null) backupData[keys[i]] = val;
+  }
+  var dateStr = nowStr();
+  localStorage.setItem("macau_backup_" + dateStr, JSON.stringify(backupData));
+  // 加入備份列表
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem("macau_backup_list") || "[]"); } catch(e) {}
+  if (list.indexOf(dateStr) === -1) {
+    list.push(dateStr);
+    list.sort(); // 升序排列
+    localStorage.setItem("macau_backup_list", JSON.stringify(list));
+  }
+}
+
+function _cleanOldBackups() {
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem("macau_backup_list") || "[]"); } catch(e) {}
+  var cutoff = new Date(new Date().getTime() + 480*60000 - 7*86400000).toISOString().slice(0,10);
+  var keep = [];
+  for (var i = 0; i < list.length; i++) {
+    if (list[i] >= cutoff) {
+      keep.push(list[i]);
+    } else {
+      localStorage.removeItem("macau_backup_" + list[i]);
+    }
+  }
+  localStorage.setItem("macau_backup_list", JSON.stringify(keep));
+}
+
+function getBackupList() {
+  try { return JSON.parse(localStorage.getItem("macau_backup_list") || "[]"); } catch(e) { return []; }
+}
+
+function restoreFromBackup(dateStr) {
+  var raw = localStorage.getItem("macau_backup_" + dateStr);
+  if (!raw) { showToast('找不到備份：' + dateStr, 'error'); return false; }
+  try {
+    var data = JSON.parse(raw);
+    var keys = Object.keys(data);
+    for (var i = 0; i < keys.length; i++) {
+      localStorage.setItem(keys[i], data[keys[i]]);
+    }
+    showToast("已從 " + dateStr + " 還原資料！重新整理中…", "success");
+    setTimeout(function() { location.reload(); }, 1500);
+    return true;
+  } catch(e) {
+    showToast("備份資料損壞，無法還原", "error");
+    return false;
+  }
+}
+
+function showBackupModal() {
+  var list = getBackupList();
+  if (list.length === 0) {
+    showToast("尚無備份紀錄，首次備份將在今日自動建立", "info");
+    return;
+  }
+  // 反序顯示（最新在上）
+  list.reverse();
+  // 建立備份對話框
+  var bg = document.createElement("div");
+  bg.className = "modal-bg show";
+  bg.id = "backup-modal";
+  bg.onclick = function(e) { if (e.target === bg) { document.body.removeChild(bg); unlockBody(); } };
+  var inner = '<div class="modal"><h3>📦 備份管理</h3>';
+  inner += '<p style="font-size:12px;color:#888;margin:0 0 10px;">自動保留最近 7 天備份，點擊日期可還原</p>';
+  inner += '<div style="max-height:300px;overflow-y:auto;">';
+  for (var i = 0; i < list.length; i++) {
+    var d = list[i];
+    // 計算該備份有多少筆交易
+    var txCount = 0;
+    try {
+      var bd = JSON.parse(localStorage.getItem("macau_backup_" + d) || "{}");
+      if (bd.macau_data) {
+        var decrypted = decryptData(bd.macau_data);
+        if (Array.isArray(decrypted)) txCount = decrypted.length;
+      }
+    } catch(e) {}
+    inner += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:4px 0;background:rgba(255,255,255,0.03);border-radius:6px;cursor:pointer;" onclick="if(confirm(\'確定要從 ' + d + ' 的備份還原嗎？\\n目前資料將被覆蓋！\')){closeBackupModal();restoreFromBackup(\'' + d + '\');}">';
+    inner += '<span style="font-size:13px;">📅 ' + d + ' <span style="font-size:10px;color:#888;">（' + txCount + ' 筆交易）</span></span>';
+    inner += '<span style="font-size:11px;color:#f39c12;">🔄 點擊還原</span>';
+    inner += '</div>';
+  }
+  inner += '</div>';
+  inner += '<div style="margin-top:12px;text-align:right;"><button class="btn" onclick="closeBackupModal()">關閉</button> <button class="btn btn-green" onclick="closeBackupModal();doBackup();_cleanOldBackups();showToast(\'手動備份完成！\',\'success\');" style="min-height:32px;">🔄 立即備份</button></div>';
+  inner += '</div>';
+  bg.innerHTML = inner;
+  document.body.appendChild(bg);
+  lockBody();
+}
+
+function closeBackupModal() {
+  var bg = document.getElementById("backup-modal");
+  if (bg && bg.parentNode) { bg.parentNode.removeChild(bg); }
+  unlockBody();
+}
 
 function openFundModal() {
   document.getElementById("fund-date").value = nowStr();
