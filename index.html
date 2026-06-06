@@ -3344,8 +3344,8 @@ function syncUpload() {
     fundWithdrawals: fundWithdrawals,
     workingMonth: workingMonth,
     archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
-    rm_bookings: (typeof RM !== 'undefined') ? RM.bookings : [],
-    rm_last_id: (typeof RM !== 'undefined') ? RM.lastId : 1,
+    rm_bookings: (typeof RM !== 'undefined' && RM.bookings && RM.bookings.length > 0) ? RM.bookings : undefined,
+    rm_last_id: (typeof RM !== 'undefined' && RM.lastId && RM.lastId > 0) ? RM.lastId : undefined,
     timestamp: Date.now()
   };
   return fetch(SYNC_API + '/api/sync/upload', {
@@ -3357,6 +3357,8 @@ function syncUpload() {
       return r.json();
     }).then(function(resp) {
     _syncDirty = false; // 上傳成功，清除髒標記
+    // 上傳成功後同步更新時間戳，避免下一輪 poll 誤判為有變更
+    if (resp && resp.lastModified) _lastSyncModified = resp.lastModified;
     console.log('[Sync ↑] 上傳成功', resp);
     return resp;
   }).catch(function(err) {
@@ -3406,8 +3408,18 @@ function syncDownload() {
       fundWithdrawals = d.fundWithdrawals || fundWithdrawals;
       if (d.workingMonth) workingMonth = d.workingMonth;
       if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
-      if (d.rm_bookings && typeof RM !== 'undefined') { RM.bookings = d.rm_bookings; RM.save(); try { RM.render(); RM.updateQuota(); } catch(e) { console.error('RM sync refresh error:', e); } }
-      if (d.rm_last_id && typeof RM !== 'undefined') { RM.lastId = d.rm_last_id; }
+      // 還原 RM 數據（只有伺服器有資料時才覆寫，避免空陣列覆蓋本地資料）
+      if (d.rm_bookings && d.rm_bookings.length > 0 && typeof RM !== 'undefined') {
+        RM.bookings = d.rm_bookings;
+        try { localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings)); } catch(e) {}
+        if (d.rm_last_id && RM.lastId < d.rm_last_id) RM.lastId = d.rm_last_id;
+        try { localStorage.setItem("rm_last_id", RM.lastId.toString()); } catch(e) {}
+        try { RM.render(); RM.updateQuota(); } catch(e) { console.error('RM sync refresh error:', e); }
+        console.log('[Sync ↓] RM 數據已還原，共 ' + d.rm_bookings.length + ' 筆');
+      } else if (typeof RM !== 'undefined') {
+        // 伺服器傳回空陣列或無資料時，保留本地資料
+        console.log('[Sync ↓] 伺服器 rm_bookings 為空，保留本地資料（共 ' + RM.bookings.length + ' 筆）');
+      }
       _lastSyncModified = d.lastModified || data.lastModified || Date.now();
       saveData(true);
       renderAll();
@@ -3441,6 +3453,12 @@ function manualSync() {
 function initSync() {
   if (!SYNC_API) { console.log('同步伺服器未配置'); return; }
   console.log('同步伺服器：' + SYNC_API + '（增量同步已啟用，間隔 10 秒）');
+  // 立即執行一次同步（不再等待 10 秒）
+  syncDownload().then(function() {
+    console.log('[Sync] 首次同步完成');
+  }).catch(function() {
+    console.log('[Sync] 首次同步失敗，將在 10 秒後重試');
+  });
   // 定期同步（每 10 秒，使用增量檢查減少流量）
   setInterval(function() {
     // 先上傳本地變更

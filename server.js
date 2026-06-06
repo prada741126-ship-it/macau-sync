@@ -141,8 +141,8 @@ app.post('/api/sync/upload', (req, res) => {
       if (!db.config) db.config = {};
       db.config.workingMonth = body.workingMonth;
     }
-    if (body.rm_bookings !== undefined) db.rm_bookings = body.rm_bookings;
-    if (body.rm_last_id !== undefined) db.rm_last_id = body.rm_last_id;
+    if (body.rm_bookings !== undefined && body.rm_bookings.length > 0) db.rm_bookings = body.rm_bookings;
+    if (body.rm_last_id !== undefined && body.rm_last_id > (db.rm_last_id || 0)) db.rm_last_id = body.rm_last_id;
     writeDB(db);
     res.json({ ok: true, lastModified: db.lastModified });
   } catch (e) {
