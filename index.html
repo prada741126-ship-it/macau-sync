@@ -2355,14 +2355,27 @@ function showUndoToast() {
 }
 function undoDelete() {
   if (!lastDeleted) return;
-  txs.push(lastDeleted);
+  // 软删除还原：找到该笔交易，把 deleted 设为 false
+  var found = false;
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].id === lastDeleted.id) {
+      txs[i].deleted = false;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    // 已被 syncDownload 移除，重新插入
+    lastDeleted.deleted = false;
+    txs.push(lastDeleted);
+  }
+  lastDeleted = null;
   saveData(true);
   renderAll();
   renderOverview();
   renderSummary();
   updateTotalWalletUI();
   showToast("已恢復交易！","success");
-  lastDeleted = null;
 }
 
 // ===== 月度管理 =====
@@ -3000,6 +3013,7 @@ function calcFundBalance() {
   for (var i = 0; i < txs.length; i++) { totalF += (txs[i].fund || 0); }
   var totalW = 0, totalD = 0, totalCD = 0;
   for (var i = 0; i < fundWithdrawals.length; i++) {
+    if (fundWithdrawals[i].deleted) continue;
     if (fundWithdrawals[i].type === "deposit") { totalD += (fundWithdrawals[i].amount || 0); }
     else if (fundWithdrawals[i].type === "cash_deposit") { totalCD += (fundWithdrawals[i].amount || 0); }
     else { totalW += (fundWithdrawals[i].amount || 0); }
@@ -3048,9 +3062,13 @@ function saveFundForm() {
 }
 function deleteFund(id) {
   if (!confirm("確定刪除？")) return;
-  var newArr = [];
-  for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id !== id) newArr.push(fundWithdrawals[i]); }
-  fundWithdrawals = newArr;
+  // 软删除：标记 deleted=true（同步时保留标记，防止 syncDownload 还原）
+  var idx = -1;
+  for (var i = 0; i < fundWithdrawals.length; i++) {
+    if (fundWithdrawals[i].id === id) { idx = i; break; }
+  }
+  if (idx < 0) return;
+  fundWithdrawals[idx].deleted = true;
   saveFundData(true);
   // 刷新所有頁面的基金餘額顯示
   renderOverview();
@@ -3447,8 +3465,16 @@ function syncDownload() {
       if (d.agentList !== undefined && d.agentList.length > 0) agentList = d.agentList;
       // agentWallets：只在上傳成功後才取代
       if (d.agentWallets !== undefined && Object.keys(d.agentWallets).length > 0) agentWallets = d.agentWallets;
-      // fundWithdrawals：只在上傳成功後才取代
-      if (d.fundWithdrawals !== undefined && d.fundWithdrawals.length > 0) fundWithdrawals = d.fundWithdrawals;
+      // 合併 fundWithdrawals（按 ID 合併，保留本地尚未上傳的資料）
+      if (d.fundWithdrawals !== undefined) {
+        var fwMap = {};
+        for (var i = 0; i < fundWithdrawals.length; i++) fwMap[fundWithdrawals[i].id] = fundWithdrawals[i];
+        for (var i = 0; i < d.fundWithdrawals.length; i++) fwMap[d.fundWithdrawals[i].id] = d.fundWithdrawals[i];
+        fundWithdrawals = [];
+        for (var fid in fwMap) fundWithdrawals.push(fwMap[fid]);
+        // 永久移除 deleted:true 資料
+        fundWithdrawals = fundWithdrawals.filter(function(f) { return !f.deleted; });
+      }
       if (d.workingMonth) workingMonth = d.workingMonth;
       if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
       // 還原 RM 數據（合併策略，保留本地尚未上傳的資料）
@@ -3722,6 +3748,7 @@ function doQuery() {
   if (!month) month = workingMonth || nowStr().slice(0, 7);
   // 公基金查询 - 分筆流水（含累計餘額）
   if (agent === "__FUND__") {
+    var __fundWithdrawals = fundWithdrawals.filter(function(f) { return !f.deleted; });
     var allFundTxs = [], preBalance = 0, totalFund = 0;
     for (var i = 0; i < _txs.length; i++) {
       var fv = _txs[i].fund || 0;
@@ -3730,8 +3757,8 @@ function doQuery() {
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     var totalW = 0, totalD = 0, totalCD = 0;
-    for (var i = 0; i < fundWithdrawals.length; i++) {
-      var r = fundWithdrawals[i];
+    for (var i = 0; i < _fundWithdrawals.length; i++) {
+      var r = _fundWithdrawals[i];
       if (r.type === "deposit") { totalD += (r.amount || 0); }
       else if (r.type === "cash_deposit") { totalCD += (r.amount || 0); }
       else { totalW += (r.amount || 0); }
@@ -4287,6 +4314,7 @@ function renderOverview() {
   var fDep=0,fCD=0,fWit=0;
   for (var j=0;j<fundWithdrawals.length;j++){
     var f=fundWithdrawals[j];
+    if (f.deleted) continue;
     if (!f.date||f.date.slice(0,7)!==now) continue;
     if (f.type==="deposit") fDep+=f.amount; else if (f.type==="cash_deposit") fCD+=f.amount; else fWit+=f.amount;
   }
@@ -4391,9 +4419,10 @@ function renderOverview() {
     if (!t.date||t.date.slice(0,7)!==now) continue;
     entries.push({date:t.date,type:t.type||"rolling",desc:(t.type==="cash"?t.agent+" 現金寄放":t.agent+" — "+t.client+(t.venue?" @ "+t.venue:"")),amount:t.type==="cash"?(t.cash||0):(t.bonus||0),extra:t.type==="cash"?"dep":"pos"});
   }
-  // 公基金異動
+  // 公基金異動（過濾已刪除）
   for (var j=0;j<fundWithdrawals.length;j++){
     var f=fundWithdrawals[j];
+    if (f.deleted) continue;
     if (!f.date||f.date.slice(0,7)!==now) continue;
     var ftype=f.type==="withdraw"?"提領":(f.type==="cash_deposit"?"自存現金":"存入");
     entries.push({date:f.date,type:"fund",desc:"公基金 "+ftype+(f.note?" — "+f.note:""),amount:f.amount||0,extra:f.type==="withdraw"?"neg":"dep"});
