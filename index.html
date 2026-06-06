@@ -2974,11 +2974,7 @@ function hideLoading() {
   if (el) el.classList.remove("show");
 }
 
-function openFundModal() {
-  document.getElementById("fund-date").value = nowStr();
-  document.getElementById("fund-type").value = "withdraw";
-  document.getElementById("fund-amount").value = "";
-  document.getElementById("fund-note").value = "";
+function calcFundBalance() {
   var totalF = 0;
   for (var i = 0; i < txs.length; i++) { totalF += (txs[i].fund || 0); }
   var totalW = 0, totalD = 0, totalCD = 0;
@@ -2987,7 +2983,14 @@ function openFundModal() {
     else if (fundWithdrawals[i].type === "cash_deposit") { totalCD += (fundWithdrawals[i].amount || 0); }
     else { totalW += (fundWithdrawals[i].amount || 0); }
   }
-  document.getElementById("fund-balance").value = fmt(Math.max(0, totalF + totalD + totalCD - totalW));
+  return Math.max(0, totalF + totalD + totalCD - totalW);
+}
+function openFundModal() {
+  document.getElementById("fund-date").value = nowStr();
+  document.getElementById("fund-type").value = "withdraw";
+  document.getElementById("fund-amount").value = "";
+  document.getElementById("fund-note").value = "";
+  document.getElementById("fund-balance").value = fmt(calcFundBalance());
   document.getElementById("fund-modal").classList.add("show");
   lockBody();
 }
@@ -3003,10 +3006,22 @@ function saveFundForm() {
   if (!date) { showToast("請選擇日期！","warning"); return; }
   if (!validateMonthDate(date, "公基金異動")) return;
   if (!amount) { showToast("請輸入金額！","warning"); return; }
+  // 檢查提領時不能超過可提領餘額
+  if (type === "withdraw") {
+    var testBal = calcFundBalance();
+    if (amount > testBal) { showToast("提領金額超過可提領餘額 " + fmt(testBal) + "！", "warning"); return; }
+  }
   fundWithdrawals.push({ id: fundNextId++, date: date, type: type, amount: amount, note: note });
   saveFundData(true);
   closeFundModal();
-  doQuery();
+  // 刷新所有頁面的基金餘額顯示
+  renderOverview();
+  renderSummary();
+  // 只在查詢頁面時刷新查詢明細
+  var qp = document.getElementById("page-query");
+  if (qp && qp.style.display !== "none") {
+    fillAgent(); doQuery();
+  }
   updateTotalWalletUI();
   showToast("已儲存！","success");
 }
@@ -3016,10 +3031,17 @@ function deleteFund(id) {
   for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id !== id) newArr.push(fundWithdrawals[i]); }
   fundWithdrawals = newArr;
   saveFundData(true);
-  doQuery();
+  // 刷新所有頁面的基金餘額顯示
+  renderOverview();
+  renderSummary();
+  var qp = document.getElementById("page-query");
+  if (qp && qp.style.display !== "none") {
+    fillAgent(); doQuery();
+  }
   updateTotalWalletUI();
 }
 function saveFundData(silent) {
+  markSyncDirty();
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
   if (typeof syncUpload === 'function') syncUpload();
 }
@@ -3280,16 +3302,7 @@ function calcTotalWallet() {
     totalAgent += bal;
   }
   // 計算公基金餘額
-  var totalFund = 0;
-  for (var i = 0; i < txs.length; i++) { totalFund += (txs[i].fund || 0); }
-  var fwDep = 0, fwCDep = 0, fwWithdraw = 0;
-  for (var i = 0; i < fundWithdrawals.length; i++) {
-    var ft = fundWithdrawals[i].type;
-    if (ft === "deposit") fwDep += (fundWithdrawals[i].amount || 0);
-    else if (ft === "cash_deposit") fwCDep += (fundWithdrawals[i].amount || 0);
-    else fwWithdraw += (fundWithdrawals[i].amount || 0);
-  }
-  var fundBal = Math.max(0, totalFund + fwDep + fwCDep - fwWithdraw);
+  var fundBal = calcFundBalance();
   return totalAgent + fundBal;
 }
 
@@ -3514,10 +3527,17 @@ function quickFilter(type, ev) {
 
 function fillAgent() {
   var sel = document.getElementById("q-agent");
+  var cur = sel ? sel.value : "";
   var h = "<option value=''>全部</option>";
   for (var j = 0; j < agentList.length; j++) { h += "<option value='" + agentList[j] + "'>" + agentList[j] + "</option>"; }
   h += "<option value='__FUND__'>公基金</option>";
   sel.innerHTML = h;
+  // 保留原本選擇
+  if (cur) {
+    for (var k = 0; k < sel.options.length; k++) {
+      if (sel.options[k].value === cur) { sel.value = cur; break; }
+    }
+  }
 }
 
 // ===== 進階篩選器 =====
@@ -3653,7 +3673,7 @@ function doQuery() {
         else preBalance -= e.amount;
       }
     }
-    var balance = Math.max(0, totalFund + totalD + totalCD - totalW);
+    var balance = calcFundBalance();
     var running = preBalance;
     document.getElementById("query-kpi").innerHTML =
       "<div class='kpi-card'><div class='label'>公基金總額</div><div class='value'>" + fmt(totalFund) + "</div></div>" +
@@ -4192,17 +4212,8 @@ function renderOverview() {
     if (!f.date||f.date.slice(0,7)!==now) continue;
     if (f.type==="deposit") fDep+=f.amount; else if (f.type==="cash_deposit") fCD+=f.amount; else fWit+=f.amount;
   }
-  var fundNet = totalFund+fDep+fCD-fWit;
   // 公基金累计馀额（所有时间）
-  var totalFundAll=0, fDepAll=0, fCDAll=0, fWitAll=0;
-  for (var ii=0;ii<txs.length;ii++) totalFundAll+=(txs[ii].fund||0);
-  for (var jj=0;jj<fundWithdrawals.length;jj++){
-    var ff=fundWithdrawals[jj];
-    if (ff.type==="deposit") fDepAll+=ff.amount;
-    else if (ff.type==="cash_deposit") fCDAll+=ff.amount;
-    else fWitAll+=ff.amount;
-  }
-  var fundBalance = Math.max(0, totalFundAll+fDepAll+fCDAll-fWitAll);
+  var fundBalance = calcFundBalance();
   var undrawnTotal = Math.max(0,totalBonus-totalDrawn);
 
   var grid=document.getElementById("ov-kpi-grid");
