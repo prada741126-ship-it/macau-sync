@@ -2141,6 +2141,7 @@ var nextId = 1;
 var fundNextId = 1;
 var agentWalletNextId = 1;
 var agentList = [];
+var lastSyncTimestamp = 0;  // Firebase 最後同步時間戳（防止舊資料覆蓋新資料）
 var sortState = { table: "", col: "", asc: true };
 
 // ===== 同步配置（v4.9 安全強化）=====
@@ -3052,7 +3053,8 @@ function deleteFund(id) {
 }
 function saveFundData(silent) {
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
-  if (typeof syncUpload === 'function') syncUpload();
+  // 延遲 300ms 再同步，確保本地資料已完全更新（避免 race condition）
+  if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
 }
 function loadFundData(silent) {
   var d = localStorage.getItem("macau_fund_data");
@@ -3147,7 +3149,7 @@ function syncAgentDrawn(agent) {
 }
 function saveAgentWallets(silent) {
   localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
-  if (typeof syncUpload === 'function') syncUpload();
+  if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
 }
 function loadAgentWallets(silent) {
   var d = localStorage.getItem("macau_agent_wallets");
@@ -3371,7 +3373,14 @@ function initSync() {
     var data = snapshot.val();
     if (!data) { console.log('[Sync ↓] Firebase 無資料'); return; }
     
-    console.log('[Sync ↓] Firebase 收到資料更新');
+    // 時間戳檢查：只接受比上次同步更新的資料（防止舊資料覆蓋新資料）
+    var incomingTs = data.timestamp || 0;
+    if (incomingTs < lastSyncTimestamp) {
+      console.log('[Sync ↓] 收到舊資料（' + incomingTs + ' < ' + lastSyncTimestamp + '），跳過');
+      return;
+    }
+    
+    console.log('[Sync ↓] Firebase 收到資料更新（timestamp: ' + incomingTs + ')');
     
     var hasChanges = false;
     
@@ -3416,15 +3425,28 @@ function initSync() {
         localStorage.setItem("macau_data", encrypted);
       } catch(e) { console.error('localStorage save error:', e); }
       
-      // 渲染所有頁面
+      // 渲染所有頁面（確保刪除後 UI 也更新）
       renderAll();
       renderOverview();
       renderSummary();
       if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
       if (typeof renderAgentWallets === 'function') renderAgentWallets();
       if (typeof updateAllAgentBalances === 'function') updateAllAgentBalances();
+      // 查詢頁面也要重新渲染（否則刪除後查詢結果不會更新）
+      try { doQuery(); } catch(e) {}
+      // 公基金頁面 UI 更新
+      try { updateTotalWalletUI(); } catch(e) {}
+      // 代理錢包餘額更新
+      try {
+        var awAgents = Object.keys(agentWallets);
+        for (var wi = 0; wi < awAgents.length; wi++) {
+          syncAgentDrawn(awAgents[wi]);
+        }
+      } catch(e) {}
       
-      console.log('[Sync ↓] Firebase 資料已合併並渲染');
+      // 更新最後同步時間戳
+      lastSyncTimestamp = incomingTs;
+      console.log('[Sync ↓] Firebase 資料已合併並渲染全部頁面');
     }
   });
 }
@@ -4524,8 +4546,8 @@ var RM = {
   save: function() {
     localStorage.setItem("rm_bookings", JSON.stringify(this.bookings));
     localStorage.setItem("rm_last_id", this.lastId.toString());
-    // 同步到 Firebase
-    if (typeof syncUpload === 'function') syncUpload();
+    // 同步到 Firebase（延遲 300ms 確保本地資料先更新完）
+    if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
   },
 
   populateAgentDropdown: function() {
