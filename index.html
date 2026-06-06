@@ -1138,6 +1138,24 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 .toast-error   { background: linear-gradient(135deg, #c0392b, #e74c3c); }
 .toast-info    { background: linear-gradient(135deg, #2980b9, #3498db); }
 
+/* 全域載入動畫 */
+#loading-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center;
+  flex-direction: column; gap: 16px;
+}
+#loading-overlay.show { display: flex; }
+.loading-spinner {
+  width: 48px; height: 48px; border: 3px solid rgba(212,175,55,0.15);
+  border-top: 3px solid #D4AF37; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  color: #D4AF37; font-size: 14px; font-weight: 500;
+  letter-spacing: 2px; text-shadow: 0 0 10px rgba(212,175,55,0.3);
+}
+
 /* ============================================================
    手機版全面修正：防止溢出與完美排版（v5.9.1）
    ============================================================ */
@@ -1273,6 +1291,9 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
 </style>
 </head>
 <body>
+
+<!-- 全域載入動畫 -->
+<div id="loading-overlay"><div class="loading-spinner"></div><div class="loading-text">處理中…</div></div>
 
 <!-- 密码保护遮罩 — 中国风 -->
 <div id="pw-overlay">
@@ -2014,6 +2035,7 @@ function isModalOpen() {
 var lastDeleted = null;
 function deleteTx(id) {
   if (!confirm("確定刪除此筆交易？")) return;
+  showLoading("刪除中…");
   // 保存副本供撤銷
   for (var i = 0; i < txs.length; i++) {
     if (txs[i].id === id) { lastDeleted = txs[i]; break; }
@@ -2029,6 +2051,7 @@ function deleteTx(id) {
   renderSummary();
   updateTotalWalletUI();
   if (lastDeleted) showUndoToast();
+  setTimeout(hideLoading, 300);
 }
 function showUndoToast() {
   var container = document.getElementById("toast-container");
@@ -2381,6 +2404,7 @@ function saveForm() {
       });
     }
   }
+  showLoading("儲存中…");
   saveData(true);
   closeModal();  // 先關閉彈窗，確保一定執行
   clearDraft();  // 清除草稿（儲存成功後不再需要）
@@ -2390,6 +2414,7 @@ function saveForm() {
   try { renderAll(); } catch(e) { console.error("renderAll error:", e); }
   try { renderOverview(); } catch(e) { console.error("renderOverview error:", e); }
   try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); }
+  setTimeout(hideLoading, 300);
 }
 
 // ===== 自動儲存草稿功能 =====
@@ -2570,6 +2595,19 @@ function closeBackupModal() {
   var bg = document.getElementById("backup-modal");
   if (bg && bg.parentNode) { bg.parentNode.removeChild(bg); }
   unlockBody();
+}
+
+// ===== 全域載入動畫 =====
+function showLoading(msg) {
+  var el = document.getElementById("loading-overlay");
+  if (el) {
+    el.querySelector(".loading-text").textContent = msg || "處理中…";
+    el.classList.add("show");
+  }
+}
+function hideLoading() {
+  var el = document.getElementById("loading-overlay");
+  if (el) el.classList.remove("show");
 }
 
 function openFundModal() {
@@ -2937,11 +2975,11 @@ function syncDownload() {
 
 function manualSync() {
   if (!SYNC_API) { showToast('未配置同步伺服器', 'warning'); return; }
-  showToast('正在同步...', 'info');
+  showLoading('正在同步…');
   syncUpload();
   setTimeout(function() {
     syncDownload();
-    setTimeout(function() { showToast('同步完成', 'success'); }, 1200);
+    setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 1200);
   }, 800);
 }
 
