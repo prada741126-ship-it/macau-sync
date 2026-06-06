@@ -1513,12 +1513,16 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
   </div>
 
   <div class="page" id="page-query">
-    <div class="toolbar">
+    <div class="toolbar" style="flex-wrap:wrap;gap:4px;">
       <label style="line-height:35px;">代理：</label>
       <select id="q-agent" style="padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;"></select>
+      <label style="line-height:35px;">地點：</label>
+      <select id="q-venue" style="padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;min-width:100px;"><option value="">全部</option></select>
       <label style="line-height:35px;">月份：</label>
-      <input type="text" id="q-month" placeholder="2026-06" style="width:80px;padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
-      <button class="btn btn-primary" onclick="doQuery()">查詢</button>
+      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;padding:6px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
+      <button class="btn btn-primary" onclick="doQuery()" style="padding:6px 14px;">查詢</button>
+      <button class="btn" onclick="toggleAdvFilter()" style="padding:6px 10px;font-size:11px;" id="btn-adv-filter">⚙ 進階</button>
+      <button class="btn" onclick="showSavedFilters()" style="padding:6px 10px;font-size:11px;" title="儲存的篩選">📌</button>
       <span class="time-filter">
         <button onclick="quickFilter('this_week',event)">本週</button>
         <button onclick="quickFilter('last_week',event)">上週</button>
@@ -1528,6 +1532,19 @@ tbody tr:hover { background: rgba(212,175,55,0.06); }
         <button onclick="quickFilter('this_year',event)">本年</button>
         <button onclick="quickFilter('all',event)">全部</button>
       </span>
+    </div>
+    <div id="adv-filter" style="display:none;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(212,175,55,0.1);">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <label style="font-size:11px;color:#888;">日期從：</label>
+        <input type="date" id="q-date-from" style="padding:4px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;width:130px;">
+        <label style="font-size:11px;color:#888;">至：</label>
+        <input type="date" id="q-date-to" style="padding:4px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;width:130px;">
+        <label style="font-size:11px;color:#888;">洗碼量：</label>
+        <input type="number" id="q-vol-min" placeholder="最低(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;">
+        <label style="font-size:11px;color:#888;">~</label>
+        <input type="number" id="q-vol-max" placeholder="最高(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;">
+        <button class="btn" onclick="saveCurrentFilter()" style="padding:4px 8px;font-size:10px;">💾 儲存篩選</button>
+      </div>
     </div>
     <div class="filter-tags" id="filter-tags"></div>
     <div id="query-kpi" class="kpi-box"></div>
@@ -2871,6 +2888,7 @@ function renderAll() {
     tbody.appendChild(tr);
   }
   fillAgent();
+  populateVenueDropdown();
 }
 
 function calcTotalWallet() {
@@ -3096,6 +3114,106 @@ function fillAgent() {
   sel.innerHTML = h;
 }
 
+// ===== 進階篩選器 =====
+function toggleAdvFilter() {
+  var el = document.getElementById("adv-filter");
+  var btn = document.getElementById("btn-adv-filter");
+  if (el.style.display === "none" || !el.style.display) {
+    el.style.display = "block";
+    if (btn) btn.classList.add("active");
+  } else {
+    el.style.display = "none";
+    if (btn) btn.classList.remove("active");
+  }
+}
+
+function saveCurrentFilter() {
+  var name = prompt("請輸入篩選名稱（例如：新濠本月）：");
+  if (!name) return;
+  var filter = {
+    agent: document.getElementById("q-agent").value,
+    venue: document.getElementById("q-venue").value,
+    month: document.getElementById("q-month").value,
+    dateFrom: document.getElementById("q-date-from").value,
+    dateTo: document.getElementById("q-date-to").value,
+    volMin: document.getElementById("q-vol-min").value,
+    volMax: document.getElementById("q-vol-max").value
+  };
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem("macau_saved_filters") || "{}"); } catch(e) {}
+  saved[name] = filter;
+  localStorage.setItem("macau_saved_filters", JSON.stringify(saved));
+  showToast("篩選「" + name + "」已儲存！", "success");
+}
+
+function showSavedFilters() {
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem("macau_saved_filters") || "{}"); } catch(e) {}
+  var names = Object.keys(saved);
+  if (!names.length) { showToast("尚無已儲存的篩選條件", "info"); return; }
+  var bg = document.createElement("div");
+  bg.className = "modal-bg show";
+  bg.id = "filter-modal";
+  bg.onclick = function(e) { if (e.target === bg) { document.body.removeChild(bg); unlockBody(); } };
+  var inner = '<div class="modal"><h3>📌 已儲存的篩選條件</h3>';
+  inner += '<div style="max-height:300px;overflow-y:auto;">';
+  for (var i = 0; i < names.length; i++) {
+    var n = names[i];
+    var f = saved[n];
+    var desc = (f.agent || "全部代理") + " / " + (f.month || "不限月份") + (f.venue ? " / " + f.venue : "");
+    inner += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:4px 0;background:rgba(255,255,255,0.03);border-radius:6px;">';
+    inner += '<div><span style="font-size:13px;color:#D4AF37;">' + n + '</span><br><span style="font-size:10px;color:#888;">' + desc + '</span></div>';
+    inner += '<div><button class="btn" style="padding:3px 8px;font-size:10px;min-height:26px;" onclick="closeFilterModal();loadSavedFilter(\'' + n.replace(/'/g, "\\'") + '\')">套用</button>';
+    inner += ' <button class="btn btn-red" style="padding:3px 8px;font-size:10px;min-height:26px;" onclick="deleteSavedFilter(\'' + n.replace(/'/g, "\\'") + '\')">✕</button></div>';
+    inner += '</div>';
+  }
+  inner += '</div>';
+  inner += '<div style="margin-top:12px;text-align:right;"><button class="btn" onclick="closeFilterModal()">關閉</button></div></div>';
+  bg.innerHTML = inner;
+  document.body.appendChild(bg);
+  lockBody();
+}
+
+function loadSavedFilter(name) {
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem("macau_saved_filters") || "{}"); } catch(e) {}
+  var f = saved[name];
+  if (!f) return;
+  document.getElementById("q-agent").value = f.agent || "";
+  document.getElementById("q-venue").value = f.venue || "";
+  document.getElementById("q-month").value = f.month || "";
+  document.getElementById("q-date-from").value = f.dateFrom || "";
+  document.getElementById("q-date-to").value = f.dateTo || "";
+  document.getElementById("q-vol-min").value = f.volMin || "";
+  document.getElementById("q-vol-max").value = f.volMax || "";
+  doQuery();
+}
+
+function deleteSavedFilter(name) {
+  if (!confirm("確定刪除篩選「" + name + "」？")) return;
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem("macau_saved_filters") || "{}"); } catch(e) {}
+  delete saved[name];
+  localStorage.setItem("macau_saved_filters", JSON.stringify(saved));
+  closeFilterModal();
+  showToast("篩選「" + name + "」已刪除", "success");
+}
+
+function closeFilterModal() {
+  var el = document.getElementById("filter-modal");
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+  unlockBody();
+}
+
+function populateVenueDropdown() {
+  var sel = document.getElementById("q-venue");
+  if (!sel) return;
+  var venues = ["新濠(勵盈1)","新濠(勵盈2)","銀河(金門1)","銀河(金門8)","金沙(御匾會)","永利(永利會)","上葡京"];
+  var h = "<option value=''>全部地點</option>";
+  for (var i = 0; i < venues.length; i++) h += "<option value='" + venues[i] + "'>" + venues[i] + "</option>";
+  sel.innerHTML = h;
+}
+
 function doQuery() {
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
@@ -3169,10 +3287,22 @@ function doQuery() {
     return;
   }
   var data = [];
+  // 讀取進階篩選條件
+  var venue = document.getElementById("q-venue").value;
+  var dateFrom = document.getElementById("q-date-from").value;
+  var dateTo = document.getElementById("q-date-to").value;
+  var volMin = toNum(document.getElementById("q-vol-min").value) || 0;
+  var volMax = toNum(document.getElementById("q-vol-max").value) || 0;
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
     if (t.date && t.date.indexOf(month) !== 0) continue;
     if (agent && t.agent !== agent) continue;
+    if (venue && t.venue !== venue) continue;
+    if (dateFrom && t.date < dateFrom) continue;
+    if (dateTo && t.date > dateTo) continue;
+    var vol = toNum(t.volume) || 0;
+    if (volMin && vol < volMin) continue;
+    if (volMax && vol > volMax) continue;
     data.push(t);
   }
   var tv = 0, tc = 0, tb = 0, td = 0;
@@ -3540,6 +3670,7 @@ function closeAgentMgr() {
   document.getElementById('agent-mgr-modal').style.display = 'none';
   populateAgentDropdown();
   fillAgent();
+  populateVenueDropdown();
   unlockBody();
 }
 
