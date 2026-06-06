@@ -1913,7 +1913,7 @@ h1 { border-bottom:3px solid rgba(212,175,55,0.4); text-shadow:0 2px 20px rgba(2
     <div class="room-controls">
       <select class="rm-select" id="rm-filter-agent"><option value="">全部代理</option></select>
       <input class="rm-input" type="month" id="rm-filter-month" onchange="RM.updateQuota()">
-      <button class="btn btn-gold" onclick="rmOpenModal()">＋ 新增訂房</button>
+      <button class="btn btn-gold" id="rm-add-btn" onclick="rmOpenModal()">＋ 新增訂房</button>
       <button class="btn btn-ghost" onclick="rmExportCSV()">匯出</button>
       <button class="btn btn-ghost" onclick="document.getElementById('rm-file-input').click()">匯入</button>
       <input type="file" id="rm-file-input" accept=".csv" style="display:none" onchange="rmImportCSV(event)">
@@ -4479,17 +4479,23 @@ var RM = {
     }
   },
   openModal: function(id) {
+    try {
     this.populateAgentDropdown();
+    } catch(e) { alert('[openModal 錯誤] populateAgentDropdown:\n' + e.message); return; }
+    try {
     this.populateDateSelects();
+    } catch(e) { alert('[openModal 錯誤] populateDateSelects:\n' + e.message); return; }
     this.editingId = id || null;
+    try {
     document.getElementById("rm-modal-title").textContent = id ? "編輯訂房" : "新增訂房";
+    } catch(e) { alert('[openModal 錯誤] setTitle:\n' + e.message); return; }
     if (id) {
       var b = this.bookings.find(function(x){ return x.id===id; });
-      if (!b) return;
+      if (!b) { alert('[openModal] 找不到 id=' + id + ' 的訂房資料'); return; }
+      try {
       document.getElementById("rm-f-agent").value = b.agent;
       document.getElementById("rm-f-client").value = b.client;
       document.getElementById("rm-f-hotel").value = b.hotel;
-      // 填入月日選擇方塊（不含年）
       var ciParts = (b.checkIn || b.date || "").split("-");
       if (ciParts.length >= 3) { document.getElementById("rm-f-checkin-mm").value = ciParts[1]; document.getElementById("rm-f-checkin-dd").value = ciParts[2]; }
       var coParts = (b.checkOut || "").split("-");
@@ -4499,7 +4505,6 @@ var RM = {
       document.getElementById("rm-f-total").value = b.totalCost;
       document.getElementById("rm-f-status").value = b.status;
       document.getElementById("rm-f-note").value = b.note||"";
-      // 恢復門檻（若舊資料無 threshold 則用酒店預設）
       var th = b.threshold || 0;
       if (!th) {
         var ho = document.getElementById("rm-f-hotel");
@@ -4507,7 +4512,9 @@ var RM = {
         th = parseInt(o.getAttribute("data-threshold"))||70;
       }
       this._editingThreshold = th;
+      } catch(e) { alert('[openModal 錯誤] 填入資料:\n' + e.message); return; }
     } else {
+      try {
       document.getElementById("rm-f-agent").value = "";
       document.getElementById("rm-f-client").value = "";
       document.getElementById("rm-f-hotel").value = "";
@@ -4520,8 +4527,13 @@ var RM = {
       document.getElementById("rm-f-total").value = "";
       document.getElementById("rm-f-status").value = "免費";
       document.getElementById("rm-f-note").value = "";
+      } catch(e) { alert('[openModal 錯誤] 重設表單:\n' + e.message); return; }
     }
+    try {
+    alert('[openModal] 即將顯示彈窗，目前 display=' + window.getComputedStyle(document.getElementById("rm-modal-bg")).display);
     document.getElementById("rm-modal-bg").classList.add("active");
+    alert('[openModal] 已加入 active 類，現在 display=' + window.getComputedStyle(document.getElementById("rm-modal-bg")).display);
+    } catch(e) { alert('[openModal 錯誤] 顯示彈窗:\n' + e.message); return; }
   },
   closeModal: function() {
     document.getElementById("rm-modal-bg").classList.remove("active");
@@ -4794,7 +4806,26 @@ var RM = {
 };
 
 // 全域函式（供 HTML onclick 呼叫）
-function rmOpenModal(id){ RM.openModal(id||null); }
+function rmOpenModal(id){
+  // 除錯：用 alert 確認函式是否被呼叫到
+  try {
+    // 先直接操作 DOM 測試能否顯示
+    var bg = document.getElementById('rm-modal-bg');
+    if (!bg) { alert('錯誤：找不到 rm-modal-bg 元素！'); return; }
+    alert('[1] rmOpenModal 已觸發！RM 類型=' + typeof RM + '\nrm-modal-bg 目前 display=' + window.getComputedStyle(bg).display);
+    if (typeof RM === 'undefined') {
+      alert('[2] RM 物件未定義！嘗試直接顯示彈窗...');
+      bg.classList.add('active');
+      bg.style.display = 'flex';
+      alert('[3] 已直接設定 display:flex，現在 display=' + window.getComputedStyle(bg).display);
+      return;
+    }
+    if (!RM.openModal) { alert('[錯誤] RM.openModal 不存在！'); return; }
+    RM.openModal(id || null);
+  } catch(e) {
+    alert('[rmOpenModal 發生錯誤]\n' + e.message + '\n\n請截圖回報！');
+  }
+}
 function rmCloseModal(){ RM.closeModal(); }
 function rmUpdatePrice(){ RM.updatePrice(); }
 function rmCalcNights(){ RM.calcNights(); }
@@ -5322,6 +5353,39 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
 <!-- 背景粒子画布 -->
 <canvas id="pw-particles"></canvas>
 <canvas id="bg-particles" style="display:none;"></canvas>
+
+<!-- ===== 緊急修復：獨立綁定「新增訂房」按鈕 ===== -->
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var btn = document.getElementById('rm-add-btn');
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var bg = document.getElementById('rm-modal-bg');
+        if (!bg) { alert('找不到 rm-modal-bg'); return; }
+        bg.classList.add('active');
+        alert('✅ 彈窗已顯示！');
+      });
+      btn.addEventListener('touchend', function(e) { e.preventDefault(); btn.click(); });
+      // 確保 onclick 也有效
+      btn.onclick = function() {
+        var bg = document.getElementById('rm-modal-bg');
+        if (!bg) { alert('找不到 rm-modal-bg'); return; }
+        bg.classList.add('active');
+        bg.style.display = 'flex';
+      };
+    } else {
+      // 按鈕不存在，檢查 DOM
+      var allBtns = document.querySelectorAll('button');
+      for (var i = 0; i < Math.min(allBtns.length, 5); i++) {
+        console.log('Button[' + i + ']: ' + allBtns[i].textContent + ' id=' + allBtns[i].id);
+      }
+    }
+  }, 500);
+});
+</script>
 
 </body>
 </html>
