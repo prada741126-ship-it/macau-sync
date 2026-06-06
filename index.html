@@ -1802,6 +1802,9 @@ tbody tr:hover {
     </div>
     <div class="filter-tags" id="filter-tags"></div>
     <div id="query-kpi" class="kpi-box"></div>
+    <div id="query-chart-wrap" style="display:none;background:rgba(18,10,6,0.92);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
+      <canvas id="query-chart" height="200" style="width:100%;"></canvas>
+    </div>
     <table>
       <thead><tr>
         <th>日期</th><th>代理</th><th>地點</th>
@@ -3571,6 +3574,7 @@ function populateVenueDropdown() {
 }
 
 function doQuery() {
+  try {
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
   if (!month) month = workingMonth || nowStr().slice(0, 7);
@@ -3610,6 +3614,9 @@ function doQuery() {
       "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(totalW) + "</div></div>" +
       "<div class='kpi-card' style='background:#f0a500;'><div class='label'>可提餘額</div><div class='value'>" + fmt(balance) + "</div></div>" +
       "<button class='btn btn-primary' style='margin-left:10px;' onclick='openFundModal()'>＋ 提領</button>";
+    // 公基金图表
+    if (allFundTxs.length > 0) { setTimeout(function() { renderFundChart(allFundTxs, month); }, 150); }
+    else { document.getElementById("query-chart-wrap").style.display = "none"; }
     var tbody = document.getElementById("query-body");
     tbody.innerHTML = "";
     // 上月累計行
@@ -3674,6 +3681,12 @@ function doQuery() {
     "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(tb) + "</div></div>" +
     "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(td) + "</div></div>" +
     "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領</div><div class='value'>" + fmt(Math.max(0, tb - td)) + "</div></div>";
+  // 图表
+  if (data.length > 0 && agent && agent !== '__FUND__') {
+    setTimeout(function() { renderQueryChart(data); }, 150);
+  } else {
+    document.getElementById("query-chart-wrap").style.display = "none";
+  }
   var tbody = document.getElementById("query-body");
   tbody.innerHTML = "";
   for (var m = 0; m < data.length; m++) {
@@ -3815,6 +3828,149 @@ function doQuery() {
     totalRow.innerHTML = "<td></td><td style='color:#1a1a2e;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
     tbody.appendChild(totalRow);
   }
+  } catch(e) {
+    console.error('[doQuery] error:', e);
+    showToast('查詢失敗：' + (e.message||e), 'error');
+  }
+}
+
+function renderQueryChart(data) {
+  try {
+    var wrap = document.getElementById("query-chart-wrap");
+    var cv = document.getElementById("query-chart");
+    if (!wrap || !cv) return;
+    if (!data || data.length === 0) { wrap.style.display = "none"; return; }
+    var ctx = cv.getContext("2d"); if (!ctx) return;
+    // 按日期分组
+    var grouped = {};
+    for (var i = 0; i < data.length; i++) {
+      var d = data[i];
+      if (!grouped[d.date]) grouped[d.date] = { rolling: 0, bonus: 0, drawn: 0, undrawn: 0 };
+      grouped[d.date].rolling += (toNum(d.volume) || 0);
+      grouped[d.date].bonus += (d.bonus || 0);
+      grouped[d.date].drawn += (d.drawn || 0);
+      grouped[d.date].undrawn += Math.max(0, (d.bonus||0) - (d.drawn||0));
+    }
+    var dates = Object.keys(grouped).sort();
+    if (dates.length === 0) { wrap.style.display = "none"; return; }
+    wrap.style.display = "block";
+    var W = cv.width = (cv.parentElement.clientWidth - 28) || 600;
+    var H = cv.height = 220;
+    var pad = { top: 25, right: 20, bottom: 35, left: 55 };
+    var cw = W - pad.left - pad.right, ch = H - pad.top - pad.bottom;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "rgba(8,4,4,0.6)"; ctx.fillRect(0, 0, W, H);
+    // Y轴最大值
+    var maxV = 0;
+    for (var i = 0; i < dates.length; i++) {
+      var g = grouped[dates[i]];
+      maxV = Math.max(maxV, g.rolling, g.bonus, g.drawn, g.undrawn);
+    }
+    if (maxV === 0) maxV = 100;
+    // 网格
+    ctx.strokeStyle = "rgba(212,175,55,0.08)"; ctx.lineWidth = 0.5;
+    for (var i = 0; i <= 4; i++) {
+      var y = pad.top + ch - (ch * i / 4);
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
+      ctx.fillStyle = "rgba(212,175,55,0.5)"; ctx.font = "9px sans-serif"; ctx.textAlign = "right";
+      var lbl = maxV >= 10000 ? (maxV*i/4/10000).toFixed(1) + "万" : (maxV*i/4).toFixed(0);
+      ctx.fillText(lbl, pad.left - 6, y + 4);
+    }
+    // X轴
+    ctx.textAlign = "center";
+    var step = dates.length > 15 ? Math.ceil(dates.length / 12) : 1;
+    for (var i = 0; i < dates.length; i += step) {
+      var x = pad.left + (cw * (i + 0.5) / dates.length);
+      ctx.fillStyle = "rgba(212,175,55,0.55)"; ctx.font = "9px sans-serif";
+      ctx.fillText(dates[i].slice(5), x, H - pad.bottom + 14);
+    }
+    function drawLine(key, color) {
+      ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2;
+      for (var i = 0; i < dates.length; i++) {
+        var x = pad.left + (cw * (i + 0.5) / dates.length);
+        var y = pad.top + ch - (grouped[dates[i]][key] / maxV * ch);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    drawLine("rolling", "#D4AF37");
+    drawLine("bonus", "#2ecc71");
+    drawLine("drawn", "#e74c3c");
+    drawLine("undrawn", "#3498db");
+    // 图例
+    var legendX = pad.left + 10, legendY = pad.top - 2;
+    [{ label: "洗碼量", color: "#D4AF37" },{ label: "碼糧", color: "#2ecc71" },{ label: "已提", color: "#e74c3c" },{ label: "未提", color: "#3498db" }].forEach(function(it, idx) {
+      ctx.fillStyle = it.color; ctx.font = "bold 9px sans-serif";
+      ctx.fillText(it.label, legendX + idx * 58, legendY);
+    });
+  } catch(e) { console.error('[renderQueryChart] error:', e); }
+}
+
+function renderFundChart(allFundTxs, month) {
+  try {
+    var wrap = document.getElementById("query-chart-wrap");
+    var cv = document.getElementById("query-chart");
+    if (!wrap || !cv) return;
+    // 按月分組
+    var grouped = {};
+    for (var i = 0; i < allFundTxs.length; i++) {
+      var d = allFundTxs[i];
+      var key = d.date.slice(0,7);
+      if (!grouped[key]) grouped[key] = { fund: 0, deposit: 0, withdraw: 0 };
+      if (d.type === "入帳") grouped[key].fund += d.amount;
+      else if (d.type === "存入" || d.type === "自存現金") grouped[key].deposit += d.amount;
+      else grouped[key].withdraw += d.amount;
+    }
+    var months = Object.keys(grouped).sort();
+    if (months.length === 0) { wrap.style.display = "none"; return; }
+    wrap.style.display = "block";
+    var W = cv.width = (cv.parentElement.clientWidth - 28) || 600;
+    var H = cv.height = 220;
+    var pad = { top: 25, right: 20, bottom: 35, left: 55 };
+    var cw = W - pad.left - pad.right, ch = H - pad.top - pad.bottom;
+    var ctx2 = cv.getContext("2d"); if (!ctx2) return;
+    ctx2.clearRect(0, 0, W, H);
+    ctx2.fillStyle = "rgba(8,4,4,0.6)"; ctx2.fillRect(0, 0, W, H);
+    var maxV = 0;
+    for (var i = 0; i < months.length; i++) {
+      var g = grouped[months[i]];
+      maxV = Math.max(maxV, g.fund, g.deposit, g.withdraw);
+    }
+    if (maxV === 0) maxV = 100;
+    ctx2.strokeStyle = "rgba(212,175,55,0.08)"; ctx2.lineWidth = 0.5;
+    for (var i = 0; i <= 4; i++) {
+      var y = pad.top + ch - (ch * i / 4);
+      ctx2.beginPath(); ctx2.moveTo(pad.left, y); ctx2.lineTo(pad.left + cw, y); ctx2.stroke();
+      ctx2.fillStyle = "rgba(212,175,55,0.5)"; ctx2.font = "9px sans-serif"; ctx2.textAlign = "right";
+      var lbl = maxV >= 10000 ? (maxV*i/4/10000).toFixed(1) + "万" : (maxV*i/4).toFixed(0);
+      ctx2.fillText(lbl, pad.left - 6, y + 4);
+    }
+    ctx2.textAlign = "center";
+    for (var i = 0; i < months.length; i++) {
+      var x = pad.left + (cw * (i + 0.5) / months.length);
+      ctx2.fillStyle = "rgba(212,175,55,0.55)"; ctx2.font = "9px sans-serif";
+      ctx2.fillText(months[i], x, H - pad.bottom + 14);
+    }
+    function drawBar(key, color, offset, barW) {
+      for (var i = 0; i < months.length; i++) {
+        var val = grouped[months[i]][key];
+        if (val <= 0) continue;
+        var x = pad.left + (cw * (i + 0.5) / months.length) - barW/2 + offset;
+        var barH = val / maxV * ch;
+        var y = pad.top + ch - barH;
+        ctx2.fillStyle = color; ctx2.fillRect(x, y, barW, barH);
+      }
+    }
+    var barW = Math.min(16, cw / months.length / 3.5);
+    drawBar("fund", "rgba(212,175,55,0.85)", -barW - 2, barW);
+    drawBar("deposit", "rgba(41,128,185,0.85)", 0, barW);
+    drawBar("withdraw", "rgba(231,76,60,0.85)", barW + 2, barW);
+    var legendX = pad.left + 10, legendY = pad.top - 2;
+    [{ label: "入帳", color: "#D4AF37" },{ label: "存入", color: "#2980b9" },{ label: "提領", color: "#e74c3c" }].forEach(function(it, idx) {
+      ctx.fillStyle = it.color; ctx.font = "bold 9px sans-serif";
+      ctx.fillText(it.label, legendX + idx * 58, legendY);
+    });
+  } catch(e) { console.error('[renderFundChart] error:', e); }
 }
 
 function exportCSV() {
