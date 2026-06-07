@@ -3498,7 +3498,11 @@ function deleteAgentWallet(agent, id) {
     }
   }
   agentWallets[agent] = newArr;
-  if (db && fbKey) db.ref('macau_data/agentWallets/' + agent + '/' + fbKey).set(null);
+  if (db && fbKey) {
+    db.ref('macau_data/agentWallets/' + agent + '/' + fbKey).set(null, function(error) {
+      if (error) console.error('[deleteAgentWallet] Firebase 刪除失敗:', error);
+    });
+  }
   saveAgentWallets(true);
   syncAgentDrawn(agent);
   doQuery();
@@ -3777,11 +3781,14 @@ function syncUpload() {
   // 1. txs：交易記錄（物件格式）
   db.ref('macau_data/txs').transaction(function(current) {
     var fb = current || {};
-    if (Array.isArray(fb)) fb = _arrToObj(fb); // v10.0 遷移：舊格式陣列 → 物件
+    if (Array.isArray(fb)) fb = _arrToObj(fb);
     var local = _arrToObj(txs);
-    // 合併：本地記錄覆蓋伺服器同名 key，伺服器獨有記錄保留
+    var localKeys = {};
     var keys = Object.keys(local);
-    for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; }
+    for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; localKeys[keys[i]] = true; }
+    // 刪除 fb 中存在但本地不存在的鍵
+    var fbKeys = Object.keys(fb);
+    for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
     return fb;
   }, function(error, committed) {
     if (error) console.error('[Sync ↑] txs 失敗', error);
@@ -3793,8 +3800,11 @@ function syncUpload() {
     var fb = current || {};
     if (Array.isArray(fb)) fb = _arrToObj(fb);
     var local = _arrToObj(fundWithdrawals);
+    var localKeys = {};
     var keys = Object.keys(local);
-    for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; }
+    for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; localKeys[keys[i]] = true; }
+    var fbKeys = Object.keys(fb);
+    for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
     return fb;
   }, function(error, committed) {
     if (error) console.error('[Sync ↑] fundWithdrawals 失敗', error);
@@ -3813,12 +3823,22 @@ function syncUpload() {
   db.ref('macau_data/agentWallets').transaction(function(current) {
     var fb = current || {};
     var local = _awArrToObj(agentWallets);
+    var localAgentKeys = {};
     var agents = Object.keys(local);
     for (var i = 0; i < agents.length; i++) {
       var a = agents[i];
+      localAgentKeys[a] = {};
       if (!fb[a]) fb[a] = {};
       var keys = Object.keys(local[a]);
-      for (var j = 0; j < keys.length; j++) { fb[a][keys[j]] = local[a][keys[j]]; }
+      for (var j = 0; j < keys.length; j++) { fb[a][keys[j]] = local[a][keys[j]]; localAgentKeys[a][keys[j]] = true; }
+    }
+    // 刪除 fb 中存在但本地不存在的鍵（每個代理內）
+    var fbAgents = Object.keys(fb);
+    for (var i = 0; i < fbAgents.length; i++) {
+      var a = fbAgents[i];
+      if (!localAgentKeys[a]) { delete fb[a]; continue; }
+      var fbKeys = Object.keys(fb[a]);
+      for (var j = 0; j < fbKeys.length; j++) { if (!localAgentKeys[a][fbKeys[j]]) delete fb[a][fbKeys[j]]; }
     }
     return fb;
   });
@@ -6221,17 +6241,31 @@ var _MAX_UNDO = 10;
     showLoading("刪除中…");
     try {
       console.log('[deleteTx] 開始刪除，交易數量（刪除前）:', txs.length);
-      var deleted = null, delIndex = -1;
+      var key = String(id);
+      var deleted = null, delIndex = -1, targetFbKey = null;
       for (var i = 0; i < txs.length; i++) {
-        if (txs[i].id === id) { deleted = txs[i]; delIndex = i; break; }
+        var t = txs[i];
+        if (!t) continue;
+        if (t._fbKey === key || String(t.id) === key || t.id === parseInt(id)) {
+          deleted = t; delIndex = i; targetFbKey = t._fbKey || key; break;
+        }
       }
       if (deleted) {
         _undoStack.push({ tx: JSON.parse(JSON.stringify(deleted)), index: delIndex });
         if (_undoStack.length > _MAX_UNDO) _undoStack.shift();
       }
+      // v10.0 直接從 Firebase 刪除該筆記錄
+      if (db && targetFbKey && targetFbKey !== "undefined") {
+        db.ref('macau_data/txs/' + targetFbKey).set(null, function(error) {
+          if (error) console.error('[deleteTx] Firebase 刪除失敗:', error);
+        });
+      }
       var newTxs = [];
       for (var i = 0; i < txs.length; i++) {
-        if (txs[i].id !== id) newTxs.push(txs[i]);
+        var t = txs[i];
+        if (!t) continue;
+        var isMatch = (t._fbKey === targetFbKey) || (String(t.id) === String(targetFbKey)) || (t.id === parseInt(targetFbKey));
+        if (!isMatch) newTxs.push(t);
       }
       txs = newTxs;
       saveData(true);
