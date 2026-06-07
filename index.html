@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v7.7.4</title>
+<title>澳門洗碼報表 v7.7.5</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3323,19 +3323,23 @@ function closeFundModal() {
   unlockBody();
 }
 function saveFundForm() {
+  // v7.7.5 防重複提交
+  if (window._savingFund) return;
+  window._savingFund = true;
   var date = document.getElementById("fund-date").value;
   var type = document.getElementById("fund-type").value;
   var amount = toNum(document.getElementById("fund-amount").value);
   var note = document.getElementById("fund-note").value.trim();
-  if (!date) { showToast("請選擇日期！","warning"); return; }
-  if (!validateMonthDate(date, "公基金異動")) return;
-  if (!amount) { showToast("請輸入金額！","warning"); return; }
+  if (!date) { window._savingFund = false; showToast("請選擇日期！","warning"); return; }
+  if (!validateMonthDate(date, "公基金異動")) { window._savingFund = false; return; }
+  if (!amount) { window._savingFund = false; showToast("請輸入金額！","warning"); return; }
   fundWithdrawals.push({ id: fundNextId++, date: date, type: type, amount: amount, note: note });
   saveFundData(true);
   closeFundModal();
   doQuery();
   updateTotalWalletUI();
   showToast("已儲存！","success");
+  window._savingFund = false;
 }
 function deleteFund(id) {
   if (!confirm("確定刪除？")) return;
@@ -3348,8 +3352,9 @@ function deleteFund(id) {
 }
 function saveFundData(silent) {
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
-  // 延遲 300ms 再同步，確保本地資料已完全更新（避免 race condition）
-  if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
+  // v7.7.5 立即設定編輯鎖，防止 Firebase 回寫在同步完成前覆蓋本機變更
+  localEditLockUntil = Date.now() + 3000;
+  if (typeof syncUpload === 'function') syncUpload();
 }
 function loadFundData(silent) {
   var d = localStorage.getItem("macau_fund_data");
