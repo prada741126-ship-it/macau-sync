@@ -3498,14 +3498,28 @@ function deleteAgentWallet(agent, id) {
     }
   }
   agentWallets[agent] = newArr;
-  if (db && fbKey) {
-    db.ref('macau_data/agentWallets/' + agent + '/' + fbKey).set(null, function(error) {
-      if (error) console.error('[deleteAgentWallet] Firebase 刪除失敗:', error);
-    });
-  }
-  saveAgentWallets(true);
+  // 先存本地（立即生效，UI 即時更新）
+  saveAgentWalletsLocalOnly();
   syncAgentDrawn(agent);
   doQuery();
+  showToast("代理錢包已刪除，同步中…", "success");
+  // 再刪除 Firebase 上的該筆記錄（非同步，完成後觸發上傳）
+  if (db && fbKey) {
+    console.log('[deleteAgentWallet] 刪除 Firebase 記錄 agent=' + agent + ' fbKey=' + fbKey);
+    db.ref('macau_data/agentWallets/' + agent + '/' + fbKey).set(null, function(error) {
+      if (error) {
+        console.error('[deleteAgentWallet] Firebase 刪除失敗:', error);
+        showToast("Firebase 刪除失敗，請檢查網路", "error");
+      } else {
+        console.log('[deleteAgentWallet] Firebase 刪除成功，準備上傳');
+        // Firebase 刪除成功後，執行一次完整上傳（確保 transaction 讀到最新狀態）
+        syncUpload();
+      }
+    });
+  } else {
+    // 離線模式：仍執行上傳（會走 localStorage 邏輯）
+    syncUpload();
+  }
 }
 function syncAgentDrawn(agent) {
   try {
@@ -3530,6 +3544,10 @@ function syncAgentDrawn(agent) {
 function saveAgentWallets(silent) {
   localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
   if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
+}
+// v10.8 僅存本地（不觸發 syncUpload）
+function saveAgentWalletsLocalOnly() {
+  localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
 }
 // v10.0 B方案：載入時自動補 _fbKey
 function loadAgentWallets(silent) {
@@ -3841,6 +3859,10 @@ function syncUpload() {
       for (var j = 0; j < fbKeys.length; j++) { if (!localAgentKeys[a][fbKeys[j]]) delete fb[a][fbKeys[j]]; }
     }
     return fb;
+  }, function(error, committed) {
+    if (error) console.error('[Sync ↑] agentWallets transaction 失敗', error);
+    else if (committed) console.log('[Sync ↑] agentWallets 同步成功');
+    else console.log('[Sync ↑] agentWallets transaction 未提交（資料未變更）');
   });
 
   // 5. workingMonth
@@ -3973,6 +3995,7 @@ function initSync() {
   db.ref('macau_data/agentWallets').on('value', function(snapshot) {
     try {
       var d = snapshot.val();
+      console.log('[Sync ↓] agentWallets 收到資料', d ? Object.keys(d).length + ' 個代理' : '空');
       if (!d || typeof d !== 'object') return;
       var newAw = {};
       var agents = Object.keys(d);
