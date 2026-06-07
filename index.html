@@ -4495,6 +4495,10 @@ document.addEventListener('keydown', function(e) {
 loadAgentList();
 loadFundData();
 loadAgentWallets();
+// 從 localStorage 加載工作日誌月份
+(function(){ try { var wm = localStorage.getItem("macau_working_month"); if (wm) workingMonth = wm; } catch(e) {} })();
+// 從 localStorage 加載酒店設定（防止 syncUpload 覆蓋 Firebase 資料）
+(function(){ try { loadHCConfig(); } catch(e) { console.error('loadHCConfig error:', e); } })();
 populateAgentDropdown();
 renderAll();
 renderOverview();
