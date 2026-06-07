@@ -5420,11 +5420,13 @@ var RM = {
     }
     if (this.editingId) {
       var idx = this.bookings.findIndex(function(x){ return x.id===RM.editingId; });
-      if (idx>=0) this.bookings[idx] = { id:this.editingId, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
+      var _k = (idx>=0 && this.bookings[idx] && this.bookings[idx]._fbKey) ? this.bookings[idx]._fbKey : _fbKey();
+      if (idx>=0) this.bookings[idx] = { id:this.editingId, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
       showToast("訂房已更新","success");
     } else {
       this.lastId++;
-      this.bookings.push({ id:this.lastId, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
+      var _k = _fbKey();
+      this.bookings.push({ id:this.lastId, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
       showToast("訂房已新增","success");
     }
     this.save();
