@@ -26,7 +26,7 @@
     });
   }
   // 3. 版本變數（給登入頁版本顯示用）
-  window.APP_VERSION = 'v10.25';
+  window.APP_VERSION = 'v10.26';
 })();
 </script>
 <meta charset="UTF-8">
@@ -34,7 +34,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v10.25</title>
+<title>澳門洗碼報表 v10.26</title>
 <style>
 :root {
   /* ===== 背景（優雅深藍黑）===== */
@@ -1533,10 +1533,10 @@ tr.row-warning td { color: #f39c12; }
   border: 1px solid rgba(212,175,55,0.2);
 }
 @keyframes toastIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
-.toast-success { background: linear-gradient(135deg, #1a4a1a, #27ae60); }
-.toast-warning { background: linear-gradient(135deg, #8B6914, #D4AF37); color:#1a1206 !important; }
-.toast-error   { background: linear-gradient(135deg, #8B0000, #B22222); }
-.toast-info    { background: linear-gradient(135deg, #1a2a4a, #3498db); }
+.toast-success { background: var(--bg-elevated, #222240); border-left: 3px solid var(--success, #3d8b6d); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.toast-warning { background: var(--bg-elevated, #222240); border-left: 3px solid var(--warning, #b8963d); box-shadow: 0 4px 16px rgba(0,0,0,0.4); color: var(--text-primary) !important; }
+.toast-error   { background: var(--bg-elevated, #222240); border-left: 3px solid var(--danger, #b85c5c); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+.toast-info    { background: var(--bg-elevated, #222240); border-left: 3px solid var(--accent-s, #4a90b8); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
 
 /* 全域載入動畫 */
 #loading-overlay {
