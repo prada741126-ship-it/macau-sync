@@ -1021,24 +1021,28 @@ tr.row-warning td { color: #f39c12; }
     bottom: 0;
     left: 0;
     right: 0;
-    height: 56px;
+    height: auto;
+    min-height: 56px;
     background: rgba(12,12,18,0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid rgba(212,175,55,0.15);
     justify-content: space-around;
-    align-items: center;
+    align-items: flex-start;
     z-index: 100;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: 6px;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
   }
 
   .mobile-bottom-nav .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 2px;
-    padding: 6px 12px;
+    padding: 4px 8px 0;
     border-radius: 8px;
     color: var(--text-muted);
     font-size: 10px;
@@ -1062,9 +1066,9 @@ tr.row-warning td { color: #f39c12; }
     letter-spacing: 0.5px;
   }
 
-  /* 主內容區需要預留底部空間（導航欄56px + iPhone安全區 + 額外緩衝） */
+  /* 主內容區需要預留底部空間（導航欄80px + iPhone安全區 + 額外緩衝） */
   #main-content {
-    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   }
 
   /* 隱藏側邊欄和遮罩層 */
