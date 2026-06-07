@@ -3374,11 +3374,15 @@ function saveFundForm() {
 // v10.0 B方案：使用 _fbKey 刪除公基金
 function deleteFund(id) {
   if (!confirm("確定刪除？")) return;
+  var key = String(id);
   var fbKey = null;
   var newArr = [];
   for (var i = 0; i < fundWithdrawals.length; i++) {
-    if (fundWithdrawals[i].id === id) { fbKey = fundWithdrawals[i]._fbKey; }
-    else { newArr.push(fundWithdrawals[i]); }
+    if (fundWithdrawals[i]._fbKey === key || fundWithdrawals[i].id === id || fundWithdrawals[i].id === parseInt(id)) {
+      fbKey = fundWithdrawals[i]._fbKey;
+    } else {
+      newArr.push(fundWithdrawals[i]);
+    }
   }
   fundWithdrawals = newArr;
   if (db && fbKey) db.ref('macau_data/fundWithdrawals/' + fbKey).set(null);
@@ -3465,11 +3469,15 @@ function saveAgentWalletForm() {
 function deleteAgentWallet(agent, id) {
   if (!confirm("確定刪除？")) return;
   var arr = agentWallets[agent] || [];
+  var key = String(id);
   var fbKey = null;
   var newArr = [];
   for (var i = 0; i < arr.length; i++) {
-    if (arr[i].id === id) { fbKey = arr[i]._fbKey; }
-    else { newArr.push(arr[i]); }
+    if (arr[i]._fbKey === key || arr[i].id === id || arr[i].id === parseInt(id)) {
+      fbKey = arr[i]._fbKey;
+    } else {
+      newArr.push(arr[i]);
+    }
   }
   agentWallets[agent] = newArr;
   if (db && fbKey) db.ref('macau_data/agentWallets/' + agent + '/' + fbKey).set(null);
@@ -4339,17 +4347,17 @@ function doQuery() {
       if (txs[p].agent !== agent) continue;
       var bv = txs[p].bonus || 0;
       var cv = txs[p].cash || 0;
-      if (bv > 0) allLedger.push({ date: txs[p].date, venue: txs[p].venue||"", client: txs[p].client||"", volume: toNum(txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: txs[p].id });
-      if (cv > 0) allLedger.push({ date: txs[p].date, venue: "現金寄放", client: txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: txs[p].id });
+      if (bv > 0) allLedger.push({ date: txs[p].date, venue: txs[p].venue||"", client: txs[p].client||"", volume: toNum(txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: txs[p].id, _fbKey: txs[p]._fbKey });
+      if (cv > 0) allLedger.push({ date: txs[p].date, venue: "現金寄放", client: txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: txs[p].id, _fbKey: txs[p]._fbKey });
     }
     for (var p = 0; p < awArr.length; p++) {
       var wt = awArr[p].type;
       if (wt === "deposit") {
-        allLedger.push({ date: awArr[p].date, venue: "存入", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_deposit", type: "存入", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
+        allLedger.push({ date: awArr[p].date, venue: "存入", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_deposit", type: "存入", source: "wallet", id: awArr[p].id, _fbKey: awArr[p]._fbKey, note: awArr[p].note||"" });
       } else if (wt === "cash_deposit") {
-        allLedger.push({ date: awArr[p].date, venue: "自存現金", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_cash_dep", type: "自存現金", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
+        allLedger.push({ date: awArr[p].date, venue: "自存現金", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_cash_dep", type: "自存現金", source: "wallet", id: awArr[p].id, _fbKey: awArr[p]._fbKey, note: awArr[p].note||"" });
       } else {
-        allLedger.push({ date: awArr[p].date, venue: "提領", client: "", volume: 0, bonus: -(awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "withdraw", type: "提領", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
+        allLedger.push({ date: awArr[p].date, venue: "提領", client: "", volume: 0, bonus: -(awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "withdraw", type: "提領", source: "wallet", id: awArr[p].id, _fbKey: awArr[p]._fbKey, note: awArr[p].note||"" });
       }
     }
     allLedger.sort(function(a,b){ return a.date.localeCompare(b.date); });
@@ -4397,15 +4405,18 @@ function doQuery() {
       var tr2 = document.createElement("tr");
       if (e.rowType === "withdraw") {
         // 提領行：日期 | 提領(紅) | | -金額(紅) | 刪除 | 累計餘額
-        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
+        var val = (e._fbKey||e.id).toString();
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
         tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e74c3c;font-weight:700;'>提領" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e74c3c;font-weight:700;'>-" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "aw_deposit") {
         // 錢包存入行：日期 | 存入(藍) | | +金額(藍) | 刪除 | 累計餘額
-        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
+        var val = (e._fbKey||e.id).toString();
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
         tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#2980b9;font-weight:700;'>存入" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#2980b9;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "aw_cash_dep") {
         // 自存現金行：日期 | 自存現金(橙) | | +金額(橙) | 刪除 | 累計餘額
-        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
+        var val = (e._fbKey||e.id).toString();
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
         tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>自存現金" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "cash") {
         // 現金寄放行：日期 | 現金寄放(橙) | | +金額(橙) | 自動 | 累計餘額
