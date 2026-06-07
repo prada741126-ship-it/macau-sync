@@ -2036,10 +2036,10 @@ tbody tr:hover {
       <div class="room-table-wrap">
         <table class="room-table">
           <thead>
-            <tr><th>日期</th><th>代理</th><th>客戶</th><th>酒店</th><th>入住</th><th>退房</th><th>天數</th><th class="num">所需轉碼</th><th class="num">總費用</th><th>狀態</th><th>操作</th></tr>
+            <tr><th>日期</th><th>代理</th><th>客戶</th><th>酒店</th><th>房型</th><th>入住</th><th>退房</th><th>天數</th><th class="num">所需轉碼</th><th class="num">總費用</th><th>狀態</th><th>操作</th></tr>
           </thead>
           <tbody id="rm-tbody"></tbody>
-          <tr id="rm-empty" style="display:none;"><td colspan="11"><div class="empty-state" style="padding:40px 20px;"><div class="empty-icon">🏨</div><div class="empty-title">尚無訂房紀錄</div><div class="empty-desc">使用上方表單新增第一筆訂房</div></div></td></tr>
+          <tr id="rm-empty" style="display:none;"><td colspan="12"><div class="empty-state" style="padding:40px 20px;"><div class="empty-icon">🏨</div><div class="empty-title">尚無訂房紀錄</div><div class="empty-desc">使用上方表單新增第一筆訂房</div></div></td></tr>
         </table>
       </div>
     </div><!-- /room-tab-booking -->
@@ -2243,8 +2243,14 @@ tbody tr:hover {
       </div>
       <div class="rm-form-group">
         <label>酒店</label>
-        <select id="rm-f-hotel" class="rm-input" onchange="rmUpdatePrice()">
+        <select id="rm-f-hotel" class="rm-input" onchange="rmOnHotelChange()">
           <option value="">請先選擇體系</option>
+        </select>
+      </div>
+      <div class="rm-form-group">
+        <label>房型</label>
+        <select id="rm-f-room" class="rm-input" onchange="rmOnRoomChange()">
+          <option value="">請先選擇酒店</option>
         </select>
       </div>
     </div>
@@ -4852,19 +4858,37 @@ var RM = {
     if (!sel) return;
     sel.innerHTML = '<option value="">' + (casino ? '請選擇酒店' : '請先選擇體系') + '</option>';
     if (!casino) return;
-    // 從 HOTEL_CONFIG 或 PRESET_CONFIG 提取該體系的酒店列表
-    var config = (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length) ? HOTEL_CONFIG : [];
+    var config = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : [];
     if (!config.length) return;
     var hotels = {};
     for (var i = 0; i < config.length; i++) {
       if (config[i].casino !== casino) continue;
       var hn = config[i].hotel;
-      if (!hotels[hn]) hotels[hn] = { price: config[i].weekday || 0, threshold: config[i].threshold || 70 };
+      if (!hotels[hn]) hotels[hn] = true;
     }
     var keys = Object.keys(hotels).sort(function(a, b) { return a.localeCompare(b, 'zh'); });
     for (var i = 0; i < keys.length; i++) {
-      var h = hotels[keys[i]];
-      sel.innerHTML += '<option value="' + keys[i] + '" data-price="' + h.price + '" data-threshold="' + h.threshold + '">' + keys[i] + '</option>';
+      sel.innerHTML += '<option value="' + keys[i] + '">' + keys[i] + '</option>';
+    }
+  },
+
+  populateRoomDropdown: function(casino, hotel) {
+    var sel = document.getElementById("rm-f-room");
+    if (!sel) return;
+    sel.innerHTML = '<option value="">請選擇房型</option>';
+    if (!casino || !hotel) return;
+    var config = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : [];
+    if (!config.length) return;
+    var rooms = {};
+    for (var i = 0; i < config.length; i++) {
+      if (config[i].casino !== casino || config[i].hotel !== hotel) continue;
+      var key = config[i].room;
+      if (!rooms[key]) rooms[key] = { code: config[i].code, weekday: config[i].weekday, threshold: config[i].threshold };
+    }
+    var keys = Object.keys(rooms);
+    for (var i = 0; i < keys.length; i++) {
+      var r = rooms[keys[i]];
+      sel.innerHTML += '<option value="' + keys[i] + '" data-code="' + r.code + '" data-price="' + r.weekday + '" data-threshold="' + r.threshold + '">' + keys[i] + ' (' + r.code + ')</option>';
     }
   },
 
@@ -4889,8 +4913,43 @@ var RM = {
   onCasinoChange: function() {
     var casino = document.getElementById("rm-f-casino").value;
     this.populateHotelDropdown(casino);
-    // 清空酒店選擇和價格
+    // 清空酒店和房型選擇和價格
+    document.getElementById("rm-f-hotel").innerHTML = '<option value="">請選擇酒店</option>';
+    document.getElementById("rm-f-room").innerHTML = '<option value="">請先選擇酒店</option>';
     document.getElementById("rm-f-price").value = "";
+    document.getElementById("rm-f-total").value = "";
+  },
+
+  onHotelChange: function() {
+    var casino = document.getElementById("rm-f-casino").value;
+    var hotel = document.getElementById("rm-f-hotel").value;
+    this.populateRoomDropdown(casino, hotel);
+    // 清空房型和價格
+    document.getElementById("rm-f-room").innerHTML = '<option value="">請選擇房型</option>';
+    if (hotel) {
+      this.populateRoomDropdown(casino, hotel);
+    }
+    document.getElementById("rm-f-price").value = "";
+    document.getElementById("rm-f-total").value = "";
+  },
+
+  onRoomChange: function() {
+    // 房型選擇後，自動填入價格和門檻
+    var sel = document.getElementById("rm-f-room");
+    var opt = sel.options[sel.selectedIndex];
+    var price = parseInt(opt.getAttribute("data-price"))||0;
+    var threshold = parseInt(opt.getAttribute("data-threshold"))||70;
+    document.getElementById("rm-f-price").value = price;
+    // 保存當前選擇的門檻（供 saveForm 使用）
+    this._currentThreshold = threshold;
+    // 自動帶入狀態：選中代理有洗碼記錄預設免費，否則預設付費
+    var now = this.nowStr().slice(0,7);
+    var agent = document.getElementById("rm-f-agent").value;
+    var hasRolling = false;
+    for (var i=0;i<txs.length;i++) { if (txs[i].agent===agent && txs[i].date&&txs[i].date.slice(0,7)===now&&txs[i].type!=="cash") { hasRolling=true; break; } }
+    var statusEl = document.getElementById("rm-f-status");
+    if (statusEl) statusEl.value = hasRolling ? "免費" : "付費";
+    this.calcTotal();
   },
 
   nowStr: function() {
@@ -4958,19 +5017,26 @@ var RM = {
       if (!b) return;
       document.getElementById("rm-f-agent").value = b.agent;
       document.getElementById("rm-f-client").value = b.client;
-      // 找出該酒店所屬的體系，並預選
+      // 找出該酒店所屬的體系，並預選（從 PRESET_CONFIG 查找）
       var casino = "";
-      var config = (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length) ? HOTEL_CONFIG : [];
+      var config = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : [];
       for (var i = 0; i < config.length; i++) {
         if (config[i].hotel === b.hotel) { casino = config[i].casino; break; }
       }
+      // 三級聯動：體系 → 酒店 → 房型
       if (casino) {
         document.getElementById("rm-f-casino").value = casino;
         this.populateHotelDropdown(casino);
+        document.getElementById("rm-f-hotel").value = b.hotel;
+        this.populateRoomDropdown(casino, b.hotel);
       } else {
         this.populateHotelDropdown();
+        this.populateRoomDropdown();
       }
-      document.getElementById("rm-f-hotel").value = b.hotel;
+      // 嘗試設定房型（兼容舊資料無 roomType 欄位）
+      if (b.roomType) {
+        try { document.getElementById("rm-f-room").value = b.roomType; } catch(e) {}
+      }
       // 填入月日選擇方塊（不含年）
       var ciParts = (b.checkIn || b.date || "").split("-");
       if (ciParts.length >= 3) { document.getElementById("rm-f-checkin-mm").value = ciParts[1]; document.getElementById("rm-f-checkin-dd").value = ciParts[2]; }
@@ -4981,12 +5047,14 @@ var RM = {
       document.getElementById("rm-f-total").value = b.totalCost;
       document.getElementById("rm-f-status").value = b.status;
       document.getElementById("rm-f-note").value = b.note||"";
-      // 恢復門檻（若舊資料無 threshold 則用酒店預設）
+      // 恢復門檻（若舊資料無 threshold 則用房型預設）
       var th = b.threshold || 0;
       if (!th) {
-        var ho = document.getElementById("rm-f-hotel");
-        var o = ho.options[ho.selectedIndex];
-        th = parseInt(o.getAttribute("data-threshold"))||70;
+        var rmSel = document.getElementById("rm-f-room");
+        if (rmSel && rmSel.selectedIndex >= 0) {
+          var o = rmSel.options[rmSel.selectedIndex];
+          th = parseInt(o.getAttribute("data-threshold"))||70;
+        }
       }
       this._editingThreshold = th;
     } else {
@@ -4994,6 +5062,7 @@ var RM = {
       document.getElementById("rm-f-client").value = "";
       document.getElementById("rm-f-casino").value = "";
       document.getElementById("rm-f-hotel").innerHTML = '<option value="">請先選擇體系</option>';
+      document.getElementById("rm-f-room").innerHTML = '<option value="">請先選擇酒店</option>';
       document.getElementById("rm-f-checkin-mm").value = "";
       document.getElementById("rm-f-checkin-dd").value = "";
       document.getElementById("rm-f-checkout-mm").value = "";
@@ -5012,15 +5081,20 @@ var RM = {
   },
 
   updatePrice: function() {
-    var sel = document.getElementById("rm-f-hotel");
-    var opt = sel.options[sel.selectedIndex];
-    document.getElementById("rm-f-price").value = opt.getAttribute("data-price")||0;
+    // 三級聯動模式下，價格由 onRoomChange() 自動填入
+    // 此函式保留供舊邏輯相容，若已選房型則從房型讀取價格
+    var roomSel = document.getElementById("rm-f-room");
+    if (roomSel && roomSel.selectedIndex >= 0 && roomSel.value) {
+      var opt = roomSel.options[roomSel.selectedIndex];
+      document.getElementById("rm-f-price").value = opt.getAttribute("data-price")||0;
+    }
     // 自動帶入狀態：選中代理有洗碼記錄預設免費，否則預設付費
     var now = this.nowStr().slice(0,7);
     var agent = document.getElementById("rm-f-agent").value;
     var hasRolling = false;
     for (var i=0;i<txs.length;i++) { if (txs[i].agent===agent && txs[i].date&&txs[i].date.slice(0,7)===now&&txs[i].type!=="cash") { hasRolling=true; break; } }
-    document.getElementById("rm-f-status").value = hasRolling ? "免費" : "付費";
+    var statusEl = document.getElementById("rm-f-status");
+    if (statusEl) statusEl.value = hasRolling ? "免費" : "付費";
     this.calcTotal();
   },
   calcNights: function() {
@@ -5046,7 +5120,9 @@ var RM = {
   saveForm: function() {
     var agent = document.getElementById("rm-f-agent").value;
     var client = document.getElementById("rm-f-client").value.trim();
+    var casino = document.getElementById("rm-f-casino").value;
     var hotel = document.getElementById("rm-f-hotel").value;
+    var roomType = document.getElementById("rm-f-room").value;
     var cimm = document.getElementById("rm-f-checkin-mm").value;
     var cidd = document.getElementById("rm-f-checkin-dd").value;
     var comm = document.getElementById("rm-f-checkout-mm").value;
@@ -5061,20 +5137,31 @@ var RM = {
     var status = document.getElementById("rm-f-status").value;
     var note = document.getElementById("rm-f-note").value.trim();
     var date = checkIn || this.nowStr();
-    // 取得門檻
-    var sel = document.getElementById("rm-f-hotel");
-    var opt = sel.options[sel.selectedIndex];
-    var threshold = parseInt(opt.getAttribute("data-threshold"))||70;
+    // 取得門檻：優先從房型下拉讀取，否則用 _currentThreshold，最後才用酒店下拉（兼容舊邏輯）
+    var threshold = this._currentThreshold || 0;
+    var roomSel = document.getElementById("rm-f-room");
+    if (roomSel && roomSel.selectedIndex >= 0) {
+      var ropt = roomSel.options[roomSel.selectedIndex];
+      var t = parseInt(ropt.getAttribute("data-threshold"))||0;
+      if (t) threshold = t;
+    }
+    if (!threshold) {
+      var hoSel = document.getElementById("rm-f-hotel");
+      if (hoSel && hoSel.selectedIndex >= 0) {
+        var hopt = hoSel.options[hoSel.selectedIndex];
+        threshold = parseInt(hopt.getAttribute("data-threshold"))||70;
+      }
+    }
     if (!agent||!client||!hotel||!checkIn||!checkout||nights<=0) {
-      showToast("請填寫所有必填欄位","error"); return;
+      showToast("請填寫所有必填欄位（體系/酒店/房型）","error"); return;
     }
     if (this.editingId) {
       var idx = this.bookings.findIndex(function(x){ return x.id===RM.editingId; });
-      if (idx>=0) this.bookings[idx] = { id:this.editingId, date:date, agent:agent, client:client, hotel:hotel, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
+      if (idx>=0) this.bookings[idx] = { id:this.editingId, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
       showToast("訂房已更新","success");
     } else {
       this.lastId++;
-      this.bookings.push({ id:this.lastId, date:date, agent:agent, client:client, hotel:hotel, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
+      this.bookings.push({ id:this.lastId, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
       showToast("訂房已新增","success");
     }
     this.save();
@@ -5118,6 +5205,7 @@ var RM = {
       html += "<td style='color:var(--gold);font-weight:600;font-size:12px;'>"+b.agent+"</td>";
       html += "<td style='font-size:12px;'>"+b.client+"</td>";
       html += "<td style='font-size:12px;'>"+b.hotel+"</td>";
+      html += "<td style='font-size:11px;color:var(--text-secondary);'>"+(b.roomType||"")+"</td>";
       html += "<td style='font-size:11px;color:var(--text-muted);'>"+b.checkIn+"</td>";
       html += "<td style='font-size:11px;color:var(--text-muted);'>"+(b.checkOut||b.checkout)+"</td>";
       html += "<td>"+b.nights+"晚</td>";
@@ -5233,10 +5321,10 @@ var RM = {
     var month = monthEl ? monthEl.value : "";
     var filtered = this.bookings.slice();
     if (month) filtered = filtered.filter(function(x){ return x.month===month; });
-    var csv = "\uFEFF日期,代理,客戶,酒店,入住日期,退房日期,天數,每晚單價,所需轉碼門檻,總費用,狀態,備註\n";
+    var csv = "\uFEFF日期,代理,客戶,體系,酒店,房型,入住日期,退房日期,天數,每晚單價,所需轉碼門檻,總費用,狀態,備註\n";
     for (var i=0; i<filtered.length; i++) {
       var b = filtered[i];
-      csv += [b.date,b.agent,b.client,b.hotel,b.checkIn,(b.checkOut||b.checkout),b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note].join(",")+"\n";
+      csv += [b.date,b.agent,b.client,(b.casino||""),b.hotel,(b.roomType||""),b.checkIn,(b.checkOut||b.checkout),b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note].join(",")+"\n";
     }
     var blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
     var url = URL.createObjectURL(blob);
@@ -5256,12 +5344,21 @@ var RM = {
     reader.onload = function(ev) {
       var lines = ev.target.result.split("\n").filter(function(x){ return x.trim(); });
       if (lines.length<2) { showToast("CSV 無資料","error"); return; }
+      // 檢測標頭是否包含「體系」或「房型」（新格式 v7.5+）
+      var header = lines[0].trim();
+      var hasNewFormat = header.indexOf("體系") >= 0 || header.indexOf("房型") >= 0;
       var imported = 0;
       for (var i=1; i<lines.length; i++) {
         var cols = lines[i].split(",");
         if (cols.length<10) continue;
         self.lastId++;
-        self.bookings.push({ id:self.lastId, date:cols[0]||self.nowStr(), agent:cols[1]||"", client:cols[2]||"", hotel:cols[3]||"", checkIn:cols[4]||"", checkOut:cols[5]||"", nights:parseInt(cols[6])||0, pricePerNight:parseInt(cols[7])||0, threshold:parseInt(cols[8])||70, totalCost:parseInt(cols[9])||0, status:cols[10]||"免費", month:(cols[0]||self.nowStr()).substring(0,7), note:cols[11]||"" });
+        if (hasNewFormat && cols.length >= 14) {
+          // 新格式：日期,代理,客戶,體系,酒店,房型,入住,退房,天數,單價,門檻,總費用,狀態,備註
+          self.bookings.push({ id:self.lastId, date:cols[0]||self.nowStr(), agent:cols[1]||"", client:cols[2]||"", casino:cols[3]||"", hotel:cols[4]||"", roomType:cols[5]||"", checkIn:cols[6]||"", checkOut:cols[7]||"", nights:parseInt(cols[8])||0, pricePerNight:parseInt(cols[9])||0, threshold:parseInt(cols[10])||70, totalCost:parseInt(cols[11])||0, status:cols[12]||"免費", month:(cols[0]||self.nowStr()).substring(0,7), note:cols[13]||"" });
+        } else {
+          // 舊格式：日期,代理,客戶,酒店,入住,退房,天數,單價,門檻,總費用,狀態,備註
+          self.bookings.push({ id:self.lastId, date:cols[0]||self.nowStr(), agent:cols[1]||"", client:cols[2]||"", casino:"", hotel:cols[3]||"", roomType:"", checkIn:cols[4]||"", checkOut:cols[5]||"", nights:parseInt(cols[6])||0, pricePerNight:parseInt(cols[7])||0, threshold:parseInt(cols[8])||70, totalCost:parseInt(cols[9])||0, status:cols[10]||"免費", month:(cols[0]||self.nowStr()).substring(0,7), note:cols[11]||"" });
+        }
         imported++;
       }
       self.save(); self.render(); self.updateQuota();
@@ -5288,6 +5385,8 @@ function rmOpenModal(id){ RM.openModal(id||null); }
 function rmCloseModal(){ RM.closeModal(); }
 function rmUpdatePrice(){ RM.updatePrice(); }
 function rmOnCasinoChange(){ RM.onCasinoChange(); }
+function rmOnHotelChange(){ RM.onHotelChange(); }
+function rmOnRoomChange(){ RM.onRoomChange(); }
 function rmCalcNights(){ RM.calcNights(); }
 function rmOnDateChange(){ RM.calcNights(); }
 function rmCalcTotal(){ RM.calcTotal(); }
