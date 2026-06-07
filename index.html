@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v9.0</title>
+<title>澳門洗碼報表 v9.3</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3636,26 +3636,109 @@ function closeCurrentMonth() {
   showToast('月末結算完成，' + now + ' 已鎖定', 'success');
 }
 
-// ===== v9.0 SSOT: Firebase 唯一數據源 =====
-var _ssotLastWrite = 0;
+// ===== v9.3 B方案：transaction() 安全合併 =====
+
+// 輔助函數：依 id 合併兩個陣列（本地優先，保留伺服器獨有記錄）
+function _mergeById(arrA, arrB) {
+  var map = {};
+  // 先放入 arrA（伺服器資料）
+  for (var i = 0; i < arrA.length; i++) {
+    if (arrA[i] && arrA[i].id) map[String(arrA[i].id)] = arrA[i];
+  }
+  // 再用 arrB（本地資料）覆蓋，本地優先
+  for (var i = 0; i < arrB.length; i++) {
+    if (arrB[i] && arrB[i].id) map[String(arrB[i].id)] = arrB[i];
+  }
+  // 轉回陣列
+  var result = [];
+  var keys = Object.keys(map);
+  for (var i = 0; i < keys.length; i++) result.push(map[keys[i]]);
+  return result;
+}
+
+// 輔助函數：依 id 找陣列索引
+function _findById(arr, id) {
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] && arr[i].id === id) return i;
+  }
+  return -1;
+}
 
 function syncUpload() {
   if (!db) { console.log('[Sync ↑] Firebase 未初始化'); return; }
-  _ssotLastWrite = Date.now();
-  var payload = {
-    txs: txs,
-    agentList: agentList,
-    agentWallets: agentWallets,
-    fundWithdrawals: fundWithdrawals,
-    workingMonth: workingMonth,
-    rmBookings: (typeof RM !== 'undefined' && RM.bookings) ? RM.bookings : [],
-    rmHotelConfig: (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG) ? HOTEL_CONFIG : [],
-    archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
-    _ts: _ssotLastWrite
-  };
-  db.ref('macau_data').set(payload)
-    .then(function() { console.log('[Sync ↑] Firebase 上傳成功 (ts:' + _ssotLastWrite + ')'); })
-    .catch(function(err) { console.error('[Sync ↑] Firebase 上傳失敗', err); });
+  console.log('[Sync ↑] 開始 transaction 上傳...');
+
+  // v9.3 B方案：對每個數據類型分別使用 transaction()，避免全量覆蓋衝突
+  // 1. txs — 交易記錄
+  db.ref('macau_data/txs').transaction(function(current) {
+    if (current === null) return txs;
+    if (!Array.isArray(current)) return txs;
+    return _mergeById(current, txs);
+  }, function(error, committed) {
+    if (error) console.error('[Sync ↑] txs transaction 失敗', error);
+    else if (committed) console.log('[Sync ↑] txs 同步成功');
+  });
+
+  // 2. fundWithdrawals — 公基金
+  db.ref('macau_data/fundWithdrawals').transaction(function(current) {
+    if (current === null) return fundWithdrawals;
+    if (!Array.isArray(current)) return fundWithdrawals;
+    return _mergeById(current, fundWithdrawals);
+  }, function(error, committed) {
+    if (error) console.error('[Sync ↑] fundWithdrawals transaction 失敗', error);
+    else if (committed) console.log('[Sync ↑] fundWithdrawals 同步成功');
+  });
+
+  // 3. agentList
+  db.ref('macau_data/agentList').transaction(function(current) {
+    if (current === null) return agentList;
+    if (!Array.isArray(current)) return agentList;
+    // 合併兩個陣列（去除重複）
+    var s = {}; for (var i = 0; i < current.length; i++) s[current[i]] = true;
+    for (var i = 0; i < agentList.length; i++) s[agentList[i]] = true;
+    return Object.keys(s);
+  }, function(error, committed) {
+    if (error) console.error('[Sync ↑] agentList transaction 失敗', error);
+  });
+
+  // 4. agentWallets
+  db.ref('macau_data/agentWallets').transaction(function(current) {
+    if (current === null) return agentWallets;
+    if (typeof current !== 'object') return agentWallets;
+    // 合併：本地優先，保留伺服器獨有代理
+    var merged = {};
+    var agents = Object.keys(current);
+    for (var i = 0; i < agents.length; i++) merged[agents[i]] = current[agents[i]];
+    agents = Object.keys(agentWallets);
+    for (var i = 0; i < agents.length; i++) merged[agents[i]] = agentWallets[agents[i]];
+    return merged;
+  }, function(error, committed) {
+    if (error) console.error('[Sync ↑] agentWallets transaction 失敗', error);
+  });
+
+  // 5. workingMonth
+  if (workingMonth) {
+    db.ref('macau_data/workingMonth').set(workingMonth);
+  }
+
+  // 6. rmBookings
+  if (typeof RM !== 'undefined' && RM.bookings) {
+    db.ref('macau_data/rmBookings').transaction(function(current) {
+      if (current === null) return RM.bookings;
+      if (!Array.isArray(current)) return RM.bookings;
+      return _mergeById(current, RM.bookings);
+    }, function(error, committed) {
+      if (error) console.error('[Sync ↑] rmBookings transaction 失敗', error);
+    });
+  }
+
+  // 7. archives（使用 set，衝突風險低）
+  try {
+    var archives = localStorage.getItem('macau_archives');
+    if (archives) db.ref('macau_data/archives').set(JSON.parse(archives));
+  } catch(e) {}
+
+  console.log('[Sync ↑] transaction 已送出');
 }
 
 function syncDownload() {
@@ -3669,103 +3752,98 @@ function manualSync() {
   setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 800);
 }
 
-// v9.0 SSOT: Firebase 為唯一數據源，無需手動對賬
+// v9.3 B方案：分路徑即時同步（transaction 安全架構）
 
 function initSync() {
   if (!db) { console.log('[Sync] Firebase 未初始化'); return; }
-  console.log('[Sync] v9.0 SSOT 即時同步已啟動（Firebase 唯一數據源）');
+  console.log('[Sync] v9.3 B方案：分路徑即時同步已啟動');
 
-  // v9.0 SSOT: 監聽 Firebase 資料變化，直接合併（無過濾、無鎖、無延後）
-  db.ref('macau_data').on('value', function(snapshot) {
+  // v9.3 B方案：每個數據類型獨立監聽，互不干擾，永不衝突
+
+  // 1. txs：交易記錄
+  db.ref('macau_data/txs').on('value', function(snapshot) {
     try {
-      var data = snapshot.val();
-      if (!data) { console.log('[Sync ↓] Firebase 無資料'); return; }
-
-      var incomingTs = data._ts || 0;
-
-      // v9.0 SSOT: 僅過濾本機回音（精確時間戳比對），其他所有資料直接合併
-      if (_ssotLastWrite > 0 && incomingTs === _ssotLastWrite) {
-        console.log('[Sync ↓] 本機回音 (ts:' + incomingTs + ')，跳過');
-        return;
-      }
-
-      console.log('[Sync ↓] Firebase 資料更新 (ts:' + incomingTs + ')，直接合併...');
-      var hasChanges = false;
-
-      if (data.txs && Array.isArray(data.txs)) {
-        txs = data.txs;
-        var maxId = 0;
-        for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; }
-        nextId = maxId + 1;
-        hasChanges = true;
-      }
-      if (data.agentList && Array.isArray(data.agentList)) {
-        agentList = data.agentList;
-        hasChanges = true;
-      }
-      if (data.agentWallets && typeof data.agentWallets === 'object') {
-        agentWallets = data.agentWallets;
-        hasChanges = true;
-      }
-      if (data.fundWithdrawals && Array.isArray(data.fundWithdrawals)) {
-        fundWithdrawals = data.fundWithdrawals;
-        var maxFwId = 0;
-        for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxFwId) maxFwId = fundWithdrawals[i].id; }
-        fundNextId = maxFwId + 1;
-        hasChanges = true;
-      }
-      if (data.workingMonth) {
-        workingMonth = data.workingMonth;
-        hasChanges = true;
-      }
-      if (data.archives) {
-        localStorage.setItem('macau_archives', JSON.stringify(data.archives));
-      }
-      if (data.rmBookings && typeof RM !== 'undefined') {
-        RM.bookings = data.rmBookings;
-        hasChanges = true;
-      }
-      if (data.rmHotelConfig && Array.isArray(data.rmHotelConfig)) {
-        HOTEL_CONFIG = data.rmHotelConfig;
-        saveHCConfig();
-        hasChanges = true;
-      }
-
-      // 同時保存到 localStorage（加密備份）
-      if (hasChanges) {
-        try {
-          var encrypted = encryptData(txs);
-          localStorage.setItem("macau_data", encrypted);
-          // 同時保存公基金和代理錢包到 localStorage
-          localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
-          localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
-        } catch(e) { console.error('localStorage save error:', e); }
-
-        // v8.2 僅在對應頁面可見時才渲染，避免干擾用戶操作
-        var pageOverview = document.getElementById("page-overview");
-        if (pageOverview && pageOverview.style.display === "block") { renderOverview(); }
-        var pageAll = document.getElementById("page-all");
-        if (pageAll && pageAll.style.display === "block") { renderAll(); }
-        var pageSummary = document.getElementById("page-summary");
-        if (pageSummary && pageSummary.style.display === "block") { renderSummary(); }
-        if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
-        if (typeof renderAgentWallets === 'function') renderAgentWallets();
-        if (typeof updateAllAgentBalances === 'function') updateAllAgentBalances();
-        var pageQuery = document.getElementById("page-query");
-        if (pageQuery && pageQuery.style.display === "block") { try { doQuery(); } catch(e) {} }
-        try { updateTotalWalletUI(); } catch(e) {}
-        // 代理錢包餘額更新
-        try {
-          var awAgents = Object.keys(agentWallets);
-          for (var wi = 0; wi < awAgents.length; wi++) {
-            syncAgentDrawn(awAgents[wi]);
-          }
-        } catch(e) {}
-
-        console.log('[Sync ↓] Firebase 資料已合併並渲染');
-      }
-    } catch(e) { console.error('[Sync ↓] SSOT 合併錯誤:', e); }
+      var d = snapshot.val() || [];
+      if (!Array.isArray(d)) { console.error('[Sync ↓] txs 格式錯誤，預期陣列'); return; }
+      txs = d;
+      var maxId = 0;
+      for (var i = 0; i < txs.length; i++) { if (txs[i] && txs[i].id > maxId) maxId = txs[i].id; }
+      nextId = maxId + 1;
+      // 存到 localStorage 作為快取
+      try { localStorage.setItem("macau_data", encryptData(txs)); } catch(e) {}
+      // 僅在對應頁面可見時才渲染
+      var pa = document.getElementById("page-all");
+      if (pa && pa.style.display === "block") renderAll();
+      var po = document.getElementById("page-overview");
+      if (po && po.style.display === "block") renderOverview();
+      var ps = document.getElementById("page-summary");
+      if (ps && ps.style.display === "block") renderSummary();
+      try { updateTotalWalletUI(); } catch(e) {}
+      console.log('[Sync ↓] txs 已同步，共 ' + txs.length + ' 筆');
+    } catch(e) { console.error('[Sync ↓] txs 處理錯誤:', e); }
   });
+
+  // 2. fundWithdrawals：公基金
+  db.ref('macau_data/fundWithdrawals').on('value', function(snapshot) {
+    try {
+      var d = snapshot.val() || [];
+      if (!Array.isArray(d)) { console.error('[Sync ↓] fundWithdrawals 格式錯誤'); return; }
+      fundWithdrawals = d;
+      var maxId = 0;
+      for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i] && fundWithdrawals[i].id > maxId) maxId = fundWithdrawals[i].id; }
+      fundNextId = maxId + 1;
+      try { localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals)); } catch(e) {}
+      var pq = document.getElementById("page-query");
+      if (pq && pq.style.display === "block") try { doQuery(); } catch(e) {}
+      try { updateTotalWalletUI(); } catch(e) {}
+      console.log('[Sync ↓] fundWithdrawals 已同步，共 ' + fundWithdrawals.length + ' 筆');
+    } catch(e) { console.error('[Sync ↓] fundWithdrawals 錯誤:', e); }
+  });
+
+  // 3. agentList
+  db.ref('macau_data/agentList').on('value', function(snapshot) {
+    try {
+      var d = snapshot.val();
+      if (d && Array.isArray(d)) { agentList = d; fillAgent(); }
+    } catch(e) {}
+  });
+
+  // 4. agentWallets
+  db.ref('macau_data/agentWallets').on('value', function(snapshot) {
+    try {
+      var d = snapshot.val();
+      if (d && typeof d === 'object') { agentWallets = d; }
+    } catch(e) {}
+  });
+
+  // 5. workingMonth
+  db.ref('macau_data/workingMonth').on('value', function(snapshot) {
+    try {
+      var d = snapshot.val();
+      if (d) workingMonth = d;
+    } catch(e) {}
+  });
+
+  // 6. rmBookings
+  db.ref('macau_data/rmBookings').on('value', function(snapshot) {
+    try {
+      if (typeof RM !== 'undefined') {
+        RM.bookings = snapshot.val() || [];
+        RM.save();
+        RM.render();
+      }
+    } catch(e) {}
+  });
+
+  // 7. archives（僅下載，不上傳）
+  db.ref('macau_data/archives').on('value', function(snapshot) {
+    try {
+      var d = snapshot.val();
+      if (d) localStorage.setItem('macau_archives', JSON.stringify(d));
+    } catch(e) {}
+  });
+
+  console.log('[Sync] v9.3 B方案：所有監聽器已啟動');
 }
 
 function renderSummary() {
