@@ -37,33 +37,57 @@
 <title>澳門洗碼報表 v10.25</title>
 <style>
 :root {
-  --gold: #D4AF37;
-  --gold-light: #F0D78C;
-  --gold-dim: #B8860B;
-  --gold-dark: #8B6914;
-  --gold-faint: rgba(212,175,55,0.10);
-  --gold-border: rgba(212,175,55,0.25);
-  --crimson: #B22222;
-  --crimson-dark: #8B0000;
-  --crimson-light: #DC3545;
-  --sidebar-w: 200px;
+  /* ===== 背景（優雅深藍黑）===== */
+  --bg-page:      #0c0c18;
+  --bg-sidebar:   #0e0e1e;
+  --bg-card:      rgba(18,18,36,0.96);
+  --bg-surface:   #1a1a32;
+  --bg-elevated:  #222240;
+  --bg-row-a:     rgba(20,20,40,0.55);
+  --bg-row-b:     rgba(26,26,48,0.45);
+
+  /* ===== 點綴色（低飽和霧面，不搶眼）===== */
+  --accent:        #5b4dbd;
+  --accent-s:      #4a90b8;
+  --success:       #3d8b6d;
+  --danger:        #b85c5c;
+  --warning:       #b8963d;
+
+  /* ===== 金色（極克制：僅 KPI 數值 + 標題）===== */
+  --gold:          #B8860B;
+  --gold-light:    #D4A844;
+  --gold-dim:      #8B6914;
+  --gold-faint:    rgba(184,134,11,0.05);
+  --gold-border:   rgba(184,134,11,0.12);
+
+  /* ===== 文字 ===== */
+  --text-main:     #e8e8f0;
+  --text-secondary: #9090a8;
+  --text-muted:    #686880;
+  --text-gold:     #D4A844;
+
+  /* ===== 邊框（極細微）===== */
+  --border:        rgba(255,255,255,0.05);
+  --border-gold:   rgba(184,134,11,0.12);
+
+  /* ===== 舊變數相容（向後相容）===== */
+  --crimson:       #8B3a3a;
+  --crimson-dark:  #6B2020;
+  --crimson-light: #b85c5c;
+
+  --sidebar-w:         200px;
   --sidebar-collapsed: 56px;
-  --bg-page: #080404;
-  --bg-sidebar: #0f0806;
-  --bg-card: rgba(18,10,6,0.96);
-  --bg-row-a: rgba(20,12,8,0.55);
-  --bg-row-b: rgba(26,16,10,0.45);
-  --text-main: #e8e0d0;
-  --text-muted: #8a7a65;
-  --status-success: #2ecc71;
-  --status-error: #e74c3c;
-  --status-warning: #f39c12;
-  --status-info: #3498db;
-  --green: #2ecc71;
-  --red: #e74c3c;
-  --blue: #3498db;
-  --orange: #e67e22;
-  --purple: #9b59b6;
+
+  --status-success: #3d8b6d;
+  --status-error:   #b85c5c;
+  --status-warning: #b8963d;
+  --status-info:    #4a90b8;
+
+  --green:  #3d8b6d;
+  --red:    #b85c5c;
+  --blue:   #4a90b8;
+  --orange: #b8963d;
+  --purple: #5b4dbd;
 }
 
 /* ============================================================
@@ -134,13 +158,13 @@ h1::after { content:""; position:absolute; bottom:-2px; left:0; width:100%; heig
 .btn { padding: 8px 18px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.25s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.35); letter-spacing: 0.5px; position:relative; overflow:hidden; }
 .btn::after { content:""; position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%; background:rgba(255,255,255,0.12); transition:all 0.5s; transform:translate(-50%,-50%); }
 .btn:active::after { width:300px; height:300px; }
-.btn-primary { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1206; position:relative; overflow:hidden; }
+.btn-primary { background: linear-gradient(135deg, var(--accent, #5b4dbd), #4a3a9d); color: white; position:relative; overflow:hidden; }
 .btn-primary::after { content:""; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg, transparent 35%, rgba(255,255,255,0.15) 50%, transparent 65%); animation: goldShimmer 3s linear infinite; }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(212,175,55,0.55); }
-.btn-red { background: linear-gradient(135deg, #B22222, #8B0000); color: #e8d5a0; font-size: 12px; padding: 5px 12px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(178,34,34,0.45); }
+.btn-red { background: linear-gradient(135deg, var(--danger, #b85c5c), #8B3a3a); color: white; font-size: 12px; padding: 5px 12px; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(184,92,92,0.3); }
 .btn-red:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(178,34,34,0.55); }
 table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; font-size: 13px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.1); }
-th { background: linear-gradient(180deg, #1a1208, #120a06); color: #D4AF37; padding: 12px 12px; text-align: left; font-size: 12px; letter-spacing: 1px; font-weight: 600; border-bottom: 1px solid rgba(212,175,55,0.25); }
+th { background: linear-gradient(180deg, #1a1a32, #12122a); color: var(--gold, #B8860B); padding: 12px 12px; text-align: left; font-size: 12px; letter-spacing: 1px; font-weight: 600; border-bottom: 1px solid var(--border-gold, rgba(184,134,11,0.12)); }
 th.sortable { cursor: pointer; user-select: none; transition: background 0.2s; }
 th.sortable:hover { background: linear-gradient(180deg, #251810, #1a1008); }
 th.sortable::after { content: " ↕"; font-size:10px; opacity:0.4; }
@@ -532,7 +556,7 @@ tr.row-warning td { color: #f39c12; }
   flex-wrap: wrap;
 }
 .month-bar-label { color: #a09070; font-size: 13px; letter-spacing: 1px; }
-.month-bar-badge { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1a12; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 2px; box-shadow: 0 0 15px rgba(212,175,55,0.3); }
+.month-bar-badge { background: linear-gradient(135deg, var(--gold-dim, #B8860B), #8B6914); color: #1a1a12; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 2px; box-shadow: 0 0 10px var(--gold-faint); }
 .month-bar-status { color: #2ecc71; font-size: 11px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
 .month-bar-status::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 6px #2ecc71; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
@@ -551,11 +575,11 @@ tr.row-warning td { color: #f39c12; }
   margin-left: 4px;
 }
 .total-wallet .tw-label { color: #a09070; font-size: 11px; letter-spacing: 0.5px; }
-.total-wallet .tw-value { color: #D4AF37; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 12px rgba(212,175,55,0.3); }
+.total-wallet .tw-value { color: var(--gold-light, #D4A844); font-size: 18px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 10px var(--gold-faint); }
 
 /* CARD (now for pages) */
-.card { background: rgba(12,12,22,0.94); backdrop-filter: blur(20px); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,175,55,0.1); overflow: hidden; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 16px; transition: all 0.25s; }
-.card:hover { box-shadow: 0 24px 70px rgba(0,0,0,0.75), 0 0 0 1px rgba(212,175,55,0.3); transform: translateY(-1px); }
+.card { background: var(--bg-card); backdrop-filter: blur(20px) saturate(120%); border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid var(--border, rgba(255,255,255,0.05)); margin-bottom: 16px; transition: all 0.25s; }
+.card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px var(--border-gold); transform: translateY(-1px); }
 /* Tabs are removed, replaced by sidebar */
 /* ===== 手機版彈窗緊湊佈局 ===== */
 @media (max-width: 600px) {
@@ -1122,21 +1146,21 @@ tr.row-warning td { color: #f39c12; }
   letter-spacing: 0.5px;
 }
 .tf-btn:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-  background: rgba(212,175,55,0.08);
+  border-color: var(--accent, #5b4dbd);
+  color: var(--accent, #5b4dbd);
+  background: rgba(91,77,189,0.08);
   transform: translateY(-1px);
 }
 .tf-btn.active {
-  background: rgba(212,175,55,0.85);
-  border-color: var(--gold);
-  color: #1a1206;
+  background: var(--accent, #5b4dbd);
+  border-color: var(--accent, #5b4dbd);
+  color: white;
   font-weight: 700;
-  box-shadow: 0 2px 10px rgba(212,175,55,0.3);
+  box-shadow: 0 2px 10px rgba(91,77,189,0.3);
 }
 .tf-btn.active:hover {
-  background: rgba(212,175,55,1);
-  color: #1a1206;
+  background: #4a3a9d;
+  color: white;
 }
 /* KPI 卡片網格 */
 .kpi-grid {
@@ -6938,30 +6962,32 @@ function filterTxsByTime(txs) {
   transition: all 0.3s ease;
 }
 .kpi-card-new::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, rgba(212,175,55,0.6), rgba(212,175,55,0.2), transparent);
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-gold, rgba(184,134,11,0.12)), transparent);
   border-radius: 14px 14px 0 0;
 }
 .kpi-card-new::after {
   content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
+  background: linear-gradient(90deg, transparent, var(--border-gold, rgba(184,134,11,0.10)), transparent);
 }
 .kpi-card-new:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(212,175,55,0.35);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 1px var(--border-gold, rgba(184,134,11,0.15));
 }
 .kpi-label {
   font-size: 11px !important;
-  color: rgba(212,175,55,0.6) !important;
+  color: var(--text-secondary, #9090a8) !important;
   letter-spacing: 1.2px !important;
   margin-bottom: 6px !important;
 }
 .kpi-value {
   font-size: 30px !important;
+  color: var(--gold-light, #D4A844) !important;
+  text-shadow: 0 0 16px var(--gold-faint);
   transition: all 0.3s ease;
 }
 .kpi-card-new:hover .kpi-value {
-  text-shadow: 0 0 24px rgba(212,175,55,0.55);
+  text-shadow: 0 0 20px var(--gold-faint);
 }
 
 /* 图表容器加强 */
