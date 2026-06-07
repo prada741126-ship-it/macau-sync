@@ -4089,10 +4089,15 @@ function initSync() {
         for (var j = 0; j < arr.length; j++) { if (arr[j] && arr[j].id > maxAWId) maxAWId = arr[j].id; }
       }
       agentWalletNextId = maxAWId + 1;
+      // v10.10 同步後刷新 UI
+      try {
+        var pq = document.getElementById("page-query");
+        if (pq && pq.style.display === "block") doQuery();
+      } catch(e) {}
     } catch(e) {}
   });
 
-  // 5. workingMonth
+ // 5. workingMonth
   db.ref('macau_data/workingMonth').on('value', function(snapshot) {
     try { var d = snapshot.val(); if (d) workingMonth = d; } catch(e) {}
   });
