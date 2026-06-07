@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v7.7.5</title>
+<title>澳門洗碼報表 v8.0</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2407,7 +2407,7 @@ var agentWalletNextId = 1;
 var agentList = [];
 var lastSyncTimestamp = 0;  // Firebase 最後同步時間戳（防止舊資料覆蓋新資料）
 var isSyncingFromFirebase = false;  // 防止 Firebase 同步時觸發上傳（避免無限循環）
-var localEditLockUntil = 0;  // 本地編輯鎖定時間：上傳後 3 秒內忽略 Firebase 更新（防止舊資料覆蓋剛刪除的資料）
+var myDeviceId = "";  // 本機設備唯一 ID（用於過濾回音）
 var sortState = { table: "", col: "", asc: true };
 
 // ===== 同步配置（v4.9 安全強化）=====
@@ -3352,8 +3352,7 @@ function deleteFund(id) {
 }
 function saveFundData(silent) {
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
-  // v7.7.5 立即設定編輯鎖，防止 Firebase 回寫在同步完成前覆蓋本機變更
-  localEditLockUntil = Date.now() + 3000;
+  // v8.0 移除全局锁，改用 deviceId 回音过滤
   if (typeof syncUpload === 'function') syncUpload();
 }
 function loadFundData(silent) {
@@ -3641,10 +3640,10 @@ function closeCurrentMonth() {
 // ===== 同步功能 =====
 function syncUpload() {
   if (!db) { console.log('[Sync ↑] Firebase 未初始化'); return; }
-  // localEditLockUntil 已經防止了無限循環（上傳後 2 秒內忽略 Firebase 更新）
-  // 不再使用 isSyncingFromFirebase 封鎖，因為它會誤擋合法的上傳（如刪除後）
+  // v8.0 deviceId 回音過濾：本機上傳標記 deviceId，接收時忽略本機回音，徹底解決全局鎖問題
   console.log('[Sync ↑] 開始上傳，交易數量：' + txs.length);
   var payload = {
+    deviceId: myDeviceId,
     txs: txs,
     agentList: agentList,
     agentWallets: agentWallets,
@@ -3655,11 +3654,10 @@ function syncUpload() {
     archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
     timestamp: Date.now()
   };
-  // 設定本地編輯鎖定：上傳後 3 秒內忽略 Firebase 更新（防止競態條件覆蓋剛刪除的資料）
-  localEditLockUntil = Date.now() + 3000;
+  // v8.0 上傳時標記本機設備 ID（用於過濾回音）
   db.ref('macau_data').set(payload)
     .then(function() { console.log('[Sync ↑] Firebase 上傳成功（已鎖定 3 秒）'); })
-    .catch(function(err) { console.error('[Sync ↑] Firebase 上傳失敗', err); localEditLockUntil = 0; });
+    .catch(function(err) { console.error('[Sync ↑] Firebase 上傳失敗', err); });
 }
 
 function syncDownload() {
@@ -3675,6 +3673,15 @@ function manualSync() {
 
 function initSync() {
   if (!db) { console.log('[Sync] Firebase 未初始化'); return; }
+  // v8.0 初始化本機設備 ID
+  if (!myDeviceId) {
+    myDeviceId = localStorage.getItem('macau_device_id');
+    if (!myDeviceId) {
+      myDeviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+      localStorage.setItem('macau_device_id', myDeviceId);
+    }
+    console.log('[Sync] 本機設備 ID: ' + myDeviceId);
+  }
   console.log('[Sync] Firebase 即時同步已啟動');
 
   // 監聽 Firebase 資料變化（即時推送）
@@ -3693,10 +3700,15 @@ function initSync() {
         return;
       }
 
-      // 本地編輯鎖定檢查：剛執行本地刪除/編輯後的 3 秒內，忽略 Firebase 更新（防止競態條件導致資料被覆蓋）
-      var now = Date.now();
-      if (now < localEditLockUntil) {
-        console.log('[Sync ↓] 本地編輯鎖定中（剩餘 ' + Math.ceil((localEditLockUntil - now) / 1000) + ' 秒），跳過 Firebase 更新');
+      // v8.0 過濾本機回音：如果是本機上傳的資料，跳過（避免回音處理）
+      if (data.deviceId && data.deviceId === myDeviceId) {
+        console.log('[Sync ↓] 收到本機回音（deviceId 相符），跳過');
+        return;
+      }
+
+      // v8.0 相容舊資料（無 deviceId）：使用時間戳檢查
+      if (!data.deviceId && data.timestamp && data.timestamp < lastSyncTimestamp) {
+        console.log('[Sync ↓] 收到舊資料（無 deviceId，timestamp: ' + data.timestamp + ' < ' + lastSyncTimestamp + '），跳過');
         return;
       }
 
@@ -3781,6 +3793,41 @@ function initSync() {
       isSyncingFromFirebase = false;
     }
   });
+
+  // v8.0 Shadow Sync：每 15 秒強制對賬一次，捕獲任何遺漏的推送
+  if (!window._shadowSyncStarted) {
+    window._shadowSyncStarted = true;
+    setInterval(function() {
+      if (!db) return;
+      console.log('[Shadow Sync] 強制對賬開始...\n');
+      db.ref('macau_data').once('value').then(function(snapshot) {
+        var data = snapshot.val();
+        if (!data) return;
+        // 過濾本機回音
+        if (data.deviceId && data.deviceId === myDeviceId) { console.log('[Shadow Sync] 本機回音，跳過\n'); return; }
+        console.log('[Shadow Sync] 收到資料，開始對賬...\n');
+        // 強制合併資料（與上方邏輯相同）
+        var hasChanges = false;
+        if (data.txs && Array.isArray(data.txs)) { txs = data.txs; var maxId = 0; for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; } nextId = maxId + 1; hasChanges = true; }
+        if (data.agentList && Array.isArray(data.agentList)) { agentList = data.agentList; hasChanges = true; }
+        if (data.agentWallets && typeof data.agentWallets === 'object') { agentWallets = data.agentWallets; hasChanges = true; }
+        if (data.fundWithdrawals && Array.isArray(data.fundWithdrawals)) { fundWithdrawals = data.fundWithdrawals; var maxFwId = 0; for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxFwId) maxFwId = fundWithdrawals[i].id; } fundNextId = maxFwId + 1; hasChanges = true; }
+        if (data.workingMonth) { workingMonth = data.workingMonth; hasChanges = true; }
+        if (data.rmBookings && typeof RM !== 'undefined') { RM.bookings = data.rmBookings; hasChanges = true; }
+        if (hasChanges) {
+          try { localStorage.setItem("macau_data", encryptData(txs)); localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals)); localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets)); } catch(e) {}
+          renderAll(); renderOverview(); renderSummary();
+          if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
+          try { doQuery(); } catch(e) {}
+          try { updateTotalWalletUI(); } catch(e) {}
+          console.log('[Shadow Sync] 對賬完成，已更新本機資料\n');
+        } else {
+          console.log('[Shadow Sync] 資料無變化\n');
+        }
+      }).catch(function(err) { console.error('[Shadow Sync] 錯誤:', err); });
+    }, 15000);
+    console.log('[Sync] Shadow Sync 已啟動（每 15 秒對賬）');
+  }
 }
 
 function renderSummary() {
@@ -4770,6 +4817,41 @@ function renderTrendChart(daily, monthLabel) {
       interaction: { mode: "index", intersect: false }
     }
   });
+
+  // v8.0 Shadow Sync：每 15 秒強制對賬一次，捕獲任何遺漏的推送
+  if (!window._shadowSyncStarted) {
+    window._shadowSyncStarted = true;
+    setInterval(function() {
+      if (!db) return;
+      console.log('[Shadow Sync] 強制對賬開始...\n');
+      db.ref('macau_data').once('value').then(function(snapshot) {
+        var data = snapshot.val();
+        if (!data) return;
+        // 過濾本機回音
+        if (data.deviceId && data.deviceId === myDeviceId) { console.log('[Shadow Sync] 本機回音，跳過\n'); return; }
+        console.log('[Shadow Sync] 收到資料，開始對賬...\n');
+        // 強制合併資料（與上方邏輯相同）
+        var hasChanges = false;
+        if (data.txs && Array.isArray(data.txs)) { txs = data.txs; var maxId = 0; for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; } nextId = maxId + 1; hasChanges = true; }
+        if (data.agentList && Array.isArray(data.agentList)) { agentList = data.agentList; hasChanges = true; }
+        if (data.agentWallets && typeof data.agentWallets === 'object') { agentWallets = data.agentWallets; hasChanges = true; }
+        if (data.fundWithdrawals && Array.isArray(data.fundWithdrawals)) { fundWithdrawals = data.fundWithdrawals; var maxFwId = 0; for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxFwId) maxFwId = fundWithdrawals[i].id; } fundNextId = maxFwId + 1; hasChanges = true; }
+        if (data.workingMonth) { workingMonth = data.workingMonth; hasChanges = true; }
+        if (data.rmBookings && typeof RM !== 'undefined') { RM.bookings = data.rmBookings; hasChanges = true; }
+        if (hasChanges) {
+          try { localStorage.setItem("macau_data", encryptData(txs)); localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals)); localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets)); } catch(e) {}
+          renderAll(); renderOverview(); renderSummary();
+          if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
+          try { doQuery(); } catch(e) {}
+          try { updateTotalWalletUI(); } catch(e) {}
+          console.log('[Shadow Sync] 對賬完成，已更新本機資料\n');
+        } else {
+          console.log('[Shadow Sync] 資料無變化\n');
+        }
+      }).catch(function(err) { console.error('[Shadow Sync] 錯誤:', err); });
+    }, 15000);
+    console.log('[Sync] Shadow Sync 已啟動（每 15 秒對賬）');
+  }
 }
 
 // ===== Chart.js 代理排行圖 =====
@@ -4844,6 +4926,41 @@ function renderRankChart(agtArr) {
       }
     }
   });
+
+  // v8.0 Shadow Sync：每 15 秒強制對賬一次，捕獲任何遺漏的推送
+  if (!window._shadowSyncStarted) {
+    window._shadowSyncStarted = true;
+    setInterval(function() {
+      if (!db) return;
+      console.log('[Shadow Sync] 強制對賬開始...\n');
+      db.ref('macau_data').once('value').then(function(snapshot) {
+        var data = snapshot.val();
+        if (!data) return;
+        // 過濾本機回音
+        if (data.deviceId && data.deviceId === myDeviceId) { console.log('[Shadow Sync] 本機回音，跳過\n'); return; }
+        console.log('[Shadow Sync] 收到資料，開始對賬...\n');
+        // 強制合併資料（與上方邏輯相同）
+        var hasChanges = false;
+        if (data.txs && Array.isArray(data.txs)) { txs = data.txs; var maxId = 0; for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; } nextId = maxId + 1; hasChanges = true; }
+        if (data.agentList && Array.isArray(data.agentList)) { agentList = data.agentList; hasChanges = true; }
+        if (data.agentWallets && typeof data.agentWallets === 'object') { agentWallets = data.agentWallets; hasChanges = true; }
+        if (data.fundWithdrawals && Array.isArray(data.fundWithdrawals)) { fundWithdrawals = data.fundWithdrawals; var maxFwId = 0; for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxFwId) maxFwId = fundWithdrawals[i].id; } fundNextId = maxFwId + 1; hasChanges = true; }
+        if (data.workingMonth) { workingMonth = data.workingMonth; hasChanges = true; }
+        if (data.rmBookings && typeof RM !== 'undefined') { RM.bookings = data.rmBookings; hasChanges = true; }
+        if (hasChanges) {
+          try { localStorage.setItem("macau_data", encryptData(txs)); localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals)); localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets)); } catch(e) {}
+          renderAll(); renderOverview(); renderSummary();
+          if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
+          try { doQuery(); } catch(e) {}
+          try { updateTotalWalletUI(); } catch(e) {}
+          console.log('[Shadow Sync] 對賬完成，已更新本機資料\n');
+        } else {
+          console.log('[Shadow Sync] 資料無變化\n');
+        }
+      }).catch(function(err) { console.error('[Shadow Sync] 錯誤:', err); });
+    }, 15000);
+    console.log('[Sync] Shadow Sync 已啟動（每 15 秒對賬）');
+  }
 }
 
 // ===== 房務系統 JS =====
