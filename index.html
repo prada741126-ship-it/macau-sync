@@ -3800,15 +3800,27 @@ function syncUpload() {
   // 5. workingMonth
   if (workingMonth) db.ref('macau_data/workingMonth').set(workingMonth);
 
-  // 6. rmBookings
-  if (typeof RM !== 'undefined' && RM.bookings && RM.bookings.length) {
+  // 6. rmBookings（修正：同步刪除）
+  if (typeof RM !== 'undefined' && RM.bookings) {
     db.ref('macau_data/rmBookings').transaction(function(current) {
-      var fb = current || {};
-      if (Array.isArray(fb)) fb = _arrToObj(fb);
+      // 以本地為基礎（確保刪除會同步）
       var local = _arrToObj(RM.bookings);
-      var keys = Object.keys(local);
-      for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; }
+      if (!current) return local;  // Firebase 無資料，直接用本地
+      var fb = current;
+      if (Array.isArray(fb)) fb = _arrToObj(fb);  // 舊格式遷移
+      // 先將本地所有記錄覆蓋到 fb
+      var localKeys = {};
+      var lk = Object.keys(local);
+      for (var i = 0; i < lk.length; i++) { fb[lk[i]] = local[lk[i]]; localKeys[lk[i]] = true; }
+      // 再刪除 fb 中存在但本地不存在的鍵（本地已刪除的）
+      var fbKeys = Object.keys(fb);
+      for (var j = 0; j < fbKeys.length; j++) {
+        if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]];
+      }
       return fb;
+    }, function(error, committed) {
+      if (error) console.error('[Sync ↑] rmBookings transaction 失敗', error);
+      else if (committed) console.log('[Sync ↑] rmBookings 同步成功');
     });
   }
 
