@@ -26,7 +26,7 @@
     });
   }
   // 3. 版本變數（給登入頁版本顯示用）
-  window.APP_VERSION = 'v10.23';
+  window.APP_VERSION = 'v10.24';
 })();
 </script>
 <meta charset="UTF-8">
@@ -4399,7 +4399,7 @@ function quickFilter(type, ev) {
     month = y + "-" + (m < 10 ? "0" + m : "" + m);
   } else if (type === "this_quarter") month = y.toString();
   else if (type === "this_year") month = y.toString();
-  else month = "";
+  else month = "__ALL__";
   document.getElementById("q-month").value = month;
   var btns = document.querySelectorAll(".time-filter button");
   for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
@@ -4529,6 +4529,7 @@ function doQuery() {
   try {
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
+  var skipMonthFilter = (month === "__ALL__");
   if (!month) month = workingMonth || nowStr().slice(0, 7);
   // 公基金查询 - 分筆流水（含累計餘額）
   if (agent === "__FUND__") {
@@ -4607,7 +4608,7 @@ function doQuery() {
   var volMax = toNum(document.getElementById("q-vol-max").value) || 0;
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
-    if (t.date && t.date.indexOf(month) !== 0) continue;
+    if (!skipMonthFilter && t.date && t.date.indexOf(month) !== 0) continue;
     if (agent && t.agent !== agent) continue;
     if (venue && t.venue !== venue) continue;
     if (dateFrom && t.date < dateFrom) continue;
