@@ -1,53 +1,39 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<!-- v10.20 激進快取清除：最開頭就強制解除所有 SW + 清除所有 Cache -->
+<script>
+(function(){
+  // 1. 強制解除所有已註冊的 Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      regs.forEach(function(r){
+        r.unregister();
+        try { r.active && r.active.postMessage('skipWaiting'); } catch(e){}
+        console.log('[SW] 已解除註冊:', r.scope);
+      });
+      // 也嘗試解除在 .register() 中的 SW
+      try { navigator.serviceWorker.getRegistration().then(function(r){ if(r) r.unregister(); }); } catch(e){}
+    });
+  }
+  // 2. 清除所有 Cache Storage
+  if ('caches' in window) {
+    caches.keys().then(function(keys){
+      keys.forEach(function(key){
+        caches.delete(key);
+        console.log('[Cache] 已刪除:', key);
+      });
+    });
+  }
+  // 3. 版本變數（給登入頁版本顯示用）
+  window.APP_VERSION = 'v10.20';
+})();
+</script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v10.19</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0c0c12">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="洗碼報表">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230c0c12'/><text x='96' y='100' text-anchor='middle' font-size='80' font-weight='bold' font-family='serif' fill='%23D4AF37'>博</text></svg>">
-<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<!-- v10.13 版本檢測：發現新版本時自動重新載入 -->
-<script>
-(function(){
-  var APP_VERSION = 'v10.19';
-  window.APP_VERSION = APP_VERSION;  // v10.18 改為全域變數，登入頁可讀取
-  var stored = localStorage.getItem('macau_app_version');
-  if (stored && stored !== APP_VERSION) {
-    console.log('[Version] 檢測到新版本 ' + APP_VERSION + '，舊版為 ' + stored + '，正在清除快取並重新載入...');
-    localStorage.setItem('macau_app_version', APP_VERSION);
-    // 強制重新載入（繞過快取）
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker.getRegistrations().then(function(regs) {
-        regs.forEach(function(r){ r.unregister(); });
-        location.reload(true);
-      }).catch(function(){ location.reload(true); });
-    } else {
-      location.reload(true);
-    }
-  } else {
-    localStorage.setItem('macau_app_version', APP_VERSION);
-  }
-})();
-// v10.18 登入頁版本號顯示
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function() {
-    var el = document.getElementById('pw-version');
-    if (el) el.textContent = window.APP_VERSION || '';
-  });
-} else {
-  var el = document.getElementById('pw-version');
-  if (el) el.textContent = window.APP_VERSION || '';
-}
-</script>
+<title>澳門洗碼報表 v10.20</title>
 <style>
 :root {
   --gold: #D4AF37;
@@ -3313,27 +3299,8 @@ document.addEventListener("DOMContentLoaded", function() {
   _setupDraftAutoSave();
   _autoBackupCheck();
   _startLoginParticles();
-  // 註冊 Service Worker（PWA 支援）
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").then(function(reg) {
-      console.log("PWA: Service Worker 已註冊", reg.scope);
-      // v10.13 監聽 SW 更新，發現新版本時提示重新載入
-      reg.addEventListener('updatefound', function() {
-        var newWorker = reg.installing;
-        newWorker.addEventListener('statechange', function() {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[SW] 新版本已下載，準備重新載入...');
-            showToast('偵測到新版，3秒後自動重新載入', 'warning');
-            setTimeout(function() {
-              window.location.reload(true);
-            }, 3000);
-          }
-        });
-      });
-    }).catch(function(err) {
-      console.log("PWA: Service Worker 註冊失敗", err);
-    });
-  }
+  // v10.20 不再註冊 Service Worker（避免快取導致版本無法更新）
+  // PWA 相關功能已停用
 });
 
 // ===== 7 天自動備份功能 =====
