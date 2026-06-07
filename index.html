@@ -126,11 +126,11 @@
 html, body { height: 100%; }
 body { font-family: "Microsoft JhengHei", "微软正黑体", "PingFang TC", "Noto Serif TC", serif; background: var(--bg-page); color: var(--text-main); display: flex; overflow: hidden; }
 .container { max-width: 1600px; margin: 0 auto; }
-h1 { color: #D4AF37; text-align: center; margin-bottom: 12px; font-size: 28px; letter-spacing: 6px; font-weight: 700; text-shadow: 0 2px 20px rgba(212,175,55,0.5), 0 0 40px rgba(212,175,55,0.2), 0 0 80px rgba(180,30,30,0.15); padding: 10px 0; border-bottom: 2px solid rgba(212,175,55,0.35); display: inline-block; width: 100%; position:relative; }
-h1::after { content:""; position:absolute; bottom:-2px; left:0; width:100%; height:2px; background:linear-gradient(90deg, transparent, rgba(212,175,55,0.7), transparent); animation: goldShimmer 4s linear infinite; background-size:200% 100%; }
-.month-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 10px 20px; margin-bottom: 16px; background: linear-gradient(135deg, rgba(24,12,8,0.95), rgba(16,6,4,0.97)); border-radius: 14px; border: 1px solid rgba(212,175,55,0.3); flex-wrap: wrap; }
+h1 { color: var(--gold, #B8860B); text-align: center; margin-bottom: 12px; font-size: 28px; letter-spacing: 6px; font-weight: 700; text-shadow: 0 2px 16px var(--gold-faint); padding: 10px 0; border-bottom: 1px solid var(--border-gold, rgba(184,134,11,0.12)); display: inline-block; width: 100%; position:relative; }
+h1::after { content:""; position:absolute; bottom:-1px; left:0; width:100%; height:1px; background:linear-gradient(90deg, transparent, var(--border-gold, rgba(184,134,11,0.12)), transparent); animation: goldShimmer 6s linear infinite; background-size:200% 100%; }
+.month-bar { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 10px 20px; margin-bottom: 16px; background: linear-gradient(135deg, var(--bg-surface), var(--bg-elevated)); border-radius: 14px; border: 1px solid var(--border, rgba(255,255,255,0.05)); flex-wrap: wrap; }
 .month-bar-label { color: #b09870; font-size: 13px; letter-spacing: 1px; }
-.month-bar-badge { background: linear-gradient(135deg, #D4AF37, #B8860B); color: #1a1206; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 2px; box-shadow: 0 0 20px rgba(212,175,55,0.4); animation: borderGlowPulse 4s ease-in-out infinite; }
+.month-bar-badge { background: linear-gradient(135deg, var(--gold-dim, #B8860B), #8B6914); color: #1a1206; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; letter-spacing: 2px; box-shadow: 0 0 10px var(--gold-faint); }
 .month-bar-status { color: #2ecc71; font-size: 11px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
 .month-bar-status::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 6px #2ecc71; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
