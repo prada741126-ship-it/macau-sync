@@ -2629,25 +2629,39 @@ function isModalOpen() {
 
 // ===== 刪除撤銷 =====
 var lastDeleted = null;
-// v10.0 B方案：使用 _fbKey 精準刪除
+// v10.0 B方案：使用 _fbKey 精準刪除（修復舊資料相容）
 function deleteTx(fbKey) {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
   // 保存副本供撤銷
+  var found = false;
   for (var i = 0; i < txs.length; i++) {
-    if (txs[i]._fbKey === fbKey || txs[i].id === fbKey || txs[i].id === parseInt(fbKey)) {
-      lastDeleted = txs[i];
-      lastDeleted.fbKey = txs[i]._fbKey;
-      fbKey = txs[i]._fbKey;  // 統一使用 _fbKey
+    var t = txs[i];
+    if (!t) continue;
+    if (t._fbKey === fbKey || String(t.id) === String(fbKey) || t.id === parseInt(fbKey) || String(t._fbKey) === String(fbKey)) {
+      lastDeleted = t;
+      lastDeleted.fbKey = t._fbKey || fbKey;
+      fbKey = t._fbKey || fbKey;  // 統一使用 _fbKey，若無則用原 fbKey
+      found = true;
       break;
     }
   }
-  // v10.0 直接從 Firebase 刪除該筆記錄（不重寫整個陣列）
-  if (db && fbKey) db.ref('macau_data/txs/' + fbKey).set(null);
-  // 本地移除
+  if (!found) {
+    hideLoading();
+    showToast("找不到該筆交易，可能已被刪除", "warning");
+    return;
+  }
+  // v10.0 直接從 Firebase 刪除該筆記錄
+  if (db && fbKey && fbKey !== "undefined") {
+    db.ref('macau_data/txs/' + fbKey).set(null);
+  }
+  // 本地移除（精準比對）
   var newTxs = [];
   for (var i = 0; i < txs.length; i++) {
-    if (txs[i]._fbKey !== fbKey && txs[i].id !== fbKey) newTxs.push(txs[i]);
+    var t = txs[i];
+    if (!t) continue;
+    var isMatch = (t._fbKey === fbKey) || (String(t.id) === String(fbKey)) || (t.id === parseInt(fbKey));
+    if (!isMatch) newTxs.push(t);
   }
   txs = newTxs;
   saveData(true);
