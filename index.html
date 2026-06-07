@@ -3548,43 +3548,30 @@ function saveAgentWalletForm() {
     try { closeAgentWalletModal(); } catch(e2) {}
   }
 }
-// v10.0 B方案：使用 _fbKey 刪除代理錢包
+// v10.12 代理錢包刪除：簡化邏輯，統一走 syncUpload transaction
 function deleteAgentWallet(agent, id) {
   if (!confirm("確定刪除？")) return;
   var arr = agentWallets[agent] || [];
   var key = String(id);
-  var fbKey = null;
   var newArr = [];
+  var found = false;
   for (var i = 0; i < arr.length; i++) {
-    if (arr[i]._fbKey === key || arr[i].id === id || arr[i].id === parseInt(id)) {
-      fbKey = arr[i]._fbKey;
-    } else {
-      newArr.push(arr[i]);
-    }
+    var t = arr[i];
+    if (!t) continue;
+    var matched = (String(t._fbKey) === key || String(t.id) === key || t.id === parseInt(id));
+    if (matched) { found = true; continue; }
+    newArr.push(t);
   }
+  if (!found) { showToast("找不到該筆記錄","warning"); return; }
   agentWallets[agent] = newArr;
-  // 先存本地（立即生效，UI 即時更新）
+  // 立即更新本地 UI
   saveAgentWalletsLocalOnly();
   syncAgentDrawn(agent);
-  doQuery();
+  try { doQuery(); } catch(e) {}
   showToast("代理錢包已刪除，同步中…", "success");
-  // 再刪除 Firebase 上的該筆記錄（非同步，完成後觸發上傳）
-  if (db && fbKey) {
-    console.log('[deleteAgentWallet] 刪除 Firebase 記錄 agent=' + agent + ' fbKey=' + fbKey);
-    db.ref('macau_data/agentWallets/' + agent + '/' + fbKey).set(null, function(error) {
-      if (error) {
-        console.error('[deleteAgentWallet] Firebase 刪除失敗:', error);
-        showToast("Firebase 刪除失敗，請檢查網路", "error");
-      } else {
-        console.log('[deleteAgentWallet] Firebase 刪除成功，準備上傳');
-        // Firebase 刪除成功後，執行一次完整上傳（確保 transaction 讀到最新狀態）
-        syncUpload();
-      }
-    });
-  } else {
-    // 離線模式：仍執行上傳（會走 localStorage 邏輯）
-    syncUpload();
-  }
+  console.log("[deleteAgentWallet] 本地刪除完成 agent=" + agent + " id=" + id + "，準備 syncUpload");
+  // 無論有無 Firebase，都執行 syncUpload（有 db 時 transaction 會正確同步）
+  syncUpload();
 }
 function syncAgentDrawn(agent) {
   try {
@@ -3903,7 +3890,9 @@ function syncUpload() {
   });
 
   // 4. agentWallets（巢狀物件）
+  console.log("[Sync ↑] agentWallets transaction 開始");
   db.ref('macau_data/agentWallets').transaction(function(current) {
+    console.log("[Sync ↑] agentWallets transaction callback，current 有資料？", !!(current && Object.keys(current).length));
     var fb = current || {};
     var local = _awArrToObj(agentWallets);
     var localAgentKeys = {};
