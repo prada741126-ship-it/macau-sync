@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v7.7</title>
+<title>澳門洗碼報表 v7.7.1</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -719,6 +719,21 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .rm-btn-save { flex: 1; padding: 10px; border: none; border-radius: 8px; background: linear-gradient(135deg, rgba(39,174,96,0.8), rgba(46,204,113,0.8)); color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; }
 .rm-btn-cancel { flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer; }
 
+/* 所需轉碼數連動顯示 */
+.rm-threshold-row {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 6px 0 10px; padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.03));
+  border: 1px solid rgba(212,175,55,0.2); border-radius: 8px;
+}
+.rm-threshold-label { font-size: 12px; color: var(--text-muted); letter-spacing: 1px; }
+.rm-threshold-value {
+  font-size: 22px; font-weight: 900; color: var(--gold);
+  text-shadow: 0 0 12px rgba(212,175,55,0.4);
+  min-width: 48px; text-align: center;
+}
+.rm-threshold-unit { font-size: 12px; color: var(--gold); opacity: 0.6; }
+
 /* ============================================================
    房務系統 — 頁籤切換 + 酒店設定
    ============================================================ */
@@ -886,6 +901,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   .topbar-toggle { display: block; font-size: 20px; padding: 4px; }
   .rm-form-row { grid-template-columns: 1fr; }
   .rm-form-row-3col { grid-template-columns: 1fr; }
+  .rm-threshold-value { font-size: 18px; }
   /* 手機版房務系統儀表板大幅縮小 */
   .rm-dashboard { margin-bottom: 8px; }
   .rm-dash-main { padding: 10px 12px 8px; }
@@ -2255,6 +2271,12 @@ tbody tr:hover {
           <option value="">請先選擇酒店</option>
         </select>
       </div>
+    </div>
+    <!-- 所選房型對應的所需轉碼數 -->
+    <div class="rm-threshold-row" id="rm-threshold-row" style="display:none;">
+      <div class="rm-threshold-label">所需轉碼數</div>
+      <div class="rm-threshold-value" id="rm-threshold-val">--</div>
+      <div class="rm-threshold-unit">萬</div>
     </div>
     <div class="rm-form-row">
       <div class="rm-form-group">
@@ -4943,6 +4965,9 @@ var RM = {
     document.getElementById("rm-f-room").innerHTML = '<option value="">請先選擇酒店</option>';
     document.getElementById("rm-f-price").value = "";
     document.getElementById("rm-f-total").value = "";
+    // 隱藏所需轉碼數顯示
+    var thrRow = document.getElementById("rm-threshold-row");
+    if (thrRow) thrRow.style.display = "none";
   },
 
   onHotelChange: function() {
@@ -4955,10 +4980,13 @@ var RM = {
     // 清空價格（房型下拉由 populateRoomDropdown 控制）
     document.getElementById("rm-f-price").value = "";
     document.getElementById("rm-f-total").value = "";
+    // 隱藏所需轉碼數顯示
+    var thrRow = document.getElementById("rm-threshold-row");
+    if (thrRow) thrRow.style.display = "none";
   },
 
   onRoomChange: function() {
-    // 房型選擇後，自動填入價格和門檻
+    // 房型選擇後，自動填入價格、門檻、顯示所需轉碼數
     var sel = document.getElementById("rm-f-room");
     var opt = sel.options[sel.selectedIndex];
     var price = parseInt(opt.getAttribute("data-price"))||0;
@@ -4966,6 +4994,13 @@ var RM = {
     document.getElementById("rm-f-price").value = price;
     // 保存當前選擇的門檻（供 saveForm 使用）
     this._currentThreshold = threshold;
+    // 顯示所需轉碼數（連動顯示）
+    var thrRow = document.getElementById("rm-threshold-row");
+    var thrVal = document.getElementById("rm-threshold-val");
+    if (thrRow && thrVal && sel.value) {
+      thrRow.style.display = "flex";
+      thrVal.textContent = threshold;
+    }
     // 自動帶入狀態：選中代理有洗碼記錄預設免費，否則預設付費
     var now = this.nowStr().slice(0,7);
     var agent = document.getElementById("rm-f-agent").value;
@@ -5035,6 +5070,9 @@ var RM = {
     this.populateDateSelects();
     this.populateCasinoDropdown();
     this.editingId = id || null;
+    // 每次開表單時隱藏轉碼數顯示（新增模式；編輯模式稍後會根據資料顯示）
+    var thrRow = document.getElementById("rm-threshold-row");
+    if (thrRow) thrRow.style.display = "none";
     document.getElementById("rm-modal-title").textContent = id ? "編輯訂房" : "新增訂房";
     if (id) {
       var b = this.bookings.find(function(x){ return x.id===id; });
@@ -5060,6 +5098,24 @@ var RM = {
       // 嘗試設定房型（兼容舊資料無 roomType 欄位）
       if (b.roomType) {
         try { document.getElementById("rm-f-room").value = b.roomType; } catch(e) {}
+      }
+      // 顯示所需轉碼數（從 PRESET_CONFIG 讀取對應門檻，或使用訂房紀錄中的值）
+      if (b.roomType && casino && b.hotel) {
+        var thrVal = b.threshold || 0;
+        if (!thrVal) {
+          for (var j = 0; j < config.length; j++) {
+            if (config[j].casino === casino && config[j].hotel === b.hotel && config[j].room === b.roomType) {
+              thrVal = config[j].threshold; break;
+            }
+          }
+        }
+        if (thrVal) {
+          var thrRow = document.getElementById("rm-threshold-row");
+          var thrValEl = document.getElementById("rm-threshold-val");
+          if (thrRow) thrRow.style.display = "flex";
+          if (thrValEl) thrValEl.textContent = thrVal;
+          this._currentThreshold = thrVal;
+        }
       }
       // 填入月日選擇方塊（不含年）
       var ciParts = (b.checkIn || b.date || "").split("-");
