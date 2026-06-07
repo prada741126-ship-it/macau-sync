@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v7.6</title>
+<title>澳門洗碼報表 v7.6.1</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -714,6 +714,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .rm-form-group input, .rm-form-group select { width: 100%; padding: 8px 10px; background: rgba(12,12,20,0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #d4d4d4; font-size: 13px; }
 .rm-form-group input:focus, .rm-form-group select:focus { border-color: var(--gold); outline: none; }
 .rm-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rm-form-row-3col { grid-template-columns: 1fr 1fr 1fr; }
 .rm-modal-actions { display: flex; gap: 8px; margin-top: 16px; }
 .rm-btn-save { flex: 1; padding: 10px; border: none; border-radius: 8px; background: linear-gradient(135deg, rgba(39,174,96,0.8), rgba(46,204,113,0.8)); color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; }
 .rm-btn-cancel { flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer; }
@@ -884,6 +885,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   #sidebar:not(.mobile-hidden) { left: 0; }
   .topbar-toggle { display: block; font-size: 20px; padding: 4px; }
   .rm-form-row { grid-template-columns: 1fr; }
+  .rm-form-row-3col { grid-template-columns: 1fr; }
   /* 手機版房務系統儀表板大幅縮小 */
   .rm-dashboard { margin-bottom: 8px; }
   .rm-dash-main { padding: 10px 12px 8px; }
@@ -1422,11 +1424,11 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   #all-table th:nth-child(7), #all-table td:nth-child(7),
   #all-table th:nth-child(11), #all-table td:nth-child(11) { display: none; }
 
-  /* 房務表格：隱藏非必要欄位 (客戶/入住/退房/總費用) */
+  /* 房務表格：隱藏非必要欄位 (客戶/入住/退房/總費用) — v7.6 更新：12列含房型 */
   .room-table th:nth-child(3), .room-table td:nth-child(3),
-  .room-table th:nth-child(5), .room-table td:nth-child(5),
   .room-table th:nth-child(6), .room-table td:nth-child(6),
-  .room-table th:nth-child(9), .room-table td:nth-child(9) { display: none; }
+  .room-table th:nth-child(7), .room-table td:nth-child(7),
+  .room-table th:nth-child(10), .room-table td:nth-child(10) { display: none; }
 
   /* 查詢表格：隱藏備註欄 */
   #page-query table th:nth-child(8), #page-query table td:nth-child(8) { display: none; }
@@ -2234,7 +2236,7 @@ tbody tr:hover {
         <input type="text" id="rm-f-client" class="rm-input" placeholder="客戶名稱">
       </div>
     </div>
-    <div class="rm-form-row">
+    <div class="rm-form-row rm-form-row-3col">
       <div class="rm-form-group">
         <label>體系</label>
         <select id="rm-f-casino" class="rm-input" onchange="rmOnCasinoChange()">
@@ -3731,6 +3733,9 @@ function initSync() {
         try {
           var encrypted = encryptData(txs);
           localStorage.setItem("macau_data", encrypted);
+          // 同時保存公基金和代理錢包到 localStorage
+          localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
+          localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
         } catch(e) { console.error('localStorage save error:', e); }
 
         // 渲染所有頁面（確保刪除後 UI 也更新）
@@ -4488,6 +4493,8 @@ document.addEventListener('keydown', function(e) {
 })();
 
 loadAgentList();
+loadFundData();
+loadAgentWallets();
 populateAgentDropdown();
 renderAll();
 renderOverview();
