@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v8.3</title>
+<title>澳門洗碼報表 v9.0</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1793,7 +1793,6 @@ tbody tr:hover {
     <button class="topbar-btn primary" onclick="openModal()">＋ 新增</button>
     <button class="topbar-btn" onclick="showBackupModal()" title="備份管理">📦</button>
     <button class="topbar-btn" onclick="manualSync()">🔄 同步</button>
-    <button class="topbar-btn" onclick="forceSync()" title="強制對賬所有資料">⚡ 強制對賬</button>
   </div>
   </div>
 
@@ -2406,9 +2405,8 @@ var nextId = 1;
 var fundNextId = 1;
 var agentWalletNextId = 1;
 var agentList = [];
-var lastSyncTimestamp = 0;  // Firebase 最後同步時間戳（防止舊資料覆蓋新資料）
-var isSyncingFromFirebase = false;  // 防止 Firebase 同步時觸發上傳（避免無限循環）
-var myDeviceId = "";  // 本機設備唯一 ID（用於過濾回音）
+var nextId = 1;
+var fundNextId = 1;
 var sortState = { table: "", col: "", asc: true };
 
 // ===== 同步配置（v4.9 安全強化）=====
@@ -3355,8 +3353,6 @@ function saveFundData(silent) {
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
   // v8.0 移除全局锁，改用 deviceId 回音过滤
   if (typeof syncUpload === 'function') syncUpload();
-  // v8.3 編輯完成後應用編輯期間收到的 pending sync
-  setTimeout(function() { if (typeof _applyPendingSync === 'function') _applyPendingSync(); }, 800);
 }
 function loadFundData(silent) {
   var d = localStorage.getItem("macau_fund_data");
@@ -3473,8 +3469,6 @@ function saveData(silent) {
     localStorage.setItem("macau_data", encrypted);
     console.log('[saveData] 已保存到 localStorage（加密）');
     if (typeof syncUpload === 'function') { console.log('[saveData] 準備呼叫 syncUpload()'); syncUpload(); }
-    // v8.3 編輯完成後應用編輯期間收到的 pending sync
-    setTimeout(function() { if (typeof _applyPendingSync === 'function') _applyPendingSync(); }, 800);
     if (!silent) showToast("已儲存 " + txs.length + " 筆","success");
   } catch(e) {
     console.error('saveData error:', e);
@@ -3642,13 +3636,13 @@ function closeCurrentMonth() {
   showToast('月末結算完成，' + now + ' 已鎖定', 'success');
 }
 
-// ===== 同步功能 =====
+// ===== v9.0 SSOT: Firebase 唯一數據源 =====
+var _ssotLastWrite = 0;
+
 function syncUpload() {
   if (!db) { console.log('[Sync ↑] Firebase 未初始化'); return; }
-  // v8.0 deviceId 回音過濾：本機上傳標記 deviceId，接收時忽略本機回音，徹底解決全局鎖問題
-  console.log('[Sync ↑] 開始上傳，交易數量：' + txs.length);
+  _ssotLastWrite = Date.now();
   var payload = {
-    deviceId: myDeviceId,
     txs: txs,
     agentList: agentList,
     agentWallets: agentWallets,
@@ -3657,11 +3651,10 @@ function syncUpload() {
     rmBookings: (typeof RM !== 'undefined' && RM.bookings) ? RM.bookings : [],
     rmHotelConfig: (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG) ? HOTEL_CONFIG : [],
     archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
-    timestamp: Date.now()
+    _ts: _ssotLastWrite
   };
-  // v8.0 上傳時標記本機設備 ID（用於過濾回音）
   db.ref('macau_data').set(payload)
-    .then(function() { console.log('[Sync ↑] Firebase 上傳成功（已鎖定 3 秒）'); })
+    .then(function() { console.log('[Sync ↑] Firebase 上傳成功 (ts:' + _ssotLastWrite + ')'); })
     .catch(function(err) { console.error('[Sync ↑] Firebase 上傳失敗', err); });
 }
 
@@ -3676,134 +3669,27 @@ function manualSync() {
   setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 800);
 }
 
-// v8.0 強制對賬：手動觸發，拉取 Firebase 最新資料並強制覆蓋本地
-
-// v8.3 檢測用戶是否正在編輯資料（任何 modal 打開中）
-function isUserEditing() {
-  try {
-    var txModal = document.getElementById("modal");
-    if (txModal && txModal.classList.contains("show")) return true;
-    var fundModal = document.getElementById("fund-modal");
-    if (fundModal && fundModal.classList.contains("show")) return true;
-    var rmBg = document.getElementById("rm-modal-bg");
-    if (rmBg && rmBg.classList.contains("active")) return true;
-  } catch(e) {}
-  return false;
-}
-
-
-// v8.3 編輯完成後，應用編輯期間收到的待處理同步數據
-function _applyPendingSync() {
-  try {
-    var pendingTxs = localStorage.getItem("macau_data_pending");
-    var pendingFund = localStorage.getItem("macau_fund_pending");
-    var pendingWallets = localStorage.getItem("macau_wallets_pending");
-    var hasPending = false;
-    if (pendingTxs) { localStorage.removeItem("macau_data_pending"); hasPending = true; }
-    if (pendingFund) { localStorage.removeItem("macau_fund_pending"); hasPending = true; }
-    if (pendingWallets) { localStorage.removeItem("macau_wallets_pending"); hasPending = true; }
-    if (hasPending && typeof syncUpload === 'function') {
-      // 上傳本機最新數據後，Shadow Sync 會自動拉取合併
-      setTimeout(function() { syncUpload(); }, 500);
-    }
-  } catch(e) {}
-}
-
-function forceSync() {
-  if (!db) { showToast('Firebase 未連線', 'warning'); return; }
-  if (isUserEditing()) { showToast('請先完成當前編輯再對賬', 'warning'); return; }
-  showLoading('強制對賬中…');
-  db.ref('macau_data').once('value').then(function(snapshot) {
-    var data = snapshot.val();
-    if (!data) { hideLoading(); showToast('Firebase 無資料', 'warning'); return; }
-    // 過濾本機回音（如果是本機剛上傳的，跳過）
-    if (data.deviceId && data.deviceId === myDeviceId) {
-      // 本機回音：強制上傳本機最新資料
-      syncUpload();
-      hideLoading();
-      showToast('已上傳本機最新資料', 'success');
-      return;
-    }
-    console.log('[Force Sync] 強制對賬開始，合併 Firebase 資料...');
-    var hasChanges = false;
-    if (data.txs && Array.isArray(data.txs)) { txs = data.txs; var maxId = 0; for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; } nextId = maxId + 1; hasChanges = true; }
-    if (data.agentList && Array.isArray(data.agentList)) { agentList = data.agentList; hasChanges = true; }
-    if (data.agentWallets && typeof data.agentWallets === 'object') { agentWallets = data.agentWallets; hasChanges = true; }
-    if (data.fundWithdrawals && Array.isArray(data.fundWithdrawals)) { fundWithdrawals = data.fundWithdrawals; var maxFwId = 0; for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxFwId) maxFwId = fundWithdrawals[i].id; } fundNextId = maxFwId + 1; hasChanges = true; }
-    if (data.workingMonth) { workingMonth = data.workingMonth; hasChanges = true; }
-    if (data.rmBookings && typeof RM !== 'undefined') { RM.bookings = data.rmBookings; hasChanges = true; }
-    if (data.archives) { localStorage.setItem('macau_archives', JSON.stringify(data.archives)); }
-    if (hasChanges) {
-      try { localStorage.setItem("macau_data", encryptData(txs)); localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals)); localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets)); } catch(e) {}
-      renderAll(); renderOverview(); renderSummary();
-      if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
-      try { doQuery(); } catch(e) {}
-      try { updateTotalWalletUI(); } catch(e) {}
-    }
-    hideLoading();
-    showToast('強制對賬完成 ✅', 'success');
-  }).catch(function(err) {
-    hideLoading();
-    console.error('[Force Sync] 錯誤:', err);
-    showToast('對賬失敗，請檢查網路', 'error');
-  });
-}
+// v9.0 SSOT: Firebase 為唯一數據源，無需手動對賬
 
 function initSync() {
   if (!db) { console.log('[Sync] Firebase 未初始化'); return; }
-  // v8.0 初始化本機設備 ID
-  if (!myDeviceId) {
-    myDeviceId = localStorage.getItem('macau_device_id');
-    if (!myDeviceId) {
-      myDeviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-      localStorage.setItem('macau_device_id', myDeviceId);
-    }
-    console.log('[Sync] 本機設備 ID: ' + myDeviceId);
-  }
-  console.log('[Sync] Firebase 即時同步已啟動');
+  console.log('[Sync] v9.0 SSOT 即時同步已啟動（Firebase 唯一數據源）');
 
-  // 監聽 Firebase 資料變化（即時推送）
+  // v9.0 SSOT: 監聽 Firebase 資料變化，直接合併（無過濾、無鎖、無延後）
   db.ref('macau_data').on('value', function(snapshot) {
-    // 設置同步標誌，防止無限循環（syncUpload 會檢查此標誌）
-    isSyncingFromFirebase = true;
-
     try {
       var data = snapshot.val();
       if (!data) { console.log('[Sync ↓] Firebase 無資料'); return; }
 
-      // 時間戳檢查：只接受比上次同步更新的資料（防止舊資料覆蓋新資料）
-      var incomingTs = data.timestamp || 0;
-      if (incomingTs < lastSyncTimestamp) {
-        console.log('[Sync ↓] 收到舊資料（' + incomingTs + ' < ' + lastSyncTimestamp + '），跳過');
+      var incomingTs = data._ts || 0;
+
+      // v9.0 SSOT: 僅過濾本機回音（精確時間戳比對），其他所有資料直接合併
+      if (_ssotLastWrite > 0 && incomingTs === _ssotLastWrite) {
+        console.log('[Sync ↓] 本機回音 (ts:' + incomingTs + ')，跳過');
         return;
       }
 
-      // v8.0 過濾本機回音：如果是本機上傳的資料，跳過（避免回音處理）
-      if (data.deviceId && data.deviceId === myDeviceId) {
-        console.log('[Sync ↓] 收到本機回音（deviceId 相符），跳過');
-        return;
-      }
-
-      // v8.0 相容舊資料（無 deviceId）：使用時間戳檢查
-      if (!data.deviceId && data.timestamp && data.timestamp < lastSyncTimestamp) {
-        console.log('[Sync ↓] 收到舊資料（無 deviceId，timestamp: ' + data.timestamp + ' < ' + lastSyncTimestamp + '），跳過');
-        return;
-      }
-
-      console.log('[Sync ↓] Firebase 收到資料更新（timestamp: ' + incomingTs + ')');
-
-      // v8.3 如果用戶正在編輯，延後合併（避免覆蓋編輯中的數據）
-      if (isUserEditing()) {
-        console.log('[Sync ↓] 用戶編輯中，寫入 localStorage 並延後合併');
-        // 先寫入 localStorage 確保不丟失，等編輯完成後再從 localStorage 恢復
-        try {
-          localStorage.setItem("macau_data_pending", JSON.stringify(data.txs || []));
-          localStorage.setItem("macau_fund_pending", JSON.stringify(data.fundWithdrawals || []));
-          localStorage.setItem("macau_wallets_pending", JSON.stringify(data.agentWallets || {}));
-        } catch(e) {}
-        return;
-      }
-
+      console.log('[Sync ↓] Firebase 資料更新 (ts:' + incomingTs + ')，直接合併...');
       var hasChanges = false;
 
       if (data.txs && Array.isArray(data.txs)) {
@@ -3876,58 +3762,10 @@ function initSync() {
           }
         } catch(e) {}
 
-        // 更新最後同步時間戳
-        lastSyncTimestamp = incomingTs;
-        console.log('[Sync ↓] Firebase 資料已合併並渲染全部頁面');
+        console.log('[Sync ↓] Firebase 資料已合併並渲染');
       }
-    } finally {
-      // 無論如何都要重置同步標誌，防止阻擋後續正常上傳
-      isSyncingFromFirebase = false;
-    }
+    } catch(e) { console.error('[Sync ↓] SSOT 合併錯誤:', e); }
   });
-
-  // v8.0 Shadow Sync：每 5 秒強制對賬一次，捕獲任何遺漏的推送
-  if (!window._shadowSyncStarted) {
-    window._shadowSyncStarted = true;
-    setInterval(function() {
-      if (!db) return;
-      if (isUserEditing()) { console.log('[Shadow Sync] 用戶編輯中，跳過對賬\n'); return; }
-      console.log('[Shadow Sync] 強制對賬開始...\n');
-      db.ref('macau_data').once('value').then(function(snapshot) {
-        var data = snapshot.val();
-        if (!data) return;
-        // 過濾本機回音
-        if (data.deviceId && data.deviceId === myDeviceId) { console.log('[Shadow Sync] 本機回音，跳過\n'); return; }
-        console.log('[Shadow Sync] 收到資料，開始對賬...\n');
-        // 強制合併資料（與上方邏輯相同）
-        var hasChanges = false;
-        if (data.txs && Array.isArray(data.txs)) { txs = data.txs; var maxId = 0; for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; } nextId = maxId + 1; hasChanges = true; }
-        if (data.agentList && Array.isArray(data.agentList)) { agentList = data.agentList; hasChanges = true; }
-        if (data.agentWallets && typeof data.agentWallets === 'object') { agentWallets = data.agentWallets; hasChanges = true; }
-        if (data.fundWithdrawals && Array.isArray(data.fundWithdrawals)) { fundWithdrawals = data.fundWithdrawals; var maxFwId = 0; for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxFwId) maxFwId = fundWithdrawals[i].id; } fundNextId = maxFwId + 1; hasChanges = true; }
-        if (data.workingMonth) { workingMonth = data.workingMonth; hasChanges = true; }
-        if (data.rmBookings && typeof RM !== 'undefined') { RM.bookings = data.rmBookings; hasChanges = true; }
-        if (hasChanges) {
-          try { localStorage.setItem("macau_data", encryptData(txs)); localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals)); localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets)); } catch(e) {}
-          // v8.2 仅在对应页面可见时才渲染，避免干扰用户操作
-          var pageOverview = document.getElementById("page-overview");
-          if (pageOverview && pageOverview.style.display === "block") { renderOverview(); }
-          var pageAll = document.getElementById("page-all");
-          if (pageAll && pageAll.style.display === "block") { renderAll(); }
-          var pageSummary = document.getElementById("page-summary");
-          if (pageSummary && pageSummary.style.display === "block") { renderSummary(); }
-          if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
-          var pageQuery = document.getElementById("page-query");
-          if (pageQuery && pageQuery.style.display === "block") { try { doQuery(); } catch(e) {} }
-          try { updateTotalWalletUI(); } catch(e) {}
-          console.log('[Shadow Sync] 對賬完成，已更新本機資料\n');
-        } else {
-          console.log('[Shadow Sync] 資料無變化\n');
-        }
-      }).catch(function(err) { console.error('[Shadow Sync] 錯誤:', err); });
-    }, 5000);
-    console.log('[Sync] Shadow Sync 已啟動（每 5 秒對賬）');
-  }
 }
 
 function renderSummary() {
