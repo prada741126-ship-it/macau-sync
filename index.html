@@ -1042,9 +1042,9 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
     letter-spacing: 0.5px;
   }
 
-  /* 主內容區需要預留底部空間 */
+  /* 主內容區需要預留底部空間（導航欄56px + iPhone安全區 + 額外緩衝） */
   #main-content {
-    padding-bottom: 56px;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 
   /* 隱藏側邊欄和遮罩層 */
