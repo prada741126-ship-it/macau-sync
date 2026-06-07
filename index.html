@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v7.6.2</title>
+<title>澳門洗碼報表 v7.7</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -4861,8 +4861,11 @@ var RM = {
   bookings: [], lastId: 0, editingId: null,
 
   getHotelSettings: function() {
-    if (typeof HOTEL_CONFIG === 'undefined' || !HOTEL_CONFIG || !HOTEL_CONFIG.length) {
-      return { "新濠天地摩柏斯":{ price:2000, threshold:80 }, "銀河":{ price:1800, threshold:60 }, "金沙":{ price:1900, threshold:70 }, "永利":{ price:1850, threshold:65 }, "上葡京":{ price:1700, threshold:55 } };
+    // 優先使用 localStorage 的 HOTEL_CONFIG，如無則從 PRESET_CONFIG 生成
+    var hc = (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length) ? HOTEL_CONFIG : [];
+    if (!hc.length) { hc = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : []; }
+    if (!hc.length) {
+      return { "新濠天地摩柏斯":{ price:2000, threshold:80 }, "金沙":{ price:1900, threshold:70 } };
     }
     var s = {};
     for (var i = 0; i < HOTEL_CONFIG.length; i++) {
@@ -4918,13 +4921,13 @@ var RM = {
     var sel = document.getElementById("rm-f-casino");
     if (!sel) return;
     sel.innerHTML = '<option value="">請選擇體系</option>';
-    // 從 HOTEL_CONFIG 提取所有不重複的體系（按 CASINO_ORDER 排序）
-    var config = (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length) ? HOTEL_CONFIG : [];
+    // 使用 PRESET_CONFIG 保持三級聯動數據一致（而非 HOTEL_CONFIG，後者可能來自 localStorage 舊快取）
+    var config = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : [];
     var casinos = {};
     for (var i = 0; i < config.length; i++) {
       casinos[config[i].casino] = true;
     }
-    var order = (typeof CASINO_ORDER !== 'undefined') ? CASINO_ORDER : ['新濠天地', '新濠影滙', '金沙', '銀河', '永利', '上葡京', '美高梅'];
+    var order = (typeof CASINO_ORDER !== 'undefined') ? CASINO_ORDER : ['新濠天地', '新濠影滙', '金沙', '銀河', '永利', '上葡京'];
     for (var i = 0; i < order.length; i++) {
       if (casinos[order[i]]) {
         sel.innerHTML += '<option value="' + order[i] + '">' + order[i] + '</option>';
@@ -4934,9 +4937,9 @@ var RM = {
 
   onCasinoChange: function() {
     var casino = document.getElementById("rm-f-casino").value;
+    // populateHotelDropdown 内部已处理「請先選擇體系」/「請選擇酒店」占位文字
     this.populateHotelDropdown(casino);
-    // 清空酒店和房型選擇和價格
-    document.getElementById("rm-f-hotel").innerHTML = '<option value="">請選擇酒店</option>';
+    // 清空房型和價格（酒店下拉由 populateHotelDropdown 控制）
     document.getElementById("rm-f-room").innerHTML = '<option value="">請先選擇酒店</option>';
     document.getElementById("rm-f-price").value = "";
     document.getElementById("rm-f-total").value = "";
@@ -4945,12 +4948,11 @@ var RM = {
   onHotelChange: function() {
     var casino = document.getElementById("rm-f-casino").value;
     var hotel = document.getElementById("rm-f-hotel").value;
-    this.populateRoomDropdown(casino, hotel);
-    // 清空房型和價格
-    document.getElementById("rm-f-room").innerHTML = '<option value="">請選擇房型</option>';
+    // populateRoomDropdown 内部已处理「請選擇房型」占位
     if (hotel) {
       this.populateRoomDropdown(casino, hotel);
     }
+    // 清空價格（房型下拉由 populateRoomDropdown 控制）
     document.getElementById("rm-f-price").value = "";
     document.getElementById("rm-f-total").value = "";
   },
@@ -5488,23 +5490,16 @@ var PRESET_CONFIG = [
   { casino:"新濠影滙", hotel:"映星滙", code:"ESXS", room:"映星滙奢房", weekday:4500, weekend:5000, special:6500, threshold:1000 },
   { casino:"新濠影滙", hotel:"映星滙", code:"ESPS", room:"映星滙總統套房", weekday:10000, weekend:11000, special:13000, threshold:3000 },
   // ===== 金沙 =====
-  { casino:"金沙", hotel:"威尼斯人", code:"VSK", room:"威尼斯人客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"金沙", hotel:"威尼斯人", code:"VST", room:"威尼斯人客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"金沙", hotel:"威尼斯人", code:"VSDL", room:"威尼斯人豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"金沙", hotel:"威尼斯人", code:"VSXS", room:"威尼斯人奢房", weekday:3000, weekend:3200, special:4500, threshold:300 },
-  { casino:"金沙", hotel:"巴黎人", code:"PRK", room:"巴黎人客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"金沙", hotel:"巴黎人", code:"PRT", room:"巴黎人客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"金沙", hotel:"巴黎人", code:"PRDL", room:"巴黎人豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"金沙", hotel:"御園", code:"GYK", room:"御園客房(大床)", weekday:2000, weekend:2300, special:3500, threshold:200 },
+  { casino:"金沙", hotel:"御園", code:"GYDL", room:"御園豪華套房", weekday:3500, weekend:3800, special:5000, threshold:350 },
   { casino:"金沙", hotel:"倫敦人", code:"LNK", room:"倫敦人客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
   { casino:"金沙", hotel:"倫敦人", code:"LNDL", room:"倫敦人豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
-  { casino:"金沙", hotel:"四季", code:"FSK", room:"四季客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"金沙", hotel:"四季", code:"FSDL", room:"四季豪華套房", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"金沙", hotel:"倫敦人名滙", code:"LNHK", room:"倫敦人名滙客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"金沙", hotel:"倫敦人名滙", code:"LNHD", room:"倫敦人名滙豪華套房", weekday:3000, weekend:3200, special:4500, threshold:300 },
   // ===== 銀河 =====
   { casino:"銀河", hotel:"銀河酒店", code:"GXK", room:"銀河客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
   { casino:"銀河", hotel:"銀河酒店", code:"GXT", room:"銀河客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
   { casino:"銀河", hotel:"銀河酒店", code:"GXDL", room:"銀河豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"銀河", hotel:"大倉", code:"OCK", room:"大倉客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"銀河", hotel:"大倉", code:"OCDL", room:"大倉豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
   { casino:"銀河", hotel:"JW萬豪", code:"JWK", room:"JW萬豪客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
   { casino:"銀河", hotel:"JW萬豪", code:"JWDL", room:"JW萬豪豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
   { casino:"銀河", hotel:"麗思卡爾頓", code:"RCK", room:"麗思卡爾頓客房", weekday:2000, weekend:2300, special:3500, threshold:200 },
@@ -5519,17 +5514,11 @@ var PRESET_CONFIG = [
   { casino:"上葡京", hotel:"上葡京酒店", code:"GPK", room:"上葡京客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
   { casino:"上葡京", hotel:"上葡京酒店", code:"GPT", room:"上葡京客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
   { casino:"上葡京", hotel:"上葡京酒店", code:"GPDL", room:"上葡京豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"上葡京", hotel:"卡爾拉格斐", code:"KLK", room:"卡爾拉格斐客房(大床)", weekday:2000, weekend:2300, special:3500, threshold:200 },
-  { casino:"上葡京", hotel:"卡爾拉格斐", code:"KLDL", room:"卡爾拉格斐豪華套房", weekday:3500, weekend:3800, special:5000, threshold:350 },
-  { casino:"上葡京", hotel:"范思哲", code:"VSK", room:"范思哲客房(大床)", weekday:2000, weekend:2300, special:3500, threshold:200 },
-  // ===== 美高梅 =====
-  { casino:"美高梅", hotel:"美高梅澳門", code:"MGK", room:"美高梅客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"美高梅", hotel:"美高梅澳門", code:"MGDL", room:"美高梅豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
-  { casino:"美高梅", hotel:"美獅美高梅", code:"MMK", room:"美獅美高梅客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"美高梅", hotel:"美獅美高梅", code:"MMDL", room:"美獅美高梅豪華套房", weekday:3000, weekend:3200, special:4500, threshold:300 }
+  { casino:"上葡京", hotel:"老佛爺", code:"KLK", room:"老佛爺客房(大床)", weekday:2000, weekend:2300, special:3500, threshold:200 },
+  { casino:"上葡京", hotel:"老佛爺", code:"KLDL", room:"老佛爺豪華套房", weekday:3500, weekend:3800, special:5000, threshold:350 }
 ];
 
-var CASINO_ORDER = ['新濠天地', '新濠影滙', '金沙', '銀河', '永利', '上葡京', '美高梅'];
+var CASINO_ORDER = ['新濠天地', '新濠影滙', '金沙', '銀河', '永利', '上葡京'];
 
 // ===== 酒店設定全局狀態 =====
 var HOTEL_CONFIG = [];
