@@ -2234,16 +2234,19 @@ tbody tr:hover {
         <input type="text" id="rm-f-client" class="rm-input" placeholder="客戶名稱">
       </div>
     </div>
-    <div class="rm-form-group">
-      <label>酒店</label>
-      <select id="rm-f-hotel" class="rm-input" onchange="rmUpdatePrice()">
-        <option value="">請選擇酒店</option>
-        <option value="新濠天地摩柏斯" data-price="2000" data-threshold="80">新濠天地摩柏斯</option>
-        <option value="銀河" data-price="1800" data-threshold="60">銀河</option>
-        <option value="金沙" data-price="1900" data-threshold="70">金沙</option>
-        <option value="永利" data-price="1850" data-threshold="65">永利</option>
-        <option value="上葡京" data-price="1700" data-threshold="55">上葡京</option>
-      </select>
+    <div class="rm-form-row">
+      <div class="rm-form-group">
+        <label>體系</label>
+        <select id="rm-f-casino" class="rm-input" onchange="rmOnCasinoChange()">
+          <option value="">請選擇體系</option>
+        </select>
+      </div>
+      <div class="rm-form-group">
+        <label>酒店</label>
+        <select id="rm-f-hotel" class="rm-input" onchange="rmUpdatePrice()">
+          <option value="">請先選擇體系</option>
+        </select>
+      </div>
     </div>
     <div class="rm-form-row">
       <div class="rm-form-group">
@@ -4844,18 +4847,50 @@ var RM = {
     return s;
   },
 
-  populateHotelDropdown: function() {
+  populateHotelDropdown: function(casino) {
     var sel = document.getElementById("rm-f-hotel");
     if (!sel) return;
-    var hotels = this.getHotelSettings();
-    sel.innerHTML = '<option value="">請選擇酒店</option>';
-    var keys = Object.keys(hotels).sort(function(a, b) {
-      return a.localeCompare(b, 'zh');
-    });
+    sel.innerHTML = '<option value="">' + (casino ? '請選擇酒店' : '請先選擇體系') + '</option>';
+    if (!casino) return;
+    // 從 HOTEL_CONFIG 或 PRESET_CONFIG 提取該體系的酒店列表
+    var config = (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length) ? HOTEL_CONFIG : [];
+    if (!config.length) return;
+    var hotels = {};
+    for (var i = 0; i < config.length; i++) {
+      if (config[i].casino !== casino) continue;
+      var hn = config[i].hotel;
+      if (!hotels[hn]) hotels[hn] = { price: config[i].weekday || 0, threshold: config[i].threshold || 70 };
+    }
+    var keys = Object.keys(hotels).sort(function(a, b) { return a.localeCompare(b, 'zh'); });
     for (var i = 0; i < keys.length; i++) {
       var h = hotels[keys[i]];
       sel.innerHTML += '<option value="' + keys[i] + '" data-price="' + h.price + '" data-threshold="' + h.threshold + '">' + keys[i] + '</option>';
     }
+  },
+
+  populateCasinoDropdown: function() {
+    var sel = document.getElementById("rm-f-casino");
+    if (!sel) return;
+    sel.innerHTML = '<option value="">請選擇體系</option>';
+    // 從 HOTEL_CONFIG 提取所有不重複的體系（按 CASINO_ORDER 排序）
+    var config = (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length) ? HOTEL_CONFIG : [];
+    var casinos = {};
+    for (var i = 0; i < config.length; i++) {
+      casinos[config[i].casino] = true;
+    }
+    var order = (typeof CASINO_ORDER !== 'undefined') ? CASINO_ORDER : ['新濠天地', '新濠影滙', '金沙', '銀河', '永利', '上葡京', '美高梅'];
+    for (var i = 0; i < order.length; i++) {
+      if (casinos[order[i]]) {
+        sel.innerHTML += '<option value="' + order[i] + '">' + order[i] + '</option>';
+      }
+    }
+  },
+
+  onCasinoChange: function() {
+    var casino = document.getElementById("rm-f-casino").value;
+    this.populateHotelDropdown(casino);
+    // 清空酒店選擇和價格
+    document.getElementById("rm-f-price").value = "";
   },
 
   nowStr: function() {
@@ -4915,7 +4950,7 @@ var RM = {
   openModal: function(id) {
     this.populateAgentDropdown();
     this.populateDateSelects();
-    this.populateHotelDropdown();
+    this.populateCasinoDropdown();
     this.editingId = id || null;
     document.getElementById("rm-modal-title").textContent = id ? "編輯訂房" : "新增訂房";
     if (id) {
@@ -4923,11 +4958,23 @@ var RM = {
       if (!b) return;
       document.getElementById("rm-f-agent").value = b.agent;
       document.getElementById("rm-f-client").value = b.client;
+      // 找出該酒店所屬的體系，並預選
+      var casino = "";
+      var config = (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length) ? HOTEL_CONFIG : [];
+      for (var i = 0; i < config.length; i++) {
+        if (config[i].hotel === b.hotel) { casino = config[i].casino; break; }
+      }
+      if (casino) {
+        document.getElementById("rm-f-casino").value = casino;
+        this.populateHotelDropdown(casino);
+      } else {
+        this.populateHotelDropdown();
+      }
       document.getElementById("rm-f-hotel").value = b.hotel;
       // 填入月日選擇方塊（不含年）
       var ciParts = (b.checkIn || b.date || "").split("-");
       if (ciParts.length >= 3) { document.getElementById("rm-f-checkin-mm").value = ciParts[1]; document.getElementById("rm-f-checkin-dd").value = ciParts[2]; }
-      var coParts = (b.checkOut || "").split("-");
+      var coParts = (b.checkOut || b.checkout || "").split("-");
       if (coParts.length >= 3) { document.getElementById("rm-f-checkout-mm").value = coParts[1]; document.getElementById("rm-f-checkout-dd").value = coParts[2]; }
       document.getElementById("rm-f-nights").value = b.nights || "";
       document.getElementById("rm-f-price").value = b.pricePerNight;
@@ -4945,7 +4992,8 @@ var RM = {
     } else {
       document.getElementById("rm-f-agent").value = "";
       document.getElementById("rm-f-client").value = "";
-      document.getElementById("rm-f-hotel").value = "";
+      document.getElementById("rm-f-casino").value = "";
+      document.getElementById("rm-f-hotel").innerHTML = '<option value="">請先選擇體系</option>';
       document.getElementById("rm-f-checkin-mm").value = "";
       document.getElementById("rm-f-checkin-dd").value = "";
       document.getElementById("rm-f-checkout-mm").value = "";
@@ -5022,16 +5070,15 @@ var RM = {
     }
     if (this.editingId) {
       var idx = this.bookings.findIndex(function(x){ return x.id===RM.editingId; });
-      if (idx>=0) this.bookings[idx] = { id:this.editingId, date:date, agent:agent, client:client, hotel:hotel, checkIn:checkIn, checkout:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
+      if (idx>=0) this.bookings[idx] = { id:this.editingId, date:date, agent:agent, client:client, hotel:hotel, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
       showToast("訂房已更新","success");
     } else {
       this.lastId++;
-      this.bookings.push({ id:this.lastId, date:date, agent:agent, client:client, hotel:hotel, checkIn:checkIn, checkout:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
+      this.bookings.push({ id:this.lastId, date:date, agent:agent, client:client, hotel:hotel, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
       showToast("訂房已新增","success");
     }
     this.save();
     this.closeModal();  // 先關閉彈窗，確保一定執行
-    showToast(this.editingId ? "訂房已更新" : "訂房已新增", "success");
     this.editingId = null;
     // 後台重新渲染（即使報錯也不影響彈窗關閉）
     try { this.render(); } catch(e) { console.error("RM.render error:", e); }
@@ -5072,7 +5119,7 @@ var RM = {
       html += "<td style='font-size:12px;'>"+b.client+"</td>";
       html += "<td style='font-size:12px;'>"+b.hotel+"</td>";
       html += "<td style='font-size:11px;color:var(--text-muted);'>"+b.checkIn+"</td>";
-      html += "<td style='font-size:11px;color:var(--text-muted);'>"+b.checkOut+"</td>";
+      html += "<td style='font-size:11px;color:var(--text-muted);'>"+(b.checkOut||b.checkout)+"</td>";
       html += "<td>"+b.nights+"晚</td>";
       var th = b.threshold||70;
       html += "<td style='font-family:monospace;color:var(--gold);'>"+this.fmt(b.nights * th)+"<span style='font-size:10px;color:var(--text-muted);'>萬</span></td>";
@@ -5189,7 +5236,7 @@ var RM = {
     var csv = "\uFEFF日期,代理,客戶,酒店,入住日期,退房日期,天數,每晚單價,所需轉碼門檻,總費用,狀態,備註\n";
     for (var i=0; i<filtered.length; i++) {
       var b = filtered[i];
-      csv += [b.date,b.agent,b.client,b.hotel,b.checkIn,b.checkOut,b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note].join(",")+"\n";
+      csv += [b.date,b.agent,b.client,b.hotel,b.checkIn,(b.checkOut||b.checkout),b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note].join(",")+"\n";
     }
     var blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
     var url = URL.createObjectURL(blob);
@@ -5214,7 +5261,7 @@ var RM = {
         var cols = lines[i].split(",");
         if (cols.length<10) continue;
         self.lastId++;
-        self.bookings.push({ id:self.lastId, date:cols[0]||self.nowStr(), agent:cols[1]||"", client:cols[2]||"", hotel:cols[3]||"", checkIn:cols[4]||"", checkout:cols[5]||"", nights:parseInt(cols[6])||0, pricePerNight:parseInt(cols[7])||0, threshold:parseInt(cols[8])||70, totalCost:parseInt(cols[9])||0, status:cols[10]||"免費", month:(cols[0]||self.nowStr()).substring(0,7), note:cols[11]||"" });
+        self.bookings.push({ id:self.lastId, date:cols[0]||self.nowStr(), agent:cols[1]||"", client:cols[2]||"", hotel:cols[3]||"", checkIn:cols[4]||"", checkOut:cols[5]||"", nights:parseInt(cols[6])||0, pricePerNight:parseInt(cols[7])||0, threshold:parseInt(cols[8])||70, totalCost:parseInt(cols[9])||0, status:cols[10]||"免費", month:(cols[0]||self.nowStr()).substring(0,7), note:cols[11]||"" });
         imported++;
       }
       self.save(); self.render(); self.updateQuota();
@@ -5228,6 +5275,7 @@ var RM = {
     this.load();
     this.populateAgentDropdown();
     this.populateAgentFilter();
+    this.populateCasinoDropdown();
     var monthEl = document.getElementById("rm-filter-month");
     if (monthEl) monthEl.value = this.nowStr().substring(0,7);
     this.render();
@@ -5239,6 +5287,7 @@ var RM = {
 function rmOpenModal(id){ RM.openModal(id||null); }
 function rmCloseModal(){ RM.closeModal(); }
 function rmUpdatePrice(){ RM.updatePrice(); }
+function rmOnCasinoChange(){ RM.onCasinoChange(); }
 function rmCalcNights(){ RM.calcNights(); }
 function rmOnDateChange(){ RM.calcNights(); }
 function rmCalcTotal(){ RM.calcTotal(); }
