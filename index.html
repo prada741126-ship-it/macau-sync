@@ -26,7 +26,7 @@
     });
   }
   // 3. 版本變數（給登入頁版本顯示用）
-  window.APP_VERSION = 'v10.24';
+  window.APP_VERSION = 'v10.25';
 })();
 </script>
 <meta charset="UTF-8">
@@ -34,7 +34,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v10.20</title>
+<title>澳門洗碼報表 v10.25</title>
 <style>
 :root {
   --gold: #D4AF37;
@@ -55,6 +55,10 @@
   --bg-row-b: rgba(26,16,10,0.45);
   --text-main: #e8e0d0;
   --text-muted: #8a7a65;
+  --status-success: #2ecc71;
+  --status-error: #e74c3c;
+  --status-warning: #f39c12;
+  --status-info: #3498db;
   --green: #2ecc71;
   --red: #e74c3c;
   --blue: #3498db;
@@ -145,8 +149,15 @@ th.sort-desc::after { content: " ▼"; opacity:1; }
 td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.035); color: #c8b890; }
 tr:last-child td { border-bottom: none; }
 tbody tr { background: rgba(20,16,8,0.5); transition: background 0.2s; }
-tbody tr:nth-child(even) { background: rgba(24,18,10,0.5); }
+tbody tr:nth-child(even) { background: rgba(26,20,12,0.55); }
 tbody tr:hover { background: rgba(212,175,55,0.08); }
+/* 表格橫向滾動容器（手機版） */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+.table-scroll table { min-width: 600px; margin-top: 0; }
+/* 表格行狀態色 */
+tr.row-positive td { color: #2ecc71; }
+tr.row-negative td { color: #e74c3c; }
+tr.row-warning td { color: #f39c12; }
 .num { text-align: right; font-family: "Consolas", "Courier New", monospace; font-weight: 600; color: #e8d5a0; }
 .kpi-box { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
 .kpi-card { background: linear-gradient(135deg, rgba(26,18,10,0.95), rgba(18,12,8,0.95)); color: #e0d0a0; padding: 16px 24px; border-radius: 14px; min-width: 140px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.2); }
@@ -543,7 +554,8 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .total-wallet .tw-value { color: #D4AF37; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 0 12px rgba(212,175,55,0.3); }
 
 /* CARD (now for pages) */
-.card { background: rgba(12,12,22,0.94); backdrop-filter: blur(20px); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,175,55,0.1); overflow: hidden; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 16px; }
+.card { background: rgba(12,12,22,0.94); backdrop-filter: blur(20px); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,175,55,0.1); overflow: hidden; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 16px; transition: all 0.25s; }
+.card:hover { box-shadow: 0 24px 70px rgba(0,0,0,0.75), 0 0 0 1px rgba(212,175,55,0.3); transform: translateY(-1px); }
 /* Tabs are removed, replaced by sidebar */
 /* ===== 手機版彈窗緊湊佈局 ===== */
 @media (max-width: 600px) {
@@ -567,10 +579,18 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .kpi-mini { background:rgba(20,20,32,0.7); border:1px solid rgba(212,175,55,0.15); border-radius:10px; padding:10px 16px; min-width:110px; display:flex; flex-direction:column; gap:2px; }
 .kpi-mini .label { font-size:10px; color:#888; letter-spacing:0.5px; }
 .kpi-mini .value { font-size:18px; font-weight:700; color:#D4AF37; }
-/* 狀態標籤 */
-.status-tag { display:inline-block; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:600; letter-spacing:0.5px; vertical-align:middle; }
-.status-new { background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid rgba(46,204,113,0.3); }
-.status-overdue { background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); }
+/* 狀態標籤系統 v10.25 */
+.status-badge,
+.status-tag { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; letter-spacing:0.3px; vertical-align:middle; white-space:nowrap; }
+.status-success,
+.status-new { background:rgba(46,204,113,0.12); color:#2ecc71; border:1px solid rgba(46,204,113,0.25); }
+.status-error,
+.status-overdue { background:rgba(231,76,60,0.12); color:#e74c3c; border:1px solid rgba(231,76,60,0.25); }
+.status-warning { background:rgba(243,156,18,0.12); color:#f39c12; border:1px solid rgba(243,156,18,0.25); }
+.status-info { background:rgba(52,152,219,0.12); color:#3498db; border:1px solid rgba(52,152,219,0.25); }
+.status-pending { background:rgba(212,175,55,0.12); color:#D4AF37; border:1px solid rgba(212,175,55,0.25); }
+.status-done { background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid rgba(46,204,113,0.3); }
+.status-undone { background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); }
 /* 快速篩選標籤 */
 .filter-tags { display:flex; gap:5px; flex-wrap:wrap; margin:8px 0; }
 .filter-tag { padding:4px 10px; border-radius:6px; font-size:11px; cursor:pointer; border:1px solid rgba(212,175,55,0.2); background:rgba(20,20,30,0.6); color:#a09070; transition:all 0.2s; user-select:none; }
@@ -1084,25 +1104,35 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   border-radius: 8px;
   margin-bottom: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
 .tf-btn {
-  padding: 6px 14px;
+  padding: 6px 16px;
   border: 1px solid rgba(212,175,55,0.2);
-  border-radius: 6px;
+  border-radius: 20px;
   background: rgba(20,20,30,0.8);
   color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  letter-spacing: 0.5px;
 }
 .tf-btn:hover {
   border-color: var(--gold);
   color: var(--gold);
+  background: rgba(212,175,55,0.08);
+  transform: translateY(-1px);
 }
 .tf-btn.active {
-  background: rgba(212,175,55,0.15);
+  background: rgba(212,175,55,0.85);
   border-color: var(--gold);
-  color: var(--gold);
+  color: #1a1206;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(212,175,55,0.3);
+}
+.tf-btn.active:hover {
+  background: rgba(212,175,55,1);
+  color: #1a1206;
 }
 /* KPI 卡片網格 */
 .kpi-grid {
@@ -1386,6 +1416,11 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   th { padding: 8px 6px; font-size: 10px; }
   td { padding: 8px 6px; }
   .num { font-size: 12px; }
+  /* 手機版表格橫向滾動 */
+  .table-scroll { margin: 0 -4px; border-radius: 8px; }
+  .table-scroll table { min-width: 640px; font-size: 11px; }
+  .table-scroll th { padding: 7px 5px; font-size: 9px; white-space: nowrap; }
+  .table-scroll td { padding: 6px 5px; white-space: nowrap; }
 
   /* KPI 迷你卡片優化 */
   .kpi-mini-box { gap: 6px; }
