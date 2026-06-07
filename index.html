@@ -26,7 +26,7 @@
     });
   }
   // 3. 版本變數（給登入頁版本顯示用）
-  window.APP_VERSION = 'v10.22';
+  window.APP_VERSION = 'v10.23';
 })();
 </script>
 <meta charset="UTF-8">
@@ -993,6 +993,73 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   #pw-box .pw-title { font-size: 24px; letter-spacing: 5px; }
   #pw-input { padding: 14px 16px 14px 42px; font-size: 15px; min-height: 46px; }
   .pw-btn { padding: 14px; font-size: 15px; min-height: 48px; letter-spacing: 4px; }
+
+  /* 手機版底部導航 */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: rgba(12,12,18,0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(212,175,55,0.15);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    flex: 1;
+  }
+
+  .mobile-bottom-nav .nav-item.active {
+    color: var(--gold);
+  }
+
+  .mobile-bottom-nav .nav-item .nav-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .mobile-bottom-nav .nav-item .nav-label {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  /* 主內容區需要預留底部空間 */
+  #main-content {
+    padding-bottom: 56px;
+  }
+
+  /* 隱藏側邊欄和遮罩層 */
+  #sidebar {
+    display: none !important;
+  }
+
+  #sidebar-overlay {
+    display: none !important;
+  }
+
+  /* 隱藏桌機版側邊欄開關按鈕 */
+  .topbar-toggle {
+    display: none !important;
+  }
 }
 
 /* ============================================================
@@ -1008,6 +1075,35 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 }
 .qa-btn:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(212,175,55,0.15); }
 .qa-btn-icon { font-size: 20px; }
+/* 時間篩選器 */
+.time-filter-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(20,20,30,0.8);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.tf-btn {
+  padding: 6px 14px;
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 6px;
+  background: rgba(20,20,30,0.8);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tf-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.tf-btn.active {
+  background: rgba(212,175,55,0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
 /* KPI 卡片網格 */
 .kpi-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px;
@@ -1814,9 +1910,33 @@ tbody tr:hover {
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
-<div id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+  <div id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-<!-- ===== MAIN CONTENT ===== -->
+  <!-- 手機版底部導航 -->
+  <div class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <div class="nav-item active" data-page="overview" onclick="mobileNavigate('overview', this)">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">總覽</span>
+    </div>
+    <div class="nav-item" data-page="all" onclick="mobileNavigate('all', this)">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">交易</span>
+    </div>
+    <div class="nav-item" data-page="query" onclick="mobileNavigate('query', this)">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">查詢</span>
+    </div>
+    <div class="nav-item" data-page="summary" onclick="mobileNavigate('summary', this)">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">統計</span>
+    </div>
+    <div class="nav-item" data-page="room" onclick="mobileNavigate('room', this)">
+      <span class="nav-icon">🏨</span>
+      <span class="nav-label">房務</span>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
 <div id="main-content">
   <!-- Topbar -->
   <div id="topbar">
@@ -1848,6 +1968,14 @@ tbody tr:hover {
   </div>
 
   <div class="page active" id="page-overview">
+    <!-- 時間篩選器 -->
+    <div class="time-filter-bar" id="overview-time-filter">
+      <button class="tf-btn active" data-offset="0" onclick="setMonth(0, 'overview', this)">本月</button>
+      <button class="tf-btn" data-offset="-1" onclick="setMonth(-1, 'overview', this)">上月</button>
+      <button class="tf-btn" data-offset="1" onclick="setMonth(1, 'overview', this)">下月</button>
+      <button class="tf-btn" onclick="setYear('overview', this)">本年</button>
+      <button class="tf-btn" onclick="setAll('overview', this)">全部</button>
+    </div>
     <!-- 快速操作列 -->
     <div class="quick-actions">
       <button class="qa-btn" onclick="showPage('all',document.querySelector('[data-label=\'全部交易\']')); setTimeout(function(){openModal();},150);">
@@ -4961,12 +5089,14 @@ function renderOverview() {
   if (_renderingOverview) return;
   _renderingOverview = true;
   try {
+  // v10.23 時間篩選
+  var filteredTxs = window.__currentTimeFilter ? filterTxsByTime(txs) : txs;
   // --- KPI 卡片 ---
   var now = workingMonth || nowStr().slice(0,7);
   var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
   var agentSet = {};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<filteredTxs.length;i++){
+    var t=filteredTxs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     if (t.type==="cash"){ totalCash+=(t.cash||0); }
     else { totalVol+=(t.volume||0); }
@@ -5024,8 +5154,8 @@ function renderOverview() {
   var daysInMonth=new Date(parseInt(now.slice(0,4)),parseInt(now.slice(5,7)),0).getDate();
   var daily=[], daily100=[];
   for (var d=1;d<=daysInMonth;d++) daily.push(0);
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<filteredTxs.length;i++){
+    var t=filteredTxs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash") continue;
     var day=parseInt(t.date.slice(8,10))-1;
     if (day>=0&&day<daysInMonth) daily[day]+=(t.volume||0);
@@ -6605,6 +6735,86 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
       else btt.style.display = "none";
     });
   }
+
+  // v10.22 手機版底部導航
+  function mobileNavigate(page, el) {
+    // 切換頁面
+    showPage(page);
+    
+    // 更新導航 active 狀態
+    var items = document.querySelectorAll('#mobile-bottom-nav .nav-item');
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.remove('active');
+    }
+    if (el) el.classList.add('active');
+  }
+
+// v10.23 時間篩選器
+window.__currentTimeFilter = null;
+
+function setMonth(offset, page, el) {
+  var now = new Date();
+  now.setMonth(now.getMonth() + offset);
+  var y = now.getFullYear();
+  var m = String(now.getMonth() + 1).padStart(2, '0');
+  window.__currentTimeFilter = { type: 'month', value: y + '-' + m };
+  
+  // 更新按鈕 active 狀態
+  var container = document.getElementById(page + '-time-filter');
+  if (container) {
+    var btns = container.querySelectorAll('.tf-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+    if (el) el.classList.add('active');
+  }
+  
+  // 重新渲染該頁面
+  if (page === 'overview') renderOverview();
+  else if (page === 'query') doQuery();
+}
+
+function setYear(page, el) {
+  var now = new Date();
+  window.__currentTimeFilter = { type: 'year', value: String(now.getFullYear()) };
+  
+  // 更新按鈕 active 狀態
+  var container = document.getElementById(page + '-time-filter');
+  if (container) {
+    var btns = container.querySelectorAll('.tf-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+    if (el) el.classList.add('active');
+  }
+  
+  // 重新渲染該頁面
+  if (page === 'overview') renderOverview();
+  else if (page === 'query') doQuery();
+}
+
+function setAll(page, el) {
+  window.__currentTimeFilter = null;
+  
+  // 更新按鈕 active 狀態
+  var container = document.getElementById(page + '-time-filter');
+  if (container) {
+    var btns = container.querySelectorAll('.tf-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+    if (el) el.classList.add('active');
+  }
+  
+  // 重新渲染該頁面
+  if (page === 'overview') renderOverview();
+  else if (page === 'query') doQuery();
+}
+
+function filterTxsByTime(txs) {
+  if (!window.__currentTimeFilter) return txs;
+  var filter = window.__currentTimeFilter;
+  return txs.filter(function(tx) {
+    if (!tx.date) return true;
+    if (filter.type === 'month') return tx.date.substring(0, 7) === filter.value;
+    if (filter.type === 'year') return tx.date.substring(0, 4) === filter.value;
+    return true;
+  });
+}
 </script>
 
 <!-- 快捷鍵幫助面板 v6.0 按 ? 顯示 -->
