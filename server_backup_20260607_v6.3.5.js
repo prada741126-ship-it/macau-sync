@@ -58,15 +58,6 @@ app.use('/api', function(req, res, next) {
 });
 
 // 靜態資源（bg_logo.png, css, js 等）
-// 對 index.html 強制禁用快取，其他靜態資源允許瀏覽器快取
-app.use(function(req, res, next) {
-  if (req.url === '/index.html' || req.url === '/sw.js') {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-  }
-  next();
-});
 app.use(express.static(__dirname));
 
 // 根路徑 - 返回 HTML（禁止快取，確保客戶端總是取得最新版本）
@@ -83,7 +74,7 @@ app.get('/', (req, res) => {
 
 // Railway 健康檢查
 app.get('/health', (req, res) => {
-  res.json({ ok: true, status: 'running', version: '6.3.5' });
+  res.json({ ok: true, status: 'running', version: '6.3.4' });
 });
 
 // 讀取數據庫
@@ -166,36 +157,6 @@ app.post('/api/save', (req, res) => {
     if (body.config !== undefined) db.config = body.config;
     if (body.agentList !== undefined) db.agentList = body.agentList;
     if (body.archives !== undefined) db.archives = body.archives;
-    // 處理 deletedIds：合併並從陣列中真正移除
-    if (body.deletedIds !== undefined && Array.isArray(body.deletedIds)) {
-      if (!db.deletedIds) db.deletedIds = [];
-      var delSet = new Set(db.deletedIds);
-      for (var di = 0; di < body.deletedIds.length; di++) {
-        delSet.add(body.deletedIds[di]);
-      }
-      db.deletedIds = Array.from(delSet);
-      // 從 txs/fundWithdrawals/rm_bookings 中移除已刪除 ID
-      var txsFresh = [];
-      for (var i = 0; i < db.txs.length; i++) {
-        if (delSet.has(db.txs[i].id)) continue;
-        txsFresh.push(db.txs[i]);
-      }
-      db.txs = txsFresh;
-      var fwFresh = [];
-      for (var i = 0; i < db.fundWithdrawals.length; i++) {
-        if (delSet.has(db.fundWithdrawals[i].id)) continue;
-        fwFresh.push(db.fundWithdrawals[i]);
-      }
-      db.fundWithdrawals = fwFresh;
-      var rmFresh = [];
-      for (var i = 0; i < db.rm_bookings.length; i++) {
-        if (delSet.has(db.rm_bookings[i].id)) continue;
-        rmFresh.push(db.rm_bookings[i]);
-      }
-      db.rm_bookings = rmFresh;
-      console.log('[Sync ↑] 已根據 deletedIds 清理伺服器資料，共 ' + db.deletedIds.length + ' 筆刪除紀錄');
-    }
-
     writeDB(db);
     res.json({ ok: true, lastModified: db.lastModified });
   } catch (e) {
@@ -268,36 +229,6 @@ app.post('/api/sync/upload', (req, res) => {
       db.rm_last_id = body.rm_last_id;
     }
 
-    // 處理 deletedIds：合併並從陣列中真正移除
-    if (body.deletedIds !== undefined && Array.isArray(body.deletedIds)) {
-      if (!db.deletedIds) db.deletedIds = [];
-      var delSet = new Set(db.deletedIds);
-      for (var di = 0; di < body.deletedIds.length; di++) {
-        delSet.add(body.deletedIds[di]);
-      }
-      db.deletedIds = Array.from(delSet);
-      // 從 txs/fundWithdrawals/rm_bookings 中移除已刪除 ID
-      var txsFresh = [];
-      for (var i = 0; i < db.txs.length; i++) {
-        if (delSet.has(db.txs[i].id)) continue;
-        txsFresh.push(db.txs[i]);
-      }
-      db.txs = txsFresh;
-      var fwFresh = [];
-      for (var i = 0; i < db.fundWithdrawals.length; i++) {
-        if (delSet.has(db.fundWithdrawals[i].id)) continue;
-        fwFresh.push(db.fundWithdrawals[i]);
-      }
-      db.fundWithdrawals = fwFresh;
-      var rmFresh = [];
-      for (var i = 0; i < db.rm_bookings.length; i++) {
-        if (delSet.has(db.rm_bookings[i].id)) continue;
-        rmFresh.push(db.rm_bookings[i]);
-      }
-      db.rm_bookings = rmFresh;
-      console.log('[Sync ↑] 已根據 deletedIds 清理伺服器資料，共 ' + db.deletedIds.length + ' 筆刪除紀錄');
-    }
-
     writeDB(db);
     res.json({ ok: true, lastModified: db.lastModified });
   } catch (e) {
@@ -318,7 +249,6 @@ app.get('/api/sync/download', (req, res) => {
     archives: db.archives || {},
     rm_bookings: db.rm_bookings || [],
     rm_last_id: db.rm_last_id || 1,
-    deletedIds: db.deletedIds || [],
     lastModified: db.lastModified || 0
   });
 });

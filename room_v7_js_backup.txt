@@ -1,0 +1,757 @@
+
+// ===== 預設酒店數據 =====
+var PRESET_CONFIG = [
+  // 新濠
+  { casino:"新濠", hotel:"君悅",    room:"大床房", threshold:80 },
+  { casino:"新濠", hotel:"君悅",    room:"雙床房", threshold:80 },
+  { casino:"新濠", hotel:"君悅",    room:"小套房", threshold:120 },
+  { casino:"新濠", hotel:"君悅",    room:"大套房", threshold:180 },
+  { casino:"新濠", hotel:"頤居",    room:"大床房", threshold:70 },
+  { casino:"新濠", hotel:"頤居",    room:"雙床房", threshold:70 },
+  { casino:"新濠", hotel:"頤居",    room:"小套房", threshold:110 },
+  { casino:"新濠", hotel:"頤居",    room:"大套房", threshold:160 },
+  { casino:"新濠", hotel:"摩柏斯",  room:"標準房", threshold:100 },
+  { casino:"新濠", hotel:"摩柏斯",  room:"套房",   threshold:200 },
+  { casino:"新濠", hotel:"迎尚",    room:"標準房", threshold:60 },
+  { casino:"新濠", hotel:"迎尚",    room:"套房",   threshold:100 },
+  // 銀河
+  { casino:"銀河", hotel:"銀河酒店",   room:"大床房", threshold:70 },
+  { casino:"銀河", hotel:"銀河酒店",   room:"雙床房", threshold:70 },
+  { casino:"銀河", hotel:"銀河酒店",   room:"套房",   threshold:130 },
+  { casino:"銀河", hotel:"百老匯",     room:"標準房", threshold:50 },
+  { casino:"銀河", hotel:"百老匯",     room:"套房",   threshold:90 },
+  { casino:"銀河", hotel:"大倉",       room:"大床房", threshold:90 },
+  { casino:"銀河", hotel:"大倉",       room:"雙床房", threshold:90 },
+  { casino:"銀河", hotel:"大倉",       room:"套房",   threshold:150 },
+  { casino:"銀河", hotel:"JW萬豪",     room:"大床房", threshold:100 },
+  { casino:"銀河", hotel:"JW萬豪",     room:"套房",   threshold:180 },
+  { casino:"銀河", hotel:"麗思卡爾頓", room:"大床房", threshold:200 },
+  { casino:"銀河", hotel:"麗思卡爾頓", room:"套房",   threshold:350 },
+  // 金沙
+  { casino:"金沙", hotel:"威尼斯人", room:"大床房", threshold:80 },
+  { casino:"金沙", hotel:"威尼斯人", room:"雙床房", threshold:80 },
+  { casino:"金沙", hotel:"威尼斯人", room:"套房",   threshold:140 },
+  { casino:"金沙", hotel:"巴黎人",   room:"大床房", threshold:80 },
+  { casino:"金沙", hotel:"巴黎人",   room:"雙床房", threshold:80 },
+  { casino:"金沙", hotel:"巴黎人",   room:"套房",   threshold:140 },
+  { casino:"金沙", hotel:"倫敦人",   room:"大床房", threshold:90 },
+  { casino:"金沙", hotel:"倫敦人",   room:"雙床房", threshold:90 },
+  { casino:"金沙", hotel:"倫敦人",   room:"套房",   threshold:160 },
+  { casino:"金沙", hotel:"四季",     room:"大床房", threshold:150 },
+  { casino:"金沙", hotel:"四季",     room:"套房",   threshold:250 },
+  { casino:"金沙", hotel:"康萊德",   room:"大床房", threshold:100 },
+  { casino:"金沙", hotel:"康萊德",   room:"雙床房", threshold:100 },
+  { casino:"金沙", hotel:"康萊德",   room:"套房",   threshold:180 },
+  { casino:"金沙", hotel:"瑞吉",     room:"大床房", threshold:180 },
+  { casino:"金沙", hotel:"瑞吉",     room:"套房",   threshold:300 },
+  // 永利
+  { casino:"永利", hotel:"永利澳門", room:"大床房", threshold:120 },
+  { casino:"永利", hotel:"永利澳門", room:"雙床房", threshold:120 },
+  { casino:"永利", hotel:"永利澳門", room:"套房",   threshold:220 },
+  { casino:"永利", hotel:"永利皇宮", room:"大床房", threshold:150 },
+  { casino:"永利", hotel:"永利皇宮", room:"雙床房", threshold:150 },
+  { casino:"永利", hotel:"永利皇宮", room:"套房",   threshold:280 },
+  // 美高梅
+  { casino:"美高梅", hotel:"澳門美高梅", room:"大床房", threshold:100 },
+  { casino:"美高梅", hotel:"澳門美高梅", room:"雙床房", threshold:100 },
+  { casino:"美高梅", hotel:"澳門美高梅", room:"套房",   threshold:180 },
+  { casino:"美高梅", hotel:"美獅美高梅", room:"大床房", threshold:120 },
+  { casino:"美高梅", hotel:"美獅美高梅", room:"雙床房", threshold:120 },
+  { casino:"美高梅", hotel:"美獅美高梅", room:"套房",   threshold:200 },
+  // 上葡京
+  { casino:"上葡京", hotel:"上葡京",       room:"大床房", threshold:80 },
+  { casino:"上葡京", hotel:"上葡京",       room:"雙床房", threshold:80 },
+  { casino:"上葡京", hotel:"上葡京",       room:"套房",   threshold:150 },
+  { casino:"上葡京", hotel:"卡爾拉格斐",   room:"大床房", threshold:200 },
+  { casino:"上葡京", hotel:"卡爾拉格斐",   room:"套房",   threshold:350 },
+  // 新葡京
+  { casino:"新葡京", hotel:"新葡京", room:"大床房", threshold:60 },
+  { casino:"新葡京", hotel:"新葡京", room:"雙床房", threshold:60 },
+  { casino:"新葡京", hotel:"新葡京", room:"套房",   threshold:120 }
+];
+
+// ===== 狀態 =====
+var hotelConfig = [];        // 當前設定
+var demoBookings = [];       // Demo 訂房記錄
+var configVisible = true;    // 設定表可見性
+var pendingQuickAdd = null;  // 快速新增上下文
+
+// ===== 初始化 =====
+function init() {
+  loadConfig();
+  populateCasinoDropdown();
+  populateFilters();
+  renderConfigTable();
+  if (hotelConfig.length === 0) {
+    showToast('已載入預設澳門酒店配置 (' + PRESET_CONFIG.length + ' 項)', 'info');
+  }
+}
+
+// ===== 資料載入/儲存 =====
+function loadConfig() {
+  try {
+    var saved = localStorage.getItem('macau_hotel_config_v7');
+    if (saved) {
+      hotelConfig = JSON.parse(saved);
+    }
+  } catch(e) {}
+  if (!hotelConfig || hotelConfig.length === 0) {
+    // 首次使用：載入預設
+    hotelConfig = JSON.parse(JSON.stringify(PRESET_CONFIG));
+    saveConfig();
+  }
+}
+
+function saveConfig() {
+  localStorage.setItem('macau_hotel_config_v7', JSON.stringify(hotelConfig));
+}
+
+function resetToPreset() {
+  if (!confirm('確定要重置酒店配置嗎？\n\n你手動新增的項目會被保留（不重複），但修改過的門檻會恢復預設值。')) return;
+
+  // 合併策略：保留使用者新增的（不在預設中的），更新預設中存在的
+  var presetMap = {};
+  for (var i = 0; i < PRESET_CONFIG.length; i++) {
+    var p = PRESET_CONFIG[i];
+    presetMap[p.casino + '|' + p.hotel + '|' + p.room] = p;
+  }
+
+  var newConfig = [];
+  var userAdded = [];
+
+  for (var i = 0; i < hotelConfig.length; i++) {
+    var c = hotelConfig[i];
+    var key = c.casino + '|' + c.hotel + '|' + c.room;
+    if (presetMap[key]) {
+      // 在預設中 → 用預設值覆蓋
+      newConfig.push(JSON.parse(JSON.stringify(presetMap[key])));
+      delete presetMap[key];
+    } else {
+      // 使用者新增的 → 保留
+      userAdded.push(c);
+    }
+  }
+
+  // 加上預設中剩餘的（使用者刪除後重新加入的）
+  for (var k in presetMap) {
+    if (presetMap.hasOwnProperty(k)) {
+      newConfig.push(JSON.parse(JSON.stringify(presetMap[k])));
+    }
+  }
+
+  // 最後合併使用者新增的
+  newConfig = newConfig.concat(userAdded);
+  hotelConfig = newConfig;
+  saveConfig();
+  renderConfigTable();
+  populateCasinoDropdown();
+  populateFilters();
+  showToast('已重置！保留 ' + userAdded.length + ' 項自訂項目', 'success');
+}
+
+// ===== 下拉選單填充 =====
+function getCasinos() {
+  var set = {};
+  for (var i = 0; i < hotelConfig.length; i++) {
+    set[hotelConfig[i].casino] = true;
+  }
+  return Object.keys(set).sort();
+}
+
+function getHotels(casino) {
+  var set = {};
+  for (var i = 0; i < hotelConfig.length; i++) {
+    if (!casino || hotelConfig[i].casino === casino) {
+      set[hotelConfig[i].hotel] = true;
+    }
+  }
+  return Object.keys(set).sort();
+}
+
+function getRooms(casino, hotel) {
+  var list = [];
+  for (var i = 0; i < hotelConfig.length; i++) {
+    var c = hotelConfig[i];
+    if (c.casino === casino && c.hotel === hotel) {
+      list.push({ room: c.room, threshold: c.threshold });
+    }
+  }
+  return list;
+}
+
+function populateCasinoDropdown() {
+  var casinos = getCasinos();
+  var sel = document.getElementById('f-casino');
+  sel.innerHTML = '<option value="">請選擇賭場</option>';
+  for (var i = 0; i < casinos.length; i++) {
+    sel.innerHTML += '<option value="' + escHtml(casinos[i]) + '">' + escHtml(casinos[i]) + '</option>';
+  }
+}
+
+function onCasinoChange() {
+  var casino = document.getElementById('f-casino').value;
+  var hotelSel = document.getElementById('f-hotel');
+  var roomSel = document.getElementById('f-room');
+  var thEl = document.getElementById('f-threshold');
+
+  hotelSel.innerHTML = '<option value="">請選擇酒店</option>';
+  roomSel.innerHTML = '<option value="">請先選酒店</option>';
+  thEl.textContent = '-- 萬';
+
+  if (!casino) return;
+
+  var hotels = getHotels(casino);
+  for (var i = 0; i < hotels.length; i++) {
+    hotelSel.innerHTML += '<option value="' + escHtml(hotels[i]) + '">' + escHtml(hotels[i]) + '</option>';
+  }
+}
+
+function onHotelChange() {
+  var casino = document.getElementById('f-casino').value;
+  var hotel = document.getElementById('f-hotel').value;
+  var roomSel = document.getElementById('f-room');
+  var thEl = document.getElementById('f-threshold');
+
+  roomSel.innerHTML = '<option value="">請選擇房型</option>';
+  thEl.textContent = '-- 萬';
+
+  if (!casino || !hotel) return;
+
+  var rooms = getRooms(casino, hotel);
+  for (var i = 0; i < rooms.length; i++) {
+    roomSel.innerHTML += '<option value="' + escHtml(rooms[i].room) + '" data-th="' + rooms[i].threshold + '">' +
+      escHtml(rooms[i].room) + '</option>';
+  }
+}
+
+function onRoomChange() {
+  var roomSel = document.getElementById('f-room');
+  var thEl = document.getElementById('f-threshold');
+  var opt = roomSel.selectedOptions[0];
+  if (opt && opt.dataset.th) {
+    thEl.textContent = opt.dataset.th + ' 萬';
+  } else {
+    thEl.textContent = '-- 萬';
+  }
+}
+
+// ===== 快速新增 =====
+function quickAddHotel() {
+  var casino = document.getElementById('f-casino').value;
+  if (!casino) { showToast('請先選擇賭場', 'error'); return; }
+
+  document.getElementById('quick-add-title').textContent = '快速新增酒店 — ' + casino;
+  document.getElementById('qa-label1').textContent = '酒店名稱';
+  document.getElementById('qa-input1').value = '';
+  document.getElementById('qa-label2').textContent = '第一個房型名稱';
+  document.getElementById('qa-input2').value = '';
+  document.getElementById('qa-threshold-row').style.display = 'flex';
+  document.getElementById('qa-threshold').value = '80';
+
+  pendingQuickAdd = { type: 'hotel', casino: casino };
+  document.getElementById('quick-add-bg').classList.add('show');
+  document.getElementById('qa-input1').focus();
+}
+
+function quickAddRoom() {
+  var casino = document.getElementById('f-casino').value;
+  var hotel = document.getElementById('f-hotel').value;
+  if (!casino) { showToast('請先選擇賭場', 'error'); return; }
+  if (!hotel) { showToast('請先選擇酒店', 'error'); return; }
+
+  document.getElementById('quick-add-title').textContent = '快速新增房型 — ' + casino + ' / ' + hotel;
+  document.getElementById('qa-label1').textContent = '房型名稱';
+  document.getElementById('qa-input1').value = '';
+  document.getElementById('qa-label2').textContent = '（此欄位可不填）';
+  document.getElementById('qa-input2').value = '';
+  document.getElementById('qa-threshold-row').style.display = 'flex';
+  document.getElementById('qa-threshold').value = '70';
+
+  pendingQuickAdd = { type: 'room', casino: casino, hotel: hotel };
+  document.getElementById('quick-add-bg').classList.add('show');
+  document.getElementById('qa-input1').focus();
+}
+
+function closeQuickAdd() {
+  document.getElementById('quick-add-bg').classList.remove('show');
+  pendingQuickAdd = null;
+}
+
+function confirmQuickAdd() {
+  if (!pendingQuickAdd) return;
+
+  if (pendingQuickAdd.type === 'hotel') {
+    var hotel = document.getElementById('qa-input1').value.trim();
+    var room = document.getElementById('qa-input2').value.trim();
+    var threshold = parseInt(document.getElementById('qa-threshold').value) || 80;
+
+    if (!hotel) { showToast('請輸入酒店名稱', 'error'); return; }
+    if (!room) { showToast('請輸入房型名稱', 'error'); return; }
+
+    // 檢查是否重複
+    var dup = false;
+    for (var i = 0; i < hotelConfig.length; i++) {
+      if (hotelConfig[i].casino === pendingQuickAdd.casino &&
+          hotelConfig[i].hotel === hotel &&
+          hotelConfig[i].room === room) { dup = true; break; }
+    }
+    if (dup) { showToast('此項目已存在', 'error'); return; }
+
+    hotelConfig.push({ casino: pendingQuickAdd.casino, hotel: hotel, room: room, threshold: threshold });
+    saveConfig();
+
+    // 更新下拉選單
+    var hotelSel = document.getElementById('f-hotel');
+    if (document.getElementById('f-casino').value === pendingQuickAdd.casino) {
+      hotelSel.innerHTML += '<option value="' + escHtml(hotel) + '">' + escHtml(hotel) + '</option>';
+    }
+    hotelSel.value = hotel;
+    onHotelChange();
+    document.getElementById('f-room').value = room;
+    onRoomChange();
+
+    renderConfigTable();
+    populateFilters();
+    showToast('已新增：' + pendingQuickAdd.casino + ' / ' + hotel + ' / ' + room, 'success');
+  }
+  else if (pendingQuickAdd.type === 'room') {
+    var room = document.getElementById('qa-input1').value.trim();
+    var threshold = parseInt(document.getElementById('qa-threshold').value) || 70;
+
+    if (!room) { showToast('請輸入房型名稱', 'error'); return; }
+
+    var dup = false;
+    for (var i = 0; i < hotelConfig.length; i++) {
+      if (hotelConfig[i].casino === pendingQuickAdd.casino &&
+          hotelConfig[i].hotel === pendingQuickAdd.hotel &&
+          hotelConfig[i].room === room) { dup = true; break; }
+    }
+    if (dup) { showToast('此房型已存在', 'error'); return; }
+
+    hotelConfig.push({ casino: pendingQuickAdd.casino, hotel: pendingQuickAdd.hotel,
+                       room: room, threshold: threshold });
+    saveConfig();
+
+    var roomSel = document.getElementById('f-room');
+    if (document.getElementById('f-casino').value === pendingQuickAdd.casino &&
+        document.getElementById('f-hotel').value === pendingQuickAdd.hotel) {
+      roomSel.innerHTML += '<option value="' + escHtml(room) + '" data-th="' + threshold + '">' +
+        escHtml(room) + '</option>';
+    }
+    roomSel.value = room;
+    onRoomChange();
+
+    renderConfigTable();
+    showToast('已新增：' + pendingQuickAdd.casino + ' / ' + pendingQuickAdd.hotel + ' / ' + room, 'success');
+  }
+
+  closeQuickAdd();
+}
+
+// ===== 設定表格 =====
+function renderConfigTable(filterCasino, filterHotel) {
+  // 過濾
+  var filtered = hotelConfig.slice();
+  if (filterCasino) {
+    filtered = filtered.filter(function(c) { return c.casino === filterCasino; });
+  }
+  if (filterHotel) {
+    filtered = filtered.filter(function(c) { return c.hotel === filterHotel; });
+  }
+
+  // 按賭場/酒店/房型排序
+  filtered.sort(function(a, b) {
+    if (a.casino !== b.casino) return a.casino.localeCompare(b.casino, 'zh');
+    if (a.hotel !== b.hotel) return a.hotel.localeCompare(b.hotel, 'zh');
+    return a.room.localeCompare(b.room, 'zh');
+  });
+
+  var tbody = document.getElementById('config-tbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:30px;">尚無配置，請點「＋ 新增項目」或「🔄 重置預設」</td></tr>';
+  } else {
+    var html = '';
+    for (var i = 0; i < filtered.length; i++) {
+      var c = filtered[i];
+      var origIdx = findOrigIndex(i);
+      html += '<tr data-idx="' + i + '" data-orig-idx="' + origIdx + '">' +
+        '<td style="text-align:center;"><input type="checkbox" class="row-cb" onchange="updateBatchButton()"></td>' +
+        '<td><input value="' + escHtml(c.casino) + '" data-field="casino" data-orig="' + escHtml(c.casino) + '" onchange="onConfigEdit(this)" onblur="onConfigEdit(this)"></td>' +
+        '<td><input value="' + escHtml(c.hotel) + '" data-field="hotel" data-orig="' + escHtml(c.hotel) + '" onchange="onConfigEdit(this)" onblur="onConfigEdit(this)"></td>' +
+        '<td><input value="' + escHtml(c.room) + '" data-field="room" data-orig="' + escHtml(c.room) + '" onchange="onConfigEdit(this)" onblur="onConfigEdit(this)"></td>' +
+        '<td style="text-align:center;"><input class="num-input" type="number" value="' + c.threshold +
+          '" data-field="threshold" data-orig="' + c.threshold + '" onchange="onConfigEdit(this)" onblur="onConfigEdit(this)"></td>' +
+        '<td class="actions">' +
+          '<button class="btn btn-danger btn-xs" onclick="deleteConfig(' + i + ',\'' + escHtml(c.casino) + '\',\'' + escHtml(c.hotel) + '\',\'' + escHtml(c.room) + '\')">✕</button>' +
+        '</td>' +
+      '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  document.getElementById('config-count').textContent = '共 ' + filtered.length + ' 項';
+}
+
+function renderCasinoSelect(casino, origIdx) {
+  var casinos = getCasinos();
+  var html = '<select data-field="casino" data-orig-idx="' + origIdx + '" onchange="onConfigSelect(this)">';
+  html += '<option value="">請選擇</option>';
+  for (var i = 0; i < casinos.length; i++) {
+    var sel = casinos[i] === casino ? ' selected' : '';
+    html += '<option value="' + escHtml(casinos[i]) + '"' + sel + '>' + escHtml(casinos[i]) + '</option>';
+  }
+  html += '<option value="__custom__">📝 自訂...</option>';
+  html += '</select>';
+  return html;
+}
+
+function renderHotelSelect(casino, hotel, origIdx) {
+  var hotels = casino ? getHotels(casino) : [];
+  var html = '<select data-field="hotel" data-orig-idx="' + origIdx + '" onchange="onConfigSelect(this)">';
+  html += '<option value="">請選擇</option>';
+  for (var i = 0; i < hotels.length; i++) {
+    var sel = hotels[i] === hotel ? ' selected' : '';
+    html += '<option value="' + escHtml(hotels[i]) + '"' + sel + '>' + escHtml(hotels[i]) + '</option>';
+  }
+  html += '<option value="__custom__">📝 自訂...</option>';
+  html += '</select>';
+  return html;
+}
+
+function onConfigSelect(sel) {
+  var field = sel.dataset.field;
+  var origIdx = parseInt(sel.dataset.origIdx);
+  var newVal = sel.value;
+
+  if (newVal === '__custom__') {
+    var customVal = prompt('請輸入自訂' + (field === 'casino' ? '賭場' : '酒店') + '名稱：');
+    if (!customVal || !customVal.trim()) {
+      // 恢復原值
+      renderConfigTable(
+        document.getElementById('filter-casino').value || null,
+        document.getElementById('filter-hotel').value || null
+      );
+      return;
+    }
+    newVal = customVal.trim();
+  }
+
+  if (origIdx >= 0 && origIdx < hotelConfig.length) {
+    hotelConfig[origIdx][field] = newVal;
+    // 如果改了賭場，酒店也要重新驗證
+    saveConfig();
+    renderConfigTable(
+      document.getElementById('filter-casino').value || null,
+      document.getElementById('filter-hotel').value || null
+    );
+    populateCasinoDropdown();
+    populateFilters();
+    showToast('已更新', 'success');
+  }
+}
+  var tr = input.closest('tr');
+  var idx = parseInt(tr.dataset.idx);
+  var field = input.dataset.field;
+  var newVal = input.value;
+  if (field === 'threshold') newVal = parseInt(newVal) || 0;
+
+  // 找到原始索引（考慮過濾）
+  var origIdx = findOrigIndex(idx);
+  if (origIdx >= 0) {
+    hotelConfig[origIdx][field] = newVal;
+    saveConfig();
+    document.getElementById('modified-indicator').style.display = 'inline';
+    setTimeout(function() {
+      document.getElementById('modified-indicator').style.display = 'none';
+    }, 2000);
+  }
+}
+
+function findOrigIndex(filteredIdx) {
+  var filterCasino = document.getElementById('filter-casino').value;
+  var filterHotel = document.getElementById('filter-hotel').value;
+  var filtered = hotelConfig.slice();
+  if (filterCasino) filtered = filtered.filter(function(c) { return c.casino === filterCasino; });
+  if (filterHotel) filtered = filtered.filter(function(c) { return c.hotel === filterHotel; });
+  filtered.sort(function(a, b) {
+    if (a.casino !== b.casino) return a.casino.localeCompare(b.casino, 'zh');
+    if (a.hotel !== b.hotel) return a.hotel.localeCompare(b.hotel, 'zh');
+    return a.room.localeCompare(b.room, 'zh');
+  });
+  if (filteredIdx < filtered.length) {
+    var target = filtered[filteredIdx];
+    for (var i = 0; i < hotelConfig.length; i++) {
+      if (hotelConfig[i].casino === target.casino &&
+          hotelConfig[i].hotel === target.hotel &&
+          hotelConfig[i].room === target.room) {
+        // 比對所有欄位來確認是同一筆
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
+function deleteConfig(idx, casino, hotel, room) {
+  if (!confirm('確定刪除 ' + casino + ' / ' + hotel + ' / ' + room + ' ？')) return;
+  var origIdx = -1;
+  for (var i = 0; i < hotelConfig.length; i++) {
+    if (hotelConfig[i].casino === casino && hotelConfig[i].hotel === hotel &&
+        hotelConfig[i].room === room) { origIdx = i; break; }
+  }
+  if (origIdx >= 0) {
+    hotelConfig.splice(origIdx, 1);
+    saveConfig();
+    renderConfigTable();
+    populateCasinoDropdown();
+    populateFilters();
+    // 重設下拉
+    document.getElementById('f-casino').value = '';
+    onCasinoChange();
+    showToast('已刪除', 'info');
+  }
+}
+
+function toggleSelectAll(masterCb) {
+  var cbs = document.querySelectorAll('#config-tbody .row-cb');
+  for (var i = 0; i < cbs.length; i++) {
+    cbs[i].checked = masterCb.checked;
+    markRowSelected(cbs[i]);
+  }
+  updateBatchButton();
+}
+
+function updateBatchButton() {
+  var checked = document.querySelectorAll('#config-tbody .row-cb:checked');
+  var count = checked.length;
+  var btn = document.getElementById('btn-batch-delete');
+  var countSpan = document.getElementById('batch-count');
+  countSpan.textContent = count;
+  btn.style.display = count > 0 ? 'inline-flex' : 'none';
+
+  // 更新全選 checkbox 狀態
+  var allCb = document.querySelectorAll('#config-tbody .row-cb');
+  var master = document.getElementById('select-all-cb');
+  if (allCb.length === 0) {
+    master.checked = false;
+    master.indeterminate = false;
+  } else if (count === 0) {
+    master.checked = false;
+    master.indeterminate = false;
+  } else if (count === allCb.length) {
+    master.checked = true;
+    master.indeterminate = false;
+  } else {
+    master.checked = false;
+    master.indeterminate = true;
+  }
+}
+
+function markRowSelected(cb) {
+  var tr = cb.closest('tr');
+  if (!tr) return;
+  if (cb.checked) {
+    tr.classList.add('selected');
+  } else {
+    tr.classList.remove('selected');
+  }
+}
+
+function batchDelete() {
+  var checked = document.querySelectorAll('#config-tbody .row-cb:checked');
+  var count = checked.length;
+  if (count === 0) { showToast('請先勾選要刪除的項目', 'error'); return; }
+
+  if (!confirm('確定批量刪除已勾選的 ' + count + ' 項？此操作不可逆！')) return;
+
+  // 收集要刪除的原始索引（去重）
+  var toDelete = [];
+  for (var i = 0; i < checked.length; i++) {
+    var tr = checked[i].closest('tr');
+    if (!tr) continue;
+    var origIdx = parseInt(tr.dataset.origIdx);
+    if (!isNaN(origIdx) && toDelete.indexOf(origIdx) === -1) {
+      toDelete.push(origIdx);
+    }
+  }
+
+  // 從大到小排序後依序刪除（避免索引偏移）
+  toDelete.sort(function(a, b) { return b - a; });
+  for (var j = 0; j < toDelete.length; j++) {
+    hotelConfig.splice(toDelete[j], 1);
+  }
+
+  saveConfig();
+  renderConfigTable();
+  populateCasinoDropdown();
+  populateFilters();
+  document.getElementById('f-casino').value = '';
+  onCasinoChange();
+  showToast('已批量刪除 ' + toDelete.length + ' 項', 'success');
+}
+
+function addNewConfigRow() {
+  // 新增空白行到表格
+  hotelConfig.push({ casino: '', hotel: '', room: '', threshold: 80 });
+  saveConfig();
+  renderConfigTable();
+  populateFilters();
+
+  // 滾動到底部
+  var tbody = document.getElementById('config-tbody');
+  var lastRow = tbody.lastElementChild;
+  if (lastRow) lastRow.scrollIntoView({ behavior: 'smooth' });
+
+  // 聚焦第一個輸入框
+  var firstInput = tbody.lastElementChild.querySelector('input');
+  if (firstInput) firstInput.focus();
+
+  showToast('已新增空白項目，請填寫賭場、酒店、房型', 'info');
+}
+
+// ===== 篩選 =====
+function populateFilters() {
+  var casinos = getCasinos();
+  var sel1 = document.getElementById('filter-casino');
+  sel1.innerHTML = '<option value="">全部賭場</option>';
+  for (var i = 0; i < casinos.length; i++) {
+    sel1.innerHTML += '<option value="' + escHtml(casinos[i]) + '">' + escHtml(casinos[i]) + '</option>';
+  }
+
+  var hotels = getHotels();
+  var sel2 = document.getElementById('filter-hotel');
+  sel2.innerHTML = '<option value="">全部酒店</option>';
+  for (var i = 0; i < hotels.length; i++) {
+    sel2.innerHTML += '<option value="' + escHtml(hotels[i]) + '">' + escHtml(hotels[i]) + '</option>';
+  }
+}
+
+function filterConfig() {
+  var casino = document.getElementById('filter-casino').value;
+  var hotel = document.getElementById('filter-hotel').value;
+  // 當賭場變更時更新酒店篩選選項
+  if (casino) {
+    var hotels = getHotels(casino);
+    var sel2 = document.getElementById('filter-hotel');
+    sel2.innerHTML = '<option value="">全部酒店</option>';
+    for (var i = 0; i < hotels.length; i++) {
+      sel2.innerHTML += '<option value="' + escHtml(hotels[i]) + '">' + escHtml(hotels[i]) + '</option>';
+    }
+  }
+  renderConfigTable(casino || null, hotel || null);
+}
+
+function toggleConfigTable() {
+  configVisible = !configVisible;
+  var wrap = document.getElementById('config-table-wrap');
+  var btn = document.getElementById('toggle-btn');
+  if (configVisible) {
+    wrap.style.display = '';
+    btn.textContent = '⚙ 管理設定';
+  } else {
+    wrap.style.display = 'none';
+    btn.textContent = '⚙ 展開設定';
+  }
+}
+
+// ===== Demo 訂房 =====
+function demoSaveBooking() {
+  var casino = document.getElementById('f-casino').value;
+  var hotel = document.getElementById('f-hotel').value;
+  var room = document.getElementById('f-room').value;
+
+  if (!casino || !hotel || !room) {
+    showToast('請完整選擇賭場 → 酒店 → 房型', 'error');
+    return;
+  }
+
+  var threshold = document.getElementById('f-threshold').textContent.replace(' 萬', '');
+  var agent = document.getElementById('f-agent').value;
+  var client = document.getElementById('f-client').value || '--';
+  var nights = document.getElementById('f-nights').value;
+  var total = document.getElementById('f-total').value || '--';
+  var status = document.querySelector('input[name="f-status"]:checked').value;
+  var note = document.getElementById('f-note').value;
+
+  var booking = {
+    casino: casino, hotel: hotel, room: room,
+    threshold: threshold, agent: agent, client: client,
+    nights: nights, total: total, status: status, note: note,
+    time: new Date().toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong' })
+  };
+
+  demoBookings.push(booking);
+  renderDemoBookings();
+  showToast('訂房已記錄（Demo）', 'success');
+}
+
+function renderDemoBookings() {
+  var wrap = document.getElementById('booking-log-wrap');
+  var tbody = document.getElementById('booking-tbody');
+
+  if (demoBookings.length === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = '';
+  document.getElementById('booking-count').textContent = '共 ' + demoBookings.length + ' 筆';
+
+  var html = '';
+  for (var i = demoBookings.length - 1; i >= 0; i--) {
+    var b = demoBookings[i];
+    html += '<tr>' +
+      '<td>' + b.time.split(' ')[0] + '</td>' +
+      '<td>' + escHtml(b.agent) + '</td>' +
+      '<td>' + escHtml(b.client) + '</td>' +
+      '<td><strong>' + escHtml(b.casino) + '/' + escHtml(b.hotel) + '</strong> · ' + escHtml(b.room) + '</td>' +
+      '<td style="text-align:center;">' + b.threshold + ' 萬</td>' +
+      '<td style="text-align:center;">' + b.nights + '</td>' +
+      '<td style="text-align:center;">' + b.total + '</td>' +
+      '<td>' + (b.status === 'free' ? '<span style="color:var(--success);">🆓 免費</span>' : '<span style="color:#f39c12;">💰 付費</span>') + '</td>' +
+      '<td>' + escHtml(b.note) + '</td>' +
+    '</tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+function onStatusChange() {
+  // 展示用，不影響表單行為
+}
+
+// ===== 輔助函式 =====
+function escHtml(s) {
+  if (typeof s !== 'string') s = String(s);
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function showToast(msg, type) {
+  var container = document.getElementById('toast-container');
+  var el = document.createElement('div');
+  el.className = 'toast-item toast-' + (type || 'info');
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(function() {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.3s';
+    setTimeout(function() { container.removeChild(el); }, 300);
+  }, 2000);
+}
+
+// 鍵盤快捷鍵：ESC 關閉快速新增
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var bg = document.getElementById('quick-add-bg');
+    if (bg && bg.classList.contains('show')) {
+      closeQuickAdd();
+    }
+  }
+});
+
+// 點擊背景關閉快速新增
+document.getElementById('quick-add-bg').addEventListener('click', function(e) {
+  if (e.target === this) closeQuickAdd();
+});
+
+// 啟動
+init();

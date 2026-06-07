@@ -1,0 +1,179 @@
+
+
+<!-- 側邊欄 -->
+<div id="sidebar">
+  <div class="sb-logo">博盈國際會</div>
+  <div class="sb-subtitle">BOYING INTERNATIONAL CLUB</div>
+  <ul class="sb-nav">
+    <li>📊 總覽</li>
+    <li>📋 全部交易</li>
+    <li>🔍 查詢</li>
+    <li>📈 統計</li>
+    <li class="active">🏨 房務系統</li>
+  </ul>
+  <div class="sb-version">v7.0 原型 · 酒店管理</div>
+</div>
+
+<!-- 主內容 -->
+<div id="main-content">
+  <div class="topbar">
+    <div class="page-title">🏨 房務系統 <span>v7.0 原型 — 酒店房型管理</span></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="resetToPreset()">🔄 重置預設</button>
+      <button class="btn btn-gold" onclick="toggleConfigTable()" id="toggle-btn">⚙ 管理設定</button>
+    </div>
+  </div>
+
+  <div id="page-scroll">
+
+    <!-- 使用說明 -->
+    <div style="background:rgba(212,175,55,0.06);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;margin-bottom:20px;font-size:12px;color:var(--text-dim);line-height:1.8;">
+      <strong style="color:var(--gold);">💡 使用說明</strong><br>
+      ① 下方<strong>酒店房間設定表</strong>可直接編輯，像 Excel — 點儲存格修改，Enter 或失焦自動儲存<br>
+      ② 訂房表單使用<strong>三級聯動下拉</strong>：選賭場 ➜ 酒店選項自動過濾 ➜ 房型選項自動過濾<br>
+      ③ 下拉選單旁的 <strong style="color:var(--gold);">＋</strong> 按鈕可<strong>快速新增</strong>酒店或房型，無需離開頁面<br>
+      ④ 已修改的項目會有<span style="color:#f39c12;">★</span>標記，點「⚙ 管理設定」可開關設定表<br>
+      ⑤ 「🔄 重置預設」會恢復原始澳門酒店配置（⚠️你手動新增的會保留，不重複）
+    </div>
+
+    <!-- 酒店房間設定表 -->
+    <div class="config-table-wrap" id="config-table-wrap">
+      <div class="section-title">
+        📋 酒店房間設定
+        <span class="section-count" id="config-count">共 0 項</span>
+        <button class="toggle-btn" onclick="toggleConfigTable()">收起</button>
+      </div>
+
+      <!-- 篩選工具欄 -->
+      <div class="toolbar" style="padding:0 16px;">
+        <div class="filter-group">
+          <select id="filter-casino" onchange="filterConfig()">
+            <option value="">全部賭場</option>
+          </select>
+          <select id="filter-hotel" onchange="filterConfig()">
+            <option value="">全部酒店</option>
+          </select>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="addNewConfigRow()">＋ 新增項目</button>
+        <button class="btn btn-danger btn-sm" onclick="batchDelete()" id="btn-batch-delete" style="display:none;">🗑️ 批量刪除（已選 <span id="batch-count">0</span> 項）</button>
+        <span id="modified-indicator" style="font-size:11px;color:#f39c12;display:none;">★ 有未儲存的修改</span>
+      </div>
+
+      <table class="config-table" id="config-table">
+        <thead>
+          <tr>
+            <th style="width:40px;text-align:center;"><input type="checkbox" onchange="toggleSelectAll(this)" id="select-all-cb"></th>
+            <th style="width:130px">賭場</th>
+            <th style="width:140px">酒店</th>
+            <th style="width:120px">房型</th>
+            <th class="num" style="width:90px">轉碼門檻(萬)</th>
+            <th style="width:80px">操作</th>
+          </tr>
+        </thead>
+        <tbody id="config-tbody">
+          <tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:30px;">載入中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 訂房表單 Demo -->
+    <div class="booking-demo">
+      <div class="section-title">📝 新增訂房（表單展示 — 三級聯動）</div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:1; min-width:140px;">
+          <label>賭場</label>
+          <div style="display:flex; gap:4px;">
+            <select id="f-casino" onchange="onCasinoChange()" style="flex:1;">
+              <option value="">請選擇賭場</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="flex:1; min-width:140px;">
+          <label>酒店</label>
+          <div style="display:flex; gap:4px;">
+            <select id="f-hotel" onchange="onHotelChange()" style="flex:1;">
+              <option value="">請先選賭場</option>
+            </select>
+            <button class="btn btn-ghost btn-icon btn-sm" title="快速新增酒店" onclick="quickAddHotel()" style="flex-shrink:0;">＋</button>
+          </div>
+        </div>
+        <div class="form-group" style="flex:1; min-width:140px;">
+          <label>房型</label>
+          <div style="display:flex; gap:4px;">
+            <select id="f-room" onchange="onRoomChange()" style="flex:1;">
+              <option value="">請先選酒店</option>
+            </select>
+            <button class="btn btn-ghost btn-icon btn-sm" title="快速新增房型" onclick="quickAddRoom()" style="flex-shrink:0;">＋</button>
+          </div>
+        </div>
+        <div class="form-group" style="max-width:110px;">
+          <label>轉碼門檻</label>
+          <div class="threshold-display" id="f-threshold">-- 萬</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:1;"><label>代理</label><select id="f-agent"><option>代理A</option><option>代理B</option><option>代理C</option></select></div>
+        <div class="form-group" style="flex:1;"><label>客戶</label><input type="text" id="f-client" placeholder="客戶名稱"></div>
+        <div class="form-group" style="flex:0.5; min-width:80px;"><label>月份</label><select id="f-month"><option>6月</option><option>7月</option><option>8月</option></select></div>
+        <div class="form-group" style="flex:0.5; min-width:70px;"><label>日期</label><select id="f-day"><option>1</option><option>2</option><option>3</option></select></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:1;"><label>入住日期</label><select id="f-checkin-month"><option>6月</option></select><select id="f-checkin-day" style="margin-top:4px;"><option>1</option></select></div>
+        <div class="form-group" style="flex:1;"><label>退房日期</label><select id="f-checkout-month"><option>6月</option></select><select id="f-checkout-day" style="margin-top:4px;"><option>2</option></select></div>
+        <div class="form-group" style="flex:0.5; min-width:60px;"><label>天數</label><input type="number" id="f-nights" value="1" min="1"></div>
+        <div class="form-group" style="flex:1;"><label>每晚單價(HKD)</label><input type="number" id="f-price" placeholder="0"></div>
+        <div class="form-group" style="flex:1;"><label>總費用(HKD)</label><input type="number" id="f-total" placeholder="自動計算" readonly style="background:rgba(30,30,40,0.6);"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:1;">
+          <label>狀態</label>
+          <div class="status-radio">
+            <label><input type="radio" name="f-status" value="free" checked onchange="onStatusChange()"> 🆓 免費</label>
+            <label><input type="radio" name="f-status" value="paid" onchange="onStatusChange()"> 💰 付費</label>
+          </div>
+        </div>
+        <div class="form-group" style="flex:2;"><label>備註</label><input type="text" id="f-note" placeholder="備註"></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-ghost">取消</button>
+        <button class="btn btn-gold" onclick="demoSaveBooking()">💾 儲存訂房（Demo）</button>
+      </div>
+    </div>
+
+    <!-- Demo 訂房記錄 -->
+    <div class="booking-demo" id="booking-log-wrap" style="display:none;">
+      <div class="section-title">📋 Demo 訂房記錄 <span class="section-count" id="booking-count"></span></div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">（僅供原型展示，不影響正式報表。重整頁面後會清除）</div>
+      <table class="config-table" style="font-size:12px;">
+        <thead>
+          <tr><th>日期</th><th>代理</th><th>客戶</th><th>賭場/酒店 · 房型</th><th>門檻</th><th>天數</th><th>總費</th><th>狀態</th><th>備註</th></tr>
+        </thead>
+        <tbody id="booking-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- 快速新增小窗 -->
+<div class="quick-add-bg" id="quick-add-bg">
+  <div class="quick-add-box">
+    <h3 id="quick-add-title">快速新增</h3>
+    <div class="form-row"><div class="form-group"><label id="qa-label1"></label><input id="qa-input1"></div></div>
+    <div class="form-row"><div class="form-group"><label id="qa-label2"></label><input id="qa-input2"></div></div>
+    <div class="form-row" id="qa-threshold-row"><div class="form-group"><label>轉碼門檻(萬)</label><input id="qa-threshold" type="number" value="80"></div></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeQuickAdd()">取消</button>
+      <button class="btn btn-gold" onclick="confirmQuickAdd()">確認新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toast-container"></div>
+

@@ -1,0 +1,118 @@
+var PRESET_CONFIG = [
+  // ===== 新濠系 =====
+  // 摩珀斯
+  { casino:"新濠", hotel:"摩珀斯", code:"MPPK", room:"摩珀斯客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"新濠", hotel:"摩珀斯", code:"MPPK", room:"摩珀斯套房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"新濠", hotel:"摩珀斯", code:"MPT",  room:"摩珀斯豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
+  { casino:"新濠", hotel:"摩珀斯", code:"MCPT", room:"摩珀斯2房奢房", weekday:4200, weekend:4500, special:6000, threshold:350 },
+  { casino:"新濠", hotel:"摩珀斯", code:"MPS",  room:"摩珀斯3房奢房", weekday:6000, weekend:6500, special:8000, threshold:1000 },
+  { casino:"新濠", hotel:"摩珀斯", code:"MES",  room:"摩珀斯總統套房", weekday:10000, weekend:11000, special:13000, threshold:3000 },
+  // 頣居
+  { casino:"新濠", hotel:"頣居", code:"NPX",  room:"繽紛客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠", hotel:"頣居", code:"NPXV", room:"繽紛套房(樓床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠", hotel:"頣居", code:"NPQV", room:"繽紛豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"新濠", hotel:"頣居", code:"NDS",  room:"繽紛套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"新濠", hotel:"頣居", code:"NCDS", room:"繽紛豪華套房", weekday:3000, weekend:3300, special:4500, threshold:300 },
+  { casino:"新濠", hotel:"頣居", code:"NPS",  room:"繽紛2房奢房", weekday:6000, weekend:6500, special:8000, threshold:3000 },
+  { casino:"新濠", hotel:"頣居", code:"NPSV", room:"繽紛2房套間", weekday:8000, weekend:8500, special:10000, threshold:3000 },
+  // 明星匯
+  { casino:"新濠", hotel:"明星匯", code:"CRX", room:"明星匯客房", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠", hotel:"明星匯", code:"CRT", room:"明星匯套房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠", hotel:"明星匯", code:"CDX", room:"明星匯豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"新濠", hotel:"明星匯", code:"CDT", room:"明星匯豪華套房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"新濠", hotel:"明星匯", code:"CSS", room:"明星匯奢房", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"新濠", hotel:"明星匯", code:"SDX", room:"明星匯豪華奢房", weekday:4500, weekend:5000, special:6500, threshold:1000 },
+  // 巨星匯
+  { casino:"新濠", hotel:"巨星匯", code:"SDT", room:"巨星匯套房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠", hotel:"巨星匯", code:"STS", room:"巨星匯套房", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"新濠", hotel:"巨星匯", code:"SPS", room:"巨星匯豪華奢房", weekday:4500, weekend:5000, special:6500, threshold:1000 },
+  { casino:"新濠", hotel:"巨星匯", code:"SGS", room:"巨星匯總統奢房", weekday:8000, weekend:8500, special:10000, threshold:3000 },
+  // 映星滙
+  { casino:"新濠", hotel:"映星滙", code:"EDX", room:"映星滙客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"新濠", hotel:"映星滙", code:"EDT", room:"映星滙客房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"新濠", hotel:"映星滙", code:"EG1", room:"映星滙套房", weekday:2700, weekend:3000, special:4200, threshold:180 },
+  { casino:"新濠", hotel:"映星滙", code:"ES1", room:"映星滙行政奢房", weekday:4200, weekend:4500, special:6500, threshold:300 },
+  { casino:"新濠", hotel:"映星滙", code:"EO1", room:"映星滙行政套房", weekday:6000, weekend:6500, special:8000, threshold:1000 },
+  { casino:"新濠", hotel:"映星滙", code:"EG2", room:"映星滙2房奢房", weekday:6000, weekend:6500, special:8000, threshold:3000 },
+  { casino:"新濠", hotel:"映星滙", code:"ES2", room:"映星滙3房奢房", weekday:8000, weekend:8500, special:10000, threshold:3000 },
+  { casino:"新濠", hotel:"映星滙", code:"EP3", room:"映星滙總統奢房", weekday:16000, weekend:16000, special:18000, threshold:3000 },
+  // 君悅
+  { casino:"新濠", hotel:"君悅", code:"KING",  room:"君悅客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠", hotel:"君悅", code:"TWIN",  room:"君悅客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠", hotel:"君悅", code:"DLXX",  room:"君悅豪華套房(大床)", weekday:1890, weekend:2000, special:3900, threshold:180 },
+  { casino:"新濠", hotel:"君悅", code:"DLXT",  room:"君悅豪華套房(雙床)", weekday:1850, weekend:2000, special:3900, threshold:150 },
+  { casino:"新濠", hotel:"君悅", code:"CLDK",  room:"君悅套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"新濠", hotel:"君悅", code:"CLDT",  room:"君悅套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"新濠", hotel:"君悅", code:"GRSK",  room:"君悅行政奢房", weekday:4500, weekend:5000, special:6550, threshold:1000 },
+  { casino:"新濠", hotel:"君悅", code:"QRXS",  room:"君悅行政套房", weekday:6000, weekend:6500, special:8000, threshold:3000 },
+  { casino:"新濠", hotel:"君悅", code:"PREM",  room:"君悅總統套房", weekday:10000, weekend:11000, special:13000, threshold:3000 },
+  { casino:"新濠", hotel:"君悅", code:"DIPL",  room:"君悅外交官奢房", weekday:15000, weekend:16000, special:18000, threshold:3000 },
+  { casino:"新濠", hotel:"君悅", code:"PRES",  room:"君悅總統奢房", weekday:20000, weekend:22000, special:26000, threshold:3000 },
+  { casino:"新濠", hotel:"君悅", code:"CHHN",  room:"君悅主席套房", weekday:30000, weekend:32000, special:35000, threshold:3000 },
+
+  // ===== 金沙系 =====
+  // 名匯
+  { casino:"金沙", hotel:"名匯", code:"R2",   room:"名匯客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:60 },
+  { casino:"金沙", hotel:"名匯", code:"RK",   room:"名匯客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:60 },
+  { casino:"金沙", hotel:"名匯", code:"V2",   room:"名匯豪華套房(大床)", weekday:1800, weekend:2000, special:3000, threshold:150 },
+  { casino:"金沙", hotel:"名匯", code:"VK",   room:"名匯豪華套房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:150 },
+  { casino:"金沙", hotel:"名匯", code:"LS2",  room:"名匯套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"名匯", code:"LSK",  room:"名匯套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"名匯", code:"GS2",  room:"名匯行政套房", weekday:4500, weekend:5000, special:6500, threshold:300 },
+  { casino:"金沙", hotel:"名匯", code:"GSK",  room:"名匯行政套房(雙床)", weekday:4500, weekend:5000, special:6500, threshold:300 },
+  { casino:"金沙", hotel:"名匯", code:"CS2",  room:"名匯主序套房", weekday:8000, weekend:8500, special:10000, threshold:300 },
+  { casino:"金沙", hotel:"名匯", code:"GC2",  room:"名匯總理套房", weekday:10000, weekend:11000, special:13000, threshold:300 },
+  { casino:"金沙", hotel:"名匯", code:"TS",   room:"名匯總統套房", weekday:15000, weekend:16000, special:18000, threshold:300 },
+  // 倫敦人
+  { casino:"金沙", hotel:"倫敦人", code:"KC",     room:"倫敦人客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:60 },
+  { casino:"金沙", hotel:"倫敦人", code:"TC",     room:"倫敦人客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:60 },
+  { casino:"金沙", hotel:"倫敦人", code:"KS",     room:"倫敦人套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"倫敦人", code:"TS",     room:"倫敦人套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"倫敦人", code:"DBK1",   room:"倫敦人雙床套房", weekday:4500, weekend:5000, special:6500, threshold:150 },
+  { casino:"金沙", hotel:"倫敦人", code:"DBKD2",  room:"倫敦人2房套房", weekday:6000, weekend:6500, special:8000, threshold:300 },
+  { casino:"金沙", hotel:"倫敦人", code:"DBKQD3", room:"倫敦人3房套房", weekday:8000, weekend:8500, special:10000, threshold:300 },
+  // 御園
+  { casino:"金沙", hotel:"御園", code:"CM1",  room:"御園客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:150 },
+  { casino:"金沙", hotel:"御園", code:"CG1",  room:"御園客房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:150 },
+  { casino:"金沙", hotel:"御園", code:"CGD1", room:"御園豪華套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"御園", code:"CMD1", room:"御園豪華套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"御園", code:"CK2",  room:"御園套房", weekday:4500, weekend:5000, special:6500, threshold:300 },
+  { casino:"金沙", hotel:"御園", code:"CKD2", room:"御園2房套房", weekday:6000, weekend:6500, special:8000, threshold:300 },
+  { casino:"金沙", hotel:"御園", code:"CV3",  room:"御園3房套房", weekday:8000, weekend:8500, special:10000, threshold:300 },
+  { casino:"金沙", hotel:"御園", code:"CVS4", room:"御園4房套房", weekday:10000, weekend:11000, special:13000, threshold:300 },
+
+  // ===== 銀河系 =====
+  // 銀河
+  { casino:"銀河", hotel:"銀河", code:"GM01",  room:"銀河客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"銀河", hotel:"銀河", code:"GM01T", room:"銀河客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"銀河", hotel:"銀河", code:"GM04",  room:"銀河豪華套房", weekday:1800, weekend:2000, special:3000, threshold:200 },
+  { casino:"銀河", hotel:"銀河", code:"GM06",  room:"銀河套房", weekday:3000, weekend:3200, special:4500, threshold:400 },
+  { casino:"銀河", hotel:"銀河", code:"GM07",  room:"銀河豪華套房", weekday:4500, weekend:5000, special:6500, threshold:400 },
+  { casino:"銀河", hotel:"銀河", code:"GM08",  room:"銀河總統套房", weekday:8000, weekend:8500, special:10000, threshold:400 },
+  // 大倉
+  { casino:"銀河", hotel:"大倉", code:"OK01", room:"大倉客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"銀河", hotel:"大倉", code:"OK02", room:"大倉客房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"銀河", hotel:"大倉", code:"OK03", room:"大倉豪華套房", weekday:2700, weekend:3000, special:4200, threshold:200 },
+  { casino:"銀河", hotel:"大倉", code:"OK05", room:"大倉套房", weekday:4200, weekend:4500, special:6000, threshold:400 },
+  { casino:"銀河", hotel:"大倉", code:"OK06", room:"大倉豪華套房", weekday:6000, weekend:6500, special:8000, threshold:400 },
+  { casino:"銀河", hotel:"大倉", code:"OK07", room:"大倉總統套房", weekday:10000, weekend:11000, special:13000, threshold:400 },
+  // 悅榕莊
+  { casino:"銀河", hotel:"悅榕莊", code:"BT01", room:"悅榕莊客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:80 },
+  { casino:"銀河", hotel:"悅榕莊", code:"BT02", room:"悅榕莊客房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:80 },
+  { casino:"銀河", hotel:"悅榕莊", code:"BT03", room:"悅榕莊套房", weekday:3000, weekend:3200, special:4500, threshold:200 },
+  { casino:"銀河", hotel:"悅榕莊", code:"BT05", room:"悅榕莊別墅", weekday:8000, weekend:8500, special:10000, threshold:400 },
+  { casino:"銀河", hotel:"悅榕莊", code:"BT06", room:"悅榕莊海景別墅", weekday:10000, weekend:11000, special:13000, threshold:400 },
+  // 萬豪
+  { casino:"銀河", hotel:"萬豪", code:"JW01", room:"萬豪客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"銀河", hotel:"萬豪", code:"JW02", room:"萬豪客房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"銀河", hotel:"萬豪", code:"JW03", room:"萬豪豪華套房", weekday:2700, weekend:3000, special:4200, threshold:200 },
+  { casino:"銀河", hotel:"萬豪", code:"JW05", room:"萬豪套房", weekday:4200, weekend:4500, special:6000, threshold:200 },
+  { casino:"銀河", hotel:"萬豪", code:"JW06", room:"萬豪行政套房", weekday:6000, weekend:6500, special:8000, threshold:200 },
+  { casino:"銀河", hotel:"萬豪", code:"JW08", room:"萬豪總統套房", weekday:15000, weekend:16000, special:18000, threshold:200 },
+  // 麗絲卡爾頓
+  { casino:"銀河", hotel:"麗絲卡爾頓", code:"RC01", room:"麗絲卡爾頓客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:200 },
+  { casino:"銀河", hotel:"麗絲卡爾頓", code:"RC03", room:"麗絲卡爾頓客房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:200 },
+  { casino:"銀河", hotel:"麗絲卡爾頓", code:"RC05", room:"麗絲卡爾頓套房", weekday:4500, weekend:5000, special:6500, threshold:200 },
+  { casino:"銀河", hotel:"麗絲卡爾頓", code:"RC06", room:"麗絲卡爾頓豪華套房", weekday:8000, weekend:8500, special:10000, threshold:200 },
+  { casino:"銀河", hotel:"麗絲卡爾頓", code:"RC07", room:"麗絲卡爾頓總統套房", weekday:15000, weekend:16000, special:18000, threshold:200 }
+];

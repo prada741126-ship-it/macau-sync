@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v10.13</title>
+<title>澳門洗碼報表 v6.3.5</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,28 +15,6 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230c0c12'/><text x='96' y='100' text-anchor='middle' font-size='80' font-weight='bold' font-family='serif' fill='%23D4AF37'>博</text></svg>">
 <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<!-- v10.13 版本檢測：發現新版本時自動重新載入 -->
-<script>
-(function(){
-  var APP_VERSION = 'v10.13';
-  var stored = localStorage.getItem('macau_app_version');
-  if (stored && stored !== APP_VERSION) {
-    console.log('[Version] 檢測到新版本 ' + APP_VERSION + '，舊版為 ' + stored + '，正在清除快取並重新載入...');
-    localStorage.setItem('macau_app_version', APP_VERSION);
-    // 強制重新載入（繞過快取）
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker.getRegistrations().then(function(regs) {
-        regs.forEach(function(r){ r.unregister(); });
-        location.reload(true);
-      }).catch(function(){ location.reload(true); });
-    } else {
-      location.reload(true);
-    }
-  } else {
-    localStorage.setItem('macau_app_version', APP_VERSION);
-  }
-})();
-</script>
 <style>
 :root {
   --gold: #D4AF37;
@@ -406,16 +384,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 }
 .sb-toggle:hover { color: var(--gold); }
 #sidebar.collapsed .sb-toggle { justify-content: center; }
-.sb-version {
-  padding: 6px 16px;
-  font-size: 10px;
-  color: var(--text-muted);
-  text-align: center;
-  opacity: 0.5;
-  border-top: 1px solid rgba(255,255,255,0.03);
-  flex-shrink: 0;
-}
-#sidebar.collapsed .sb-version { display: none; }
 
 /* ============================================================
    MAIN CONTENT
@@ -724,17 +692,13 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   #page-room .room-controls { flex-shrink: 0; }
   #page-room .room-table-wrap {
     flex: 1;
-    min-height: 300px;
+    min-height: 500px;
     max-height: calc(100vh - 500px);
     overflow-y: auto;
   }
   #page-room .room-table { font-size: 13px; }
   #page-room .room-table th { padding: 8px 10px; font-size: 11px; }
   #page-room .room-table td { padding: 9px 10px; }
-  /* 酒店設定桌面佈局 */
-  #room-tab-config.active { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-  .hc-panel { flex: 1; min-height: 0; }
-  .hc-table-wrap { max-height: calc(100vh - 350px); }
 }
 
 #rm-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
@@ -746,147 +710,9 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .rm-form-group input, .rm-form-group select { width: 100%; padding: 8px 10px; background: rgba(12,12,20,0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #d4d4d4; font-size: 13px; }
 .rm-form-group input:focus, .rm-form-group select:focus { border-color: var(--gold); outline: none; }
 .rm-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.rm-form-row-3col { grid-template-columns: 1fr 1fr 1fr; }
 .rm-modal-actions { display: flex; gap: 8px; margin-top: 16px; }
 .rm-btn-save { flex: 1; padding: 10px; border: none; border-radius: 8px; background: linear-gradient(135deg, rgba(39,174,96,0.8), rgba(46,204,113,0.8)); color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; }
 .rm-btn-cancel { flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 13px; cursor: pointer; }
-
-/* 所需轉碼數連動顯示 */
-.rm-threshold-row {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin: 6px 0 10px; padding: 8px 12px;
-  background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(212,175,55,0.03));
-  border: 1px solid rgba(212,175,55,0.2); border-radius: 8px;
-}
-.rm-threshold-label { font-size: 12px; color: var(--text-muted); letter-spacing: 1px; }
-.rm-threshold-value {
-  font-size: 22px; font-weight: 900; color: var(--gold);
-  text-shadow: 0 0 12px rgba(212,175,55,0.4);
-  min-width: 48px; text-align: center;
-}
-.rm-threshold-unit { font-size: 12px; color: var(--gold); opacity: 0.6; }
-
-/* ============================================================
-   房務系統 — 頁籤切換 + 酒店設定
-   ============================================================ */
-.room-tabs {
-  display: flex; gap: 4px; margin-bottom: 12px;
-  background: linear-gradient(180deg, rgba(24,12,8,0.95), rgba(16,8,4,0.97));
-  border: 1px solid rgba(212,175,55,0.18); border-radius: 12px;
-  padding: 4px; flex-shrink: 0;
-}
-.room-tab {
-  flex: 1; padding: 9px 16px; cursor: pointer; font-weight: 600;
-  color: #9a8b6e; border: none; border-radius: 9px;
-  user-select: none; transition: all 0.3s ease;
-  font-size: 13px; letter-spacing: 1px;
-  background: transparent; text-align: center;
-}
-.room-tab:hover { background: rgba(212,175,55,0.1); color: #E8D5A0; }
-.room-tab.active {
-  color: #1a1206; background: linear-gradient(135deg, #D4AF37, #C9A96E);
-  box-shadow: 0 0 20px rgba(212,175,55,0.35); font-weight: 700;
-}
-.room-tab-content { display: none; flex: 1; min-height: 0; }
-.room-tab-content.active { display: flex; flex-direction: column; }
-
-/* 酒店設定面板 */
-.hc-panel {
-  background: rgba(18,10,6,0.96); border-radius: 14px;
-  border: 1px solid rgba(212,175,55,0.2);
-  overflow: hidden; flex: 1; display: flex; flex-direction: column;
-  min-height: 0;
-}
-.hc-filter-bar {
-  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-  padding: 10px 14px; border-bottom: 1px solid rgba(212,175,55,0.15);
-  background: rgba(22,13,7,0.6); flex-shrink: 0;
-}
-.hc-filter-bar select, .hc-filter-bar input {
-  padding: 6px 10px; font-size: 12px;
-  background: rgba(20,20,30,0.7); color: #d4d4d4;
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
-  outline: none; font-family: inherit;
-}
-.hc-filter-bar select:focus, .hc-filter-bar input:focus { border-color: var(--gold); }
-.hc-filter-bar input { width: 150px; }
-.hc-table-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px; flex-shrink: 0;
-}
-.hc-table-title { font-size: 13px; font-weight: 600; color: var(--gold); }
-.hc-table-count { font-size: 11px; color: var(--text-muted); }
-.hc-table-wrap { flex: 1; overflow-y: auto; min-height: 0; }
-.hc-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 0; box-shadow: none; border: none; border-radius: 0; }
-.hc-table thead th {
-  background: rgba(212,175,55,0.06); padding: 7px 10px;
-  font-size: 11px; font-weight: 600; color: var(--gold);
-  border-bottom: 2px solid rgba(212,175,55,0.25);
-  text-align: left; white-space: nowrap;
-  position: sticky; top: 0; z-index: 2;
-}
-.hc-table tbody td {
-  padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.03);
-  font-size: 12px; color: #c8b890; vertical-align: middle;
-}
-.hc-table tbody tr:hover { background: rgba(212,175,55,0.04); }
-.hc-table .hc-code { color: var(--gold); font-family: monospace; font-size: 11px; text-align: center; }
-
-/* 酒店設定彈窗 (復用 modal-bg 模式) */
-#hc-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2001; justify-content: center; align-items: center; }
-#hc-modal-bg.active { display: flex; }
-#hc-help-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2001; justify-content: center; align-items: center; }
-#hc-help-bg.active { display: flex; }
-.hc-modal {
-  background: linear-gradient(180deg, rgba(24,14,8,0.98), rgba(16,8,4,0.99));
-  border: 1px solid rgba(212,175,55,0.25); border-radius: 14px;
-  padding: 20px 22px; width: 90%; max-width: 520px;
-  max-height: 85vh; overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.06);
-}
-.hc-modal h3 { color: var(--gold); font-size: 16px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(212,175,55,0.2); }
-.hc-modal .hc-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-.hc-modal .hc-group { flex: 1; min-width: 100px; }
-.hc-modal .hc-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-.hc-modal .hc-group input, .hc-modal .hc-group select {
-  width: 100%; padding: 8px 10px; font-size: 13px;
-  background: rgba(20,20,30,0.8); color: #d4d4d4;
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
-  outline: none; font-family: inherit;
-}
-.hc-modal .hc-group input:focus, .hc-modal .hc-group select:focus { border-color: var(--gold); }
-.hc-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(212,175,55,0.12); }
-
-/* 快速新增彈窗 */
-#hc-quick-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2005; justify-content: center; align-items: center; }
-#hc-quick-bg.active { display: flex; }
-.hc-quick-box {
-  background: linear-gradient(180deg, rgba(24,14,8,0.98), rgba(16,8,4,0.99));
-  border: 1px solid rgba(212,175,55,0.25); border-radius: 14px;
-  padding: 22px; width: 380px; max-width: 90vw;
-  box-shadow: 0 0 40px rgba(212,175,55,0.12);
-}
-.hc-quick-box h3 { color: var(--gold); font-size: 16px; margin-bottom: 14px; text-align: center; }
-.hc-quick-box .hc-group { margin-bottom: 10px; }
-.hc-quick-box .hc-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-.hc-quick-box .hc-group input {
-  width: 100%; padding: 8px 10px; font-size: 13px;
-  background: rgba(20,20,30,0.8); color: #d4d4d4;
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
-  outline: none; box-sizing: border-box;
-}
-.hc-quick-box .hc-group input:focus { border-color: var(--gold); }
-
-/* 手機響應式 — 酒店設定 */
-@media (max-width: 700px) {
-  .room-tabs { margin-bottom: 8px; border-radius: 10px; }
-  .room-tab { padding: 7px 10px; font-size: 12px; }
-  .hc-filter-bar { padding: 8px 10px; gap: 6px; }
-  .hc-filter-bar input { width: 100%; flex: 1; min-width: 0; }
-  .hc-table { font-size: 11px; }
-  .hc-table thead th { padding: 6px 8px; font-size: 10px; }
-  .hc-table tbody td { padding: 6px 8px; font-size: 11px; }
-}
 
 /* ============================================================
    玻璃擬態 / KPI 動畫 / 快速操作 / 通知 / Toast
@@ -900,7 +726,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(212,175,55,0.4); }
 .btn-ghost { background: rgba(26,26,38,0.9); color: var(--text-muted); padding: 8px 18px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
 .btn-ghost:hover { color: var(--gold); border-color: var(--gold-border); }
-.btn-sm { padding: 5px 10px !important; font-size: 11px !important; border-radius: 6px; }
 
 .notif-dot { display: inline-block; width: 7px; height: 7px; background: var(--red); border-radius: 50%; margin-left: auto; flex-shrink: 0; animation: notifPulse 2s ease-in-out infinite; }
 @keyframes notifPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -932,8 +757,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   #sidebar:not(.mobile-hidden) { left: 0; }
   .topbar-toggle { display: block; font-size: 20px; padding: 4px; }
   .rm-form-row { grid-template-columns: 1fr; }
-  .rm-form-row-3col { grid-template-columns: 1fr; }
-  .rm-threshold-value { font-size: 18px; }
   /* 手機版房務系統儀表板大幅縮小 */
   .rm-dashboard { margin-bottom: 8px; }
   .rm-dash-main { padding: 10px 12px 8px; }
@@ -1197,7 +1020,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 
   /* ===== 手機版全局優化 ===== */
   /* 防止內容溢出 */
-  body { overflow-x: hidden; }
+  body { overflow-x: auto; }
 
   /* 頂部標題列優化 */
   #topbar { padding: 0 10px; height: 48px; gap: 6px; }
@@ -1416,7 +1239,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 @media (max-width: 700px) {
   /* 頁面容器：消除多層 padding 造成的寬度損失 */
   .page { padding: 6px 4px; }
-  #page-scroll { overflow-x: hidden; }
+  #page-scroll { overflow-x: auto; }
 
   /* 月份列：強制靠左對齊以利換行，防止單行過寬 */
   .month-bar { justify-content: flex-start; }
@@ -1445,11 +1268,11 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   #all-table th:nth-child(7), #all-table td:nth-child(7),
   #all-table th:nth-child(11), #all-table td:nth-child(11) { display: none; }
 
-  /* 房務表格：隱藏非必要欄位 (客戶/入住/退房/總費用) — v7.6 更新：12列含房型 */
+  /* 房務表格：隱藏非必要欄位 (客戶/入住/退房/總費用) */
   .room-table th:nth-child(3), .room-table td:nth-child(3),
+  .room-table th:nth-child(5), .room-table td:nth-child(5),
   .room-table th:nth-child(6), .room-table td:nth-child(6),
-  .room-table th:nth-child(7), .room-table td:nth-child(7),
-  .room-table th:nth-child(10), .room-table td:nth-child(10) { display: none; }
+  .room-table th:nth-child(9), .room-table td:nth-child(9) { display: none; }
 
   /* 查詢表格：隱藏備註欄 */
   #page-query table th:nth-child(8), #page-query table td:nth-child(8) { display: none; }
@@ -1700,25 +1523,6 @@ tbody tr:hover {
 .count-animate { animation: countUp 0.4s ease forwards; }
 
 </style>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDPLDEr5QnMQ_AD-z7Wppt2fylxWoBuxj0U",
-    authDomain: "macau-sync.firebaseapp.com",
-    databaseURL: "https://macau-sync-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "macau-sync",
-    storageBucket: "macau-sync.appspot.com",
-    messagingSenderId: "5394959664910",
-    appId: "1:5394959664910:web:f445ede79937711fdd65f",
-    measurementId: "G-8BFD758YCF"
-  };
-  firebase.initializeApp(firebaseConfig);
-  var db = firebase.database();
-  console.log('[Firebase] 初始化完成');
-</script>
 </head>
 <body>
 
@@ -1809,8 +1613,8 @@ tbody tr:hover {
     <span class="sb-icon">◀</span>
     <span class="sb-label">折疊選單</span>
   </div>
-  <!-- v10.13 版本號顯示 -->
-  <div class="sb-version" id="sb-version">v10.13</div>
+  <!-- 版本號（便於確認是否為最新版） -->
+  <div class="sb-version" style="position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:10px;color:rgba(212,175,55,0.4);letter-spacing:1px;">v6.3.5</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
@@ -1877,7 +1681,7 @@ tbody tr:hover {
     <div class="ov-two-col">
       <div class="ov-panel">
         <div class="ov-panel-head"><span>🏆</span> 代理洗碼排行 Top 10</div>
-        <div class="ov-panel-body" id="ov-agent-rank" style="position:relative;min-height:200px;">
+        <div class="ov-panel-body" id="ov-agent-rank" style="position:relative;height:200px;">
           <canvas id="ov-rank-chart"></canvas>
         </div>
       </div>
@@ -1982,121 +1786,72 @@ tbody tr:hover {
   </div>
 
   <div class="page" id="page-room">
-    <!-- 房務頁籤切換 -->
-    <div class="room-tabs">
-      <button class="room-tab active" onclick="switchRoomTab('booking',this)">📋 訂房管理</button>
-      <button class="room-tab" onclick="switchRoomTab('config',this)">⚙ 酒店設定</button>
+    <div class="rm-dashboard">
+      <div class="rm-dash-main">
+        <div class="rm-dash-hero">
+          <div class="rm-hero-card">
+            <div class="rm-hero-label">本月總洗碼量</div>
+            <div class="rm-hero-val" id="rm-q-rolling">0<span>萬</span></div>
+          </div>
+          <div class="rm-hero-card">
+            <div class="rm-hero-label">已使用轉碼數</div>
+            <div class="rm-hero-val" id="rm-q-used-hero">0<span>晚</span></div>
+          </div>
+          <div class="rm-hero-card">
+            <div class="rm-hero-label">剩餘轉碼數</div>
+            <div class="rm-hero-val" id="rm-q-used-rolling">0<span>萬</span></div>
+          </div>
+        </div>
+        <div class="rm-dash-bar-wrap">
+          <div class="rm-dash-bar-info">
+            <span class="rm-dash-bar-label">額度使用率</span>
+            <span class="rm-dash-bar-pct" id="rm-progress-pct">0%</span>
+          </div>
+          <div class="rm-dash-bar-track">
+            <div class="rm-dash-bar-fill" id="rm-progress" style="width:0%;">
+              <div class="rm-dash-bar-glow"></div>
+            </div>
+            <div class="rm-dash-bar-ticks">
+              <span style="left:0%">0</span><span style="left:25%">25%</span><span style="left:50%">50%</span><span style="left:75%">75%</span><span style="left:100%">100%</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- 頁籤：訂房管理 -->
-    <div class="room-tab-content active" id="room-tab-booking">
-      <div class="rm-dashboard">
-        <div class="rm-dash-main">
-          <div class="rm-dash-hero">
-            <div class="rm-hero-card">
-              <div class="rm-hero-label">本月總洗碼量</div>
-              <div class="rm-hero-val" id="rm-q-rolling">0<span>萬</span></div>
-            </div>
-            <div class="rm-hero-card">
-              <div class="rm-hero-label">已使用轉碼數</div>
-              <div class="rm-hero-val" id="rm-q-used-hero">0<span>晚</span></div>
-            </div>
-            <div class="rm-hero-card">
-              <div class="rm-hero-label">剩餘轉碼數</div>
-              <div class="rm-hero-val" id="rm-q-used-rolling">0<span>萬</span></div>
-            </div>
-          </div>
-          <div class="rm-dash-bar-wrap">
-            <div class="rm-dash-bar-info">
-              <span class="rm-dash-bar-label">額度使用率</span>
-              <span class="rm-dash-bar-pct" id="rm-progress-pct">0%</span>
-            </div>
-            <div class="rm-dash-bar-track">
-              <div class="rm-dash-bar-fill" id="rm-progress" style="width:0%;">
-                <div class="rm-dash-bar-glow"></div>
-              </div>
-              <div class="rm-dash-bar-ticks">
-                <span style="left:0%">0</span><span style="left:25%">25%</span><span style="left:50%">50%</span><span style="left:75%">75%</span><span style="left:100%">100%</span>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- 本月統計摘要 -->
+    <div class="rm-stats-row">
+      <div class="rm-stat-item">
+        <span class="rm-stat-num" id="rm-stat-total">0</span>
+        <span class="rm-stat-label">筆訂房</span>
       </div>
+    </div>
 
-      <div class="rm-stats-row">
-        <div class="rm-stat-item">
-          <span class="rm-stat-num" id="rm-stat-total">0</span>
-          <span class="rm-stat-label">筆訂房</span>
-        </div>
-      </div>
+    <!-- 本月每日訂房長條圖 -->
+    <div class="rm-chart-wrap">
+      <div class="rm-chart-title">本月每日訂房量</div>
+      <div class="rm-chart" id="rm-chart"></div>
+    </div>
 
-      <div class="rm-chart-wrap">
-        <div class="rm-chart-title">本月每日訂房量</div>
-        <div class="rm-chart" id="rm-chart"></div>
-      </div>
+    <div class="room-controls">
+      <select class="rm-select" id="rm-filter-agent"><option value="">全部代理</option></select>
+      <input class="rm-input" type="month" id="rm-filter-month" onchange="RM.updateQuota()">
+      <button class="btn btn-gold" onclick="rmOpenModal()">＋ 新增訂房</button>
+      <button class="btn btn-ghost" onclick="rmExportCSV()">匯出</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('rm-file-input').click()">匯入</button>
+      <input type="file" id="rm-file-input" accept=".csv" style="display:none" onchange="rmImportCSV(event)">
+    </div>
 
-      <div class="room-controls">
-        <select class="rm-select" id="rm-filter-agent"><option value="">全部代理</option></select>
-        <input class="rm-input" type="month" id="rm-filter-month" onchange="RM.updateQuota()">
-        <button class="btn btn-gold" onclick="rmOpenModal()">＋ 新增訂房</button>
-        <button class="btn btn-ghost" onclick="rmExportCSV()">匯出</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('rm-file-input').click()">匯入</button>
-        <input type="file" id="rm-file-input" accept=".csv" style="display:none" onchange="rmImportCSV(event)">
-      </div>
-
-      <div class="room-table-wrap">
-        <table class="room-table">
-          <thead>
-            <tr><th>日期</th><th>代理</th><th>客戶</th><th>酒店</th><th>房型</th><th>入住</th><th>退房</th><th>天數</th><th class="num">所需轉碼</th><th class="num">總費用</th><th>狀態</th><th>操作</th></tr>
-          </thead>
-          <tbody id="rm-tbody"></tbody>
-          <tr id="rm-empty" style="display:none;"><td colspan="12"><div class="empty-state" style="padding:40px 20px;"><div class="empty-icon">🏨</div><div class="empty-title">尚無訂房紀錄</div><div class="empty-desc">使用上方表單新增第一筆訂房</div></div></td></tr>
-        </table>
-      </div>
-    </div><!-- /room-tab-booking -->
-
-    <!-- 頁籤：酒店設定 -->
-    <div class="room-tab-content" id="room-tab-config">
-      <div class="hc-panel">
-        <div class="hc-filter-bar">
-          <select id="hc-filter-casino" onchange="hcFilter()">
-            <option value="">全部體系</option>
-          </select>
-          <select id="hc-filter-hotel" onchange="hcFilter()">
-            <option value="">全部酒店</option>
-          </select>
-          <input type="text" id="hc-search" placeholder="搜尋房型/CODE..." oninput="hcFilter()">
-          <button class="btn btn-ghost btn-sm" onclick="hcAddCasino()">＋ 新增體系</button>
-          <button class="btn btn-ghost btn-sm" onclick="hcAddHotel()">＋ 新增酒店</button>
-          <button class="btn btn-gold btn-sm" onclick="hcOpenModal()">＋ 新增房型</button>
-          <button class="btn btn-ghost btn-sm" onclick="hcReset()" title="重置預設">🔄</button>
-        </div>
-        <div class="hc-table-header">
-          <span class="hc-table-title">📋 房型列表</span>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span class="hc-table-count" id="hc-count">共 0 項</span>
-            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('hc-help-bg').classList.add('active')" title="使用說明" style="padding:3px 7px;font-size:12px;">❓</button>
-          </div>
-        </div>
-        <div class="hc-table-wrap">
-          <table class="hc-table">
-            <thead>
-              <tr>
-                <th style="width:80px;">體系</th>
-                <th style="width:80px;">酒店</th>
-                <th style="width:60px;">CODE</th>
-                <th style="min-width:120px;">房型</th>
-                <th style="width:90px;">操作</th>
-              </tr>
-            </thead>
-            <tbody id="hc-tbody">
-              <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">載入中...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div><!-- /room-tab-config -->
-  </div><!-- /page-room -->
+    <div class="room-table-wrap">
+      <table class="room-table">
+        <thead>
+          <tr><th>日期</th><th>代理</th><th>客戶</th><th>酒店</th><th>入住</th><th>退房</th><th>天數</th><th class="num">所需轉碼</th><th class="num">總費用</th><th>狀態</th><th>操作</th></tr>
+        </thead>
+        <tbody id="rm-tbody"></tbody>
+        <tr id="rm-empty" style="display:none;"><td colspan="11"><div class="empty-state" style="padding:40px 20px;"><div class="empty-icon">🏨</div><div class="empty-title">尚無訂房紀錄</div><div class="empty-desc">使用上方表單新增第一筆訂房</div></div></td></tr>
+      </table>
+    </div>
+  </div>
 </div><!-- /page-scroll -->
 </div><!-- /main-content -->
 
@@ -2245,31 +2000,16 @@ tbody tr:hover {
         <input type="text" id="rm-f-client" class="rm-input" placeholder="客戶名稱">
       </div>
     </div>
-    <div class="rm-form-row rm-form-row-3col">
-      <div class="rm-form-group">
-        <label>體系</label>
-        <select id="rm-f-casino" class="rm-input" onchange="rmOnCasinoChange()">
-          <option value="">請選擇體系</option>
-        </select>
-      </div>
-      <div class="rm-form-group">
-        <label>酒店</label>
-        <select id="rm-f-hotel" class="rm-input" onchange="rmOnHotelChange()">
-          <option value="">請先選擇體系</option>
-        </select>
-      </div>
-      <div class="rm-form-group">
-        <label>房型</label>
-        <select id="rm-f-room" class="rm-input" onchange="rmOnRoomChange()">
-          <option value="">請先選擇酒店</option>
-        </select>
-      </div>
-    </div>
-    <!-- 所選房型對應的所需轉碼數 -->
-    <div class="rm-threshold-row" id="rm-threshold-row" style="display:none;">
-      <div class="rm-threshold-label">所需轉碼數</div>
-      <div class="rm-threshold-value" id="rm-threshold-val">--</div>
-      <div class="rm-threshold-unit">萬</div>
+    <div class="rm-form-group">
+      <label>酒店</label>
+      <select id="rm-f-hotel" class="rm-input" onchange="rmUpdatePrice()">
+        <option value="">請選擇酒店</option>
+        <option value="新濠天地摩柏斯" data-price="2000" data-threshold="80">新濠天地摩柏斯</option>
+        <option value="銀河" data-price="1800" data-threshold="60">銀河</option>
+        <option value="金沙" data-price="1900" data-threshold="70">金沙</option>
+        <option value="永利" data-price="1850" data-threshold="65">永利</option>
+        <option value="上葡京" data-price="1700" data-threshold="55">上葡京</option>
+      </select>
     </div>
     <div class="rm-form-row">
       <div class="rm-form-group">
@@ -2331,187 +2071,22 @@ tbody tr:hover {
   </div>
 </div>
 
-<!-- 酒店設定 — 編輯彈窗 -->
-<div id="hc-modal-bg">
-  <div class="hc-modal">
-    <h3 id="hc-modal-title">新增房型</h3>
-    <div class="hc-row">
-      <div class="hc-group">
-        <label>體系</label>
-        <select id="hc-em-casino" onchange="hcOnCasinoChange()">
-          <option value="">請選擇體系</option>
-        </select>
-      </div>
-      <div class="hc-group">
-        <label>酒店</label>
-        <select id="hc-em-hotel">
-          <option value="">請先選體系</option>
-        </select>
-      </div>
-    </div>
-    <div class="hc-row">
-      <div class="hc-group">
-        <label>CODE</label>
-        <input type="text" id="hc-em-code" placeholder="房型代碼">
-      </div>
-      <div class="hc-group">
-        <label>房型名稱</label>
-        <input type="text" id="hc-em-room" placeholder="房型名稱">
-      </div>
-    </div>
-    <div class="hc-row">
-      <div class="hc-group">
-        <label>平日價 (¥)</label>
-        <input type="number" id="hc-em-weekday" placeholder="平日房價">
-      </div>
-      <div class="hc-group">
-        <label>週五/六價 (¥)</label>
-        <input type="number" id="hc-em-weekend" placeholder="週末房價">
-      </div>
-      <div class="hc-group">
-        <label>特殊日價 (¥)</label>
-        <input type="number" id="hc-em-special" placeholder="特殊日房價">
-      </div>
-    </div>
-    <div class="hc-row">
-      <div class="hc-group" style="max-width:200px;">
-        <label>轉碼門檻 (萬)</label>
-        <input type="number" id="hc-em-threshold" placeholder="轉碼門檻">
-      </div>
-    </div>
-    <div class="hc-modal-actions">
-      <button class="btn btn-ghost" onclick="hcCloseModal()">取消</button>
-      <button class="btn btn-gold" onclick="hcSaveModal()">儲存</button>
-    </div>
-  </div>
-</div>
-
-<!-- 酒店設定 — 幫助彈窗 -->
-<div id="hc-help-bg">
-  <div class="hc-modal" style="max-width:480px;">
-    <h3>💡 使用說明</h3>
-    <div style="line-height:1.8;font-size:13px;color:var(--text-muted);">
-      ① 此頁籤用於管理<strong style="color:var(--gold);">體系、酒店、房型、CODE、價格、轉碼門檻</strong><br>
-      ② 使用<strong style="color:var(--gold);">篩選下拉</strong>可以快速找到目標<br>
-      ③ 點擊<strong style="color:var(--gold);">「＋ 新增房型」</strong>可以新增房型<br>
-      ④ 點擊<strong style="color:var(--gold);">「編輯」</strong>可以修改全部欄位<br>
-      ⑤ 點擊<strong style="color:var(--danger);">「✕」</strong>可以刪除項目<br>
-      ⑥ 設定後會自動同步到訂房管理的酒店選單
-    </div>
-    <div class="hc-modal-actions">
-      <button class="btn btn-gold" onclick="document.getElementById('hc-help-bg').classList.remove('active')">知道了</button>
-    </div>
-  </div>
-</div>
-
-<!-- 酒店設定 — 快速新增彈窗 -->
-<div id="hc-quick-bg">
-  <div class="hc-quick-box">
-    <h3 id="hc-quick-title">快速新增</h3>
-    <div class="hc-group">
-      <label id="hc-qa-label1"></label>
-      <input id="hc-qa-input1">
-    </div>
-    <div class="hc-group">
-      <label id="hc-qa-label2"></label>
-      <input id="hc-qa-input2">
-    </div>
-    <div class="hc-group" id="hc-qa-threshold-row">
-      <label>轉碼門檻 (萬)</label>
-      <input id="hc-qa-threshold" type="number" value="80">
-    </div>
-    <div class="hc-modal-actions">
-      <button class="btn btn-ghost" onclick="document.getElementById('hc-quick-bg').classList.remove('active')">取消</button>
-      <button class="btn btn-gold" onclick="hcConfirmQuick()">確認新增</button>
-    </div>
-  </div>
-</div>
-
 <!-- Toast 通知容器 -->
 <div class="toast-container" id="toast-container"></div>
-
-<!-- v10.10 手機除錯面板 -->
-<button id="debug-toggle" onclick="DBG.toggle()" title="除錯面板">⌨</button>
-<div id="debug-panel"></div>
-<script>
-// ══════════════════════════════════════
-// v10.10 手機除錯系統：攔截 console.log/error/warn
-// ══════════════════════════════════════
-var DBG = (function(){
-  var MAX = 200;
-  var logs = [];
-  var panel = null;
-  var timer = null;
-
-  function render() {
-    if (!panel) panel = document.getElementById('debug-panel');
-    if (!panel) return;
-    var html = '<div id="debug-clear" onclick="DBG.clear()">— 清除紀錄 —</div>';
-    for (var i = 0; i < logs.length; i++) {
-      var c = logs[i].level === 'error' ? 'dbg-err' : logs[i].level === 'warn' ? 'dbg-warn' : 'dbg-info';
-      html += '<div class="dbg-line ' + c + '">' + escHtml(logs[i].msg) + '</div>';
-    }
-    panel.innerHTML = html;
-    panel.scrollTop = panel.scrollHeight;
-  }
-
-  function escHtml(s) {
-    if (!s) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // 攔截並記錄
-  function hook(fn, level) {
-    return function() {
-      var args = Array.prototype.slice.call(arguments);
-      var msg = args.map(function(a){ try{ return typeof a==='object'? JSON.stringify(a) : String(a); }catch(e){ return String(a); } }).join(' ');
-      logs.push({ level: level, msg: msg, t: Date.now() });
-      if (logs.length > MAX) logs.shift();
-      render();
-      return fn.apply(console, arguments);
-    };
-  }
-
-  // 攔截 XMLHttpRequest/fetch 的 Firebase 呼叫（簡易版）
-  function init() {
-    panel = document.getElementById('debug-panel');
-    // 攔截 console
-    console.log   = hook(console.log.bind(console),   'info');
-    console.error  = hook(console.error.bind(console),  'error');
-    console.warn   = hook(console.warn.bind(console),   'warn');
-    console.info   = hook(console.info.bind(console),   'info');
-    render();
-  }
-
-  return {
-    toggle: function() {
-      if (!panel) panel = document.getElementById('debug-panel');
-      if (panel) panel.classList.toggle('show');
-      if (!DBG._inited) { DBG._inited = true; init(); }
-    },
-    clear: function() { logs = []; render(); },
-    _inited: false
-  };
-})();
-</script>
 
 <script>
 var txs = [];
 var fundWithdrawals = [];
+// v6.3.6 分離式 deletedIds：避免不同資料類型 ID 碰撞導致誤刪
+var deletedTxIds = [];    // 交易刪除 ID 清單（同步用）
+var deletedFundIds = [];  // 公基金刪除 ID 清單（同步用）
+var deletedRoomIds = []; // 房務刪除 ID 清單（同步用）
 var agentWallets = {};
-var editId = null;          // v10.0 B方案：editId 現在儲存 _fbKey（字串）而非數字 id
+var editId = null;
 var nextId = 1;
 var fundNextId = 1;
 var agentWalletNextId = 1;
 var agentList = [];
-var nextId = 1;
-var fundNextId = 1;
-// v10.0 B方案：Firebase push() 鍵架構
-var _migrated = false;      // 是否已完成 Firebase 物件格式遷移
-function _fbKey() {
-  if (db && db.ref) { try { return db.ref('macau_data/x').push().key; } catch(e) {} }
-  return 'L' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-}
 var sortState = { table: "", col: "", asc: true };
 
 // ===== 同步配置（v4.9 安全強化）=====
@@ -2522,8 +2097,8 @@ var SYNC_API = (function() {
   if (window.location.protocol === 'file:') return 'http://192.168.18.157:3000';
   var h = window.location.hostname;
   if (h.match(/^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/)) return 'http://' + h + ':3000';
-  if (h.indexOf('codebuddy.work') >= 0) return 'https://macau-sync.onrender.com';
-  return 'https://macau-sync.onrender.com';
+  // 生產環境：使用當前站點作為同步端點（server.js 已內建 /api/sync/*）
+  return window.location.origin;
 })();
 
 // ===== 核心工具函数（v4.3 修復）=====
@@ -2728,57 +2303,42 @@ function isModalOpen() {
 
 // ===== 刪除撤銷 =====
 var lastDeleted = null;
-// v10.0 B方案：使用 _fbKey 精準刪除（修復舊資料相容）
-function deleteTx(fbKey) {
-  try {
+function deleteTx(id) {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
-  // 保存副本供撤銷
-  var found = false;
-  var targetFbKey = fbKey;
+  // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
+  var deleted = null, idx = -1;
   for (var i = 0; i < txs.length; i++) {
-    var t = txs[i];
-    if (!t) continue;
-    if (t._fbKey === fbKey || String(t.id) === String(fbKey) || t.id === parseInt(fbKey) || String(t._fbKey) === String(fbKey)) {
-      lastDeleted = t;
-      lastDeleted.fbKey = t._fbKey || fbKey;
-      targetFbKey = t._fbKey || fbKey;
-      found = true;
-      break;
-    }
+    if (txs[i].id === id) { deleted = txs[i]; idx = i; break; }
   }
-  if (!found) {
-    hideLoading();
-    showToast("找不到該筆交易，可能已被刪除", "warning");
-    return;
-  }
-  // v10.0 直接從 Firebase 刪除該筆記錄
-  if (db && targetFbKey && String(targetFbKey) !== "undefined") {
-    db.ref('macau_data/txs/' + targetFbKey).set(null, function(error) {
-      if (error) { console.error('[deleteTx] Firebase 刪除失敗:', error); }
-    });
-  }
-  // 本地移除（精準比對）
-  var newTxs = [];
-  for (var i = 0; i < txs.length; i++) {
-    var t = txs[i];
-    if (!t) continue;
-    var isMatch = (t._fbKey === targetFbKey) || (String(t.id) === String(targetFbKey)) || (t.id === parseInt(targetFbKey));
-    if (!isMatch) newTxs.push(t);
-  }
-  txs = newTxs;
+  if (idx < 0) { hideLoading(); return; }
+  txs.splice(idx, 1);              // 從陣列移除
+  deletedIds.push(id);              // 記錄已刪除 ID
+  lastDeleted = deleted;
+  // 存到 localStorage（不含已刪除項目；deletedIds 另存）
   saveData(true);
-  renderAll();
-  renderOverview();
-  renderSummary();
-  updateTotalWalletUI();
-  if (lastDeleted) showUndoToast();
-  setTimeout(hideLoading, 300);
-  } catch(e) {
+  // 儲存 deletedIds
+  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
+  // 標記髒資料，確保上傳
+  if (typeof markSyncDirty === 'function') markSyncDirty();
+  // 立即上傳，上傳成功後再渲染
+  var p = (typeof syncUpload === 'function') ? syncUpload() : Promise.resolve({skipped:true});
+  p.then(function() {
+    renderAll();
+    renderOverview();
+    renderSummary();
+    updateTotalWalletUI();
+    if (lastDeleted) showUndoToast();
     hideLoading();
-    console.error('[deleteTx] 錯誤:', e);
-    showToast("刪除失敗：" + (e.message||e), "error");
-  }
+  }).catch(function() {
+    renderAll();
+    renderOverview();
+    renderSummary();
+    updateTotalWalletUI();
+    if (lastDeleted) showUndoToast();
+    hideLoading();
+    if (typeof showToast === 'function') showToast("刪除成功，但同步失敗", "warning");
+  });
 }
 function showUndoToast() {
   var container = document.getElementById("toast-container");
@@ -2795,19 +2355,21 @@ function showUndoToast() {
   container.appendChild(el);
   setTimeout(function() { if (el.parentNode) el.remove(); }, 5000);
 }
-// v10.0 B方案：撤銷時寫入 Firebase
 function undoDelete() {
   if (!lastDeleted) return;
+  // 撤銷刪除：從 deletedIds 移除 ID，並將資料重新插入陣列
+  var did = lastDeleted.id;
+  var di = deletedIds.indexOf(did);
+  if (di >= 0) deletedIds.splice(di, 1);
   txs.push(lastDeleted);
-  // 寫入 Firebase
-  if (db && lastDeleted.fbKey) db.ref('macau_data/txs/' + lastDeleted.fbKey).set(lastDeleted);
+  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
+  lastDeleted = null;
   saveData(true);
   renderAll();
   renderOverview();
   renderSummary();
   updateTotalWalletUI();
   showToast("已恢復交易！","success");
-  lastDeleted = null;
 }
 
 // ===== 月度管理 =====
@@ -2935,7 +2497,7 @@ function showPage(name, sidebarEl) {
   if (name === "all") { try { renderAll(); } catch(e) { console.error("renderAll error:", e); } }
   if (name === "summary") { try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); } }
   if (name === "query") { try { fillAgent(); doQuery(); updateTotalWalletUI(); } catch(e) { console.error("query page error:", e); } }
-  if (name === "room") { try { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } switchRoomTab("booking", document.querySelector('.room-tab')); } catch(e) { console.error("room page error:", e); } }
+  if (name === "room") { try { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } } catch(e) { console.error("room page error:", e); } }
 }
 
 // ===== Sidebar toggle =====
@@ -2987,46 +2549,7 @@ function validateMonthDate(dateStr, label) {
   return true;
 }
 
-// v10.0 B方案：openModal 接受 _fbKey（字串）或數字 id（向後兼容）
-function openModal(id) {
-  // 編輯模式：傳入 id（_fbKey 或數字 id）
-  if (id) {
-    var tx = null;
-    // 先按 _fbKey 查找
-    for (var i = 0; i < txs.length; i++) {
-      if (txs[i]._fbKey === id) { tx = txs[i]; editId = id; break; }
-    }
-    // 向後兼容：按數字 id 查找
-    if (!tx) {
-      var nid = parseInt(id);
-      if (!isNaN(nid)) {
-        for (var i = 0; i < txs.length; i++) {
-          if (txs[i].id === nid) { tx = txs[i]; editId = txs[i]._fbKey; break; }
-        }
-      }
-    }
-    if (!tx) { showToast("找不到該筆交易！", "warning"); return; }
-    document.getElementById("modal-title").textContent = "編輯交易";
-    populateAgentDropdown();
-    document.getElementById("f-date").value = tx.date || nowStr();
-    document.getElementById("f-dow").value = getDow(tx.date || nowStr());
-    document.getElementById("f-type").value = tx.type || "rolling";
-    toggleTypeFields();
-    document.getElementById("f-agent").value = tx.agent || "";
-    document.getElementById("f-client").value = tx.client || "";
-    document.getElementById("f-venue").value = tx.venue || "";
-    document.getElementById("f-vol").value = tx.volume || "";
-    document.getElementById("f-rate").value = tx.rate || "1.24";
-    document.getElementById("f-bonus").value = tx.bonus || "";
-    document.getElementById("f-drawn").value = tx.drawn || "0";
-    document.getElementById("f-cash").value = tx.cash || "";
-    document.getElementById("f-note").value = tx.note || "";
-    calc();
-    document.getElementById("modal").classList.add("show");
-    lockBody();
-    return;
-  }
-  // 新增模式（原有邏輯）
+function openModal() {
   editId = null;
   document.getElementById("modal-title").textContent = "新增交易";
   populateAgentDropdown();
@@ -3081,6 +2604,35 @@ function closeModal() {
   unlockBody();
 }
 
+function editTx(id) {
+  // 根據 ID 查找交易並填入表單進行編輯
+  var tx = null;
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].id === id) { tx = txs[i]; break; }
+  }
+  if (!tx) { showToast("找不到該筆交易", "warning"); return; }
+  editId = id;
+  document.getElementById("modal-title").textContent = "編輯交易";
+  populateAgentDropdown();
+  document.getElementById("f-date").value = tx.date || nowStr();
+  document.getElementById("f-dow").value = tx.dow || getDow(tx.date || nowStr());
+  document.getElementById("f-type").value = tx.type || "rolling";
+  toggleTypeFields();
+  document.getElementById("f-agent").value = tx.agent || "";
+  document.getElementById("f-client").value = tx.client || "";
+  document.getElementById("f-venue").value = tx.venue || "";
+  document.getElementById("f-vol").value = tx.volume || "";
+  document.getElementById("f-rate").value = tx.rate || "1.24";
+  document.getElementById("f-bonus").value = tx.bonus || "";
+  document.getElementById("f-drawn").value = tx.drawn || "0";
+  document.getElementById("f-cash").value = tx.cash || "";
+  document.getElementById("f-note").value = tx.note || "";
+  calc();
+  clearDraft(); // 編輯時清除草稿
+  document.getElementById("modal").classList.add("show");
+  lockBody();
+}
+
 function calc() {
   var vol = toNum(document.getElementById("f-vol").value);
   var rate = toNum(document.getElementById("f-rate").value);
@@ -3092,7 +2644,6 @@ function calc() {
   document.getElementById("f-undrawn").value = Math.max(0, bonus - drawn);
 }
 
-// v10.0 B方案：使用 _fbKey 直接寫入 Firebase 個別路徑
 function saveForm() {
   var date = document.getElementById("f-date").value;
   var type = document.getElementById("f-type").value;
@@ -3101,29 +2652,42 @@ function saveForm() {
   if (!date) { showToast("請選擇日期！","warning"); return; }
   if (!validateMonthDate(date, "交易")) return;
   if (!agent) { showToast("請選擇代理！","warning"); return; }
-  var isEdit = !!editId;
-  var fbKey = isEdit ? editId : _fbKey();
 
   if (type === "cash") {
     // 現金寄放：只需日期、代理、寄放金額、備註
     var cash = toNum(document.getElementById("f-cash").value);
     if (!cash) { showToast("請輸入寄放金額！","warning"); return; }
-    var cashObj = {
-      _fbKey: fbKey, id: isEdit ? (function(){for(var i=0;i<txs.length;i++)if(txs[i]._fbKey===fbKey)return txs[i].id; return nextId;})() : nextId++,
-      date: date, dow: getDow(date), type: "cash",
-      agent: agent, client: "", venue: "", volume: 0, rate: 0,
-      comm: 0, bonus: 0, drawn: 0, undrawn: 0, fund: 0,
-      cash: cash, note: note
-    };
-    if (isEdit) {
+    if (editId) {
       for (var i = 0; i < txs.length; i++) {
-        if (txs[i]._fbKey === editId) { txs[i] = cashObj; break; }
+        if (txs[i].id === editId) {
+          txs[i].date = date;
+          txs[i].dow = getDow(date);
+          txs[i].type = "cash";
+          txs[i].agent = agent;
+          txs[i].cash = cash;
+          txs[i].note = note;
+          txs[i].client = "";
+          txs[i].venue = "";
+          txs[i].volume = 0;
+          txs[i].rate = 0;
+          txs[i].comm = 0;
+          txs[i].bonus = 0;
+          txs[i].drawn = 0;
+          txs[i].undrawn = 0;
+          txs[i].fund = 0;
+          break;
+        }
       }
     } else {
-      txs.push(cashObj);
+      txs.push({
+        id: nextId++, date: date, dow: getDow(date), type: "cash",
+        agent: agent, client: "", venue: "", volume: 0, rate: 0,
+        comm: 0, bonus: 0, drawn: 0, undrawn: 0, fund: 0,
+        cash: cash, note: note
+      });
     }
   } else {
-    // 洗碼交易
+    // 洗碼交易：原有邏輯
     var client = document.getElementById("f-client").value.trim();
     var venue = document.getElementById("f-venue").value;
     var vol = toNum(document.getElementById("f-vol").value);
@@ -3134,33 +2698,36 @@ function saveForm() {
     var comm = calcComm(vol, rate);
     var fund = calcFund(comm, bonus);
     var undrawn = Math.max(0, bonus - drawn);
-    var rollingObj = {
-      _fbKey: fbKey, id: isEdit ? (function(){for(var i=0;i<txs.length;i++)if(txs[i]._fbKey===fbKey)return txs[i].id; return nextId;})() : nextId++,
-      date: date, dow: getDow(date), type: "rolling",
-      agent: agent, client: client, venue: venue,
-      volume: vol, rate: rate, comm: comm, bonus: bonus,
-      drawn: drawn, undrawn: undrawn, fund: fund, cash: 0, note: note
-    };
-    if (isEdit) {
+    if (editId) {
       for (var i = 0; i < txs.length; i++) {
-        if (txs[i]._fbKey === editId) { txs[i] = rollingObj; break; }
+        if (txs[i].id === editId) {
+          txs[i].date = date; txs[i].dow = getDow(date);
+          txs[i].type = "rolling";
+          txs[i].agent = agent; txs[i].client = client; txs[i].venue = venue;
+          txs[i].volume = vol; txs[i].rate = rate;
+          txs[i].comm = comm; txs[i].bonus = bonus;
+          txs[i].drawn = drawn; txs[i].undrawn = undrawn;
+          txs[i].fund = fund; txs[i].note = note;
+          txs[i].cash = 0;
+          break;
+        }
       }
     } else {
-      txs.push(rollingObj);
+      txs.push({
+        id: nextId++, date: date, dow: getDow(date), type: "rolling",
+        agent: agent, client: client, venue: venue,
+        volume: vol, rate: rate, comm: comm, bonus: bonus,
+        drawn: drawn, undrawn: undrawn, fund: fund, cash: 0, note: note
+      });
     }
   }
   showLoading("儲存中…");
-  // v10.0 B方案：直接寫入 Firebase 個別路徑（永不覆蓋其他記錄）
-  if (db && fbKey) {
-    var targetObj = null;
-    for (var i = 0; i < txs.length; i++) { if (txs[i]._fbKey === fbKey) { targetObj = txs[i]; break; } }
-    if (targetObj) db.ref('macau_data/txs/' + fbKey).set(targetObj);
-  }
   saveData(true);
-  closeModal();
-  clearDraft();
-  showToast(isEdit ? "已更新！" : "已新增！","success");
+  closeModal();  // 先關閉彈窗，確保一定執行
+  clearDraft();  // 清除草稿（儲存成功後不再需要）
+  showToast(editId ? "已更新！" : "已新增！","success");
   editId = null;
+  // 後台重新渲染（即使報錯也不影響彈窗關閉）
   try { renderAll(); } catch(e) { console.error("renderAll error:", e); }
   try { renderOverview(); } catch(e) { console.error("renderOverview error:", e); }
   try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); }
@@ -3304,19 +2871,6 @@ document.addEventListener("DOMContentLoaded", function() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js").then(function(reg) {
       console.log("PWA: Service Worker 已註冊", reg.scope);
-      // v10.13 監聽 SW 更新，發現新版本時提示重新載入
-      reg.addEventListener('updatefound', function() {
-        var newWorker = reg.installing;
-        newWorker.addEventListener('statechange', function() {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[SW] 新版本已下載，準備重新載入...');
-            showToast('偵測到新版，3秒後自動重新載入', 'warning');
-            setTimeout(function() {
-              window.location.reload(true);
-            }, 3000);
-          }
-        });
-      });
     }).catch(function(err) {
       console.log("PWA: Service Worker 註冊失敗", err);
     });
@@ -3448,20 +3002,24 @@ function hideLoading() {
   if (el) el.classList.remove("show");
 }
 
+function calcFundBalance() {
+  var totalF = 0;
+  for (var i = 0; i < txs.length; i++) { totalF += (txs[i].fund || 0); }
+  var totalW = 0, totalD = 0, totalCD = 0;
+  for (var i = 0; i < fundWithdrawals.length; i++) {
+    if (fundWithdrawals[i].deleted) continue;
+    if (fundWithdrawals[i].type === "deposit") { totalD += (fundWithdrawals[i].amount || 0); }
+    else if (fundWithdrawals[i].type === "cash_deposit") { totalCD += (fundWithdrawals[i].amount || 0); }
+    else { totalW += (fundWithdrawals[i].amount || 0); }
+  }
+  return Math.max(0, totalF + totalD + totalCD - totalW);
+}
 function openFundModal() {
   document.getElementById("fund-date").value = nowStr();
   document.getElementById("fund-type").value = "withdraw";
   document.getElementById("fund-amount").value = "";
   document.getElementById("fund-note").value = "";
-  var totalF = 0;
-  for (var i = 0; i < txs.length; i++) { totalF += (txs[i].fund || 0); }
-  var totalW = 0, totalD = 0, totalCD = 0;
-  for (var i = 0; i < fundWithdrawals.length; i++) {
-    if (fundWithdrawals[i].type === "deposit") { totalD += (fundWithdrawals[i].amount || 0); }
-    else if (fundWithdrawals[i].type === "cash_deposit") { totalCD += (fundWithdrawals[i].amount || 0); }
-    else { totalW += (fundWithdrawals[i].amount || 0); }
-  }
-  document.getElementById("fund-balance").value = fmt(Math.max(0, totalF + totalD + totalCD - totalW));
+  document.getElementById("fund-balance").value = fmt(calcFundBalance());
   document.getElementById("fund-modal").classList.add("show");
   lockBody();
 }
@@ -3469,72 +3027,65 @@ function closeFundModal() {
   document.getElementById("fund-modal").classList.remove("show");
   unlockBody();
 }
-// v10.0 B方案：公基金使用 _fbKey
 function saveFundForm() {
-  if (window._savingFund) return;
-  window._savingFund = true;
   var date = document.getElementById("fund-date").value;
   var type = document.getElementById("fund-type").value;
   var amount = toNum(document.getElementById("fund-amount").value);
   var note = document.getElementById("fund-note").value.trim();
-  if (!date) { window._savingFund = false; showToast("請選擇日期！","warning"); return; }
-  if (!validateMonthDate(date, "公基金異動")) { window._savingFund = false; return; }
-  if (!amount) { window._savingFund = false; showToast("請輸入金額！","warning"); return; }
-  var fbKey = _fbKey();
-  var rec = { _fbKey: fbKey, id: fundNextId++, date: date, type: type, amount: amount, note: note };
-  fundWithdrawals.push(rec);
-  // v10.0 直接寫入 Firebase
-  if (db && fbKey) db.ref('macau_data/fundWithdrawals/' + fbKey).set(rec);
+  if (!date) { showToast("請選擇日期！","warning"); return; }
+  if (!validateMonthDate(date, "公基金異動")) return;
+  if (!amount) { showToast("請輸入金額！","warning"); return; }
+  // 檢查提領時不能超過可提領餘額
+  if (type === "withdraw") {
+    var testBal = calcFundBalance();
+    if (amount > testBal) { showToast("提領金額超過可提領餘額 " + fmt(testBal) + "！", "warning"); return; }
+  }
+  fundWithdrawals.push({ id: fundNextId++, date: date, type: type, amount: amount, note: note });
   saveFundData(true);
   closeFundModal();
-  doQuery();
+  // 刷新所有頁面的基金餘額顯示
+  renderOverview();
+  renderSummary();
+  // 只在查詢頁面時刷新查詢明細
+  var qp = document.getElementById("page-query");
+  if (qp && qp.style.display !== "none") {
+    fillAgent(); doQuery();
+  }
   updateTotalWalletUI();
   showToast("已儲存！","success");
-  window._savingFund = false;
 }
-// v10.0 B方案：使用 _fbKey 刪除公基金
 function deleteFund(id) {
-  try {
   if (!confirm("確定刪除？")) return;
-  var key = String(id);
-  var fbKey = null;
-  var newArr = [];
+  // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
+  var idx = -1;
   for (var i = 0; i < fundWithdrawals.length; i++) {
-    if (fundWithdrawals[i]._fbKey === key || fundWithdrawals[i].id === id || fundWithdrawals[i].id === parseInt(id)) {
-      fbKey = fundWithdrawals[i]._fbKey;
-    } else {
-      newArr.push(fundWithdrawals[i]);
-    }
+    if (fundWithdrawals[i].id === id) { idx = i; break; }
   }
-  fundWithdrawals = newArr;
-  if (db && fbKey) {
-    db.ref('macau_data/fundWithdrawals/' + fbKey).set(null, function(error) {
-      if (error) console.error('[deleteFund] Firebase 刪除失敗:', error);
-    });
-  }
+  if (idx < 0) return;
+  var deleted = fundWithdrawals.splice(idx, 1)[0]; // 從陣列移除
+  deletedIds.push(id);                               // 記錄已刪除 ID
+  try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
   saveFundData(true);
-  doQuery();
-  updateTotalWalletUI();
-  } catch(e) {
-    console.error('[deleteFund] 錯誤:', e);
-    showToast("刪除失敗：" + (e.message||e), "error");
+  // 刷新所有頁面的基金餘額顯示
+  renderOverview();
+  renderSummary();
+  var qp = document.getElementById("page-query");
+  if (qp && qp.style.display !== "none") {
+    fillAgent(); doQuery();
   }
+  updateTotalWalletUI();
 }
 function saveFundData(silent) {
+  markSyncDirty();
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
-  // v8.0 移除全局锁，改用 deviceId 回音过滤
   if (typeof syncUpload === 'function') syncUpload();
 }
-// v10.0 B方案：載入時自動補 _fbKey
 function loadFundData(silent) {
   var d = localStorage.getItem("macau_fund_data");
   if (!d) return;
   fundWithdrawals = decryptData(d);
   var maxId = 0;
-  for (var i = 0; i < fundWithdrawals.length; i++) {
-    if (!fundWithdrawals[i]._fbKey) fundWithdrawals[i]._fbKey = _fbKey();  // v10.0 補 _fbKey
-    if (fundWithdrawals[i].id > maxId) maxId = fundWithdrawals[i].id;
-  }
+  for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i].id > maxId) maxId = fundWithdrawals[i].id; }
   fundNextId = maxId + 1;
 }
 
@@ -3567,7 +3118,6 @@ function closeAgentWalletModal() {
   document.getElementById("agent-wallet-modal").classList.remove("show");
   unlockBody();
 }
-// v10.0 B方案：代理錢包使用 _fbKey
 function saveAgentWalletForm() {
   var date = document.getElementById("aw-date").value;
   var type = document.getElementById("aw-type").value;
@@ -3579,11 +3129,7 @@ function saveAgentWalletForm() {
   if (!amount) { showToast("請輸入金額！","warning"); return; }
   try {
     if (!agentWallets[agent]) agentWallets[agent] = [];
-    var fbKey = _fbKey();
-    var rec = { _fbKey: fbKey, id: agentWalletNextId++, date: date, type: type, amount: amount, note: note };
-    agentWallets[agent].push(rec);
-    // v10.0 直接寫入 Firebase
-    if (db && fbKey) db.ref('macau_data/agentWallets/' + agent + '/' + fbKey).set(rec);
+    agentWallets[agent].push({ id: agentWalletNextId++, date: date, type: type, amount: amount, note: note });
     saveAgentWallets(true);
     syncAgentDrawn(agent);
     closeAgentWalletModal();
@@ -3595,30 +3141,15 @@ function saveAgentWalletForm() {
     try { closeAgentWalletModal(); } catch(e2) {}
   }
 }
-// v10.12 代理錢包刪除：簡化邏輯，統一走 syncUpload transaction
 function deleteAgentWallet(agent, id) {
   if (!confirm("確定刪除？")) return;
   var arr = agentWallets[agent] || [];
-  var key = String(id);
   var newArr = [];
-  var found = false;
-  for (var i = 0; i < arr.length; i++) {
-    var t = arr[i];
-    if (!t) continue;
-    var matched = (String(t._fbKey) === key || String(t.id) === key || t.id === parseInt(id));
-    if (matched) { found = true; continue; }
-    newArr.push(t);
-  }
-  if (!found) { showToast("找不到該筆記錄","warning"); return; }
+  for (var i = 0; i < arr.length; i++) { if (arr[i].id !== id) newArr.push(arr[i]); }
   agentWallets[agent] = newArr;
-  // 立即更新本地 UI
-  saveAgentWalletsLocalOnly();
+  saveAgentWallets(true);
   syncAgentDrawn(agent);
-  try { doQuery(); } catch(e) {}
-  showToast("代理錢包已刪除，同步中…", "success");
-  console.log("[deleteAgentWallet] 本地刪除完成 agent=" + agent + " id=" + id + "，準備 syncUpload");
-  // 無論有無 Firebase，都執行 syncUpload（有 db 時 transaction 會正確同步）
-  syncUpload();
+  doQuery();
 }
 function syncAgentDrawn(agent) {
   try {
@@ -3642,13 +3173,8 @@ function syncAgentDrawn(agent) {
 }
 function saveAgentWallets(silent) {
   localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
-  if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
+  if (typeof syncUpload === 'function') syncUpload();
 }
-// v10.8 僅存本地（不觸發 syncUpload）
-function saveAgentWalletsLocalOnly() {
-  localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
-}
-// v10.0 B方案：載入時自動補 _fbKey
 function loadAgentWallets(silent) {
   var d = localStorage.getItem("macau_agent_wallets");
   if (!d) return;
@@ -3657,21 +3183,17 @@ function loadAgentWallets(silent) {
   var agents = Object.keys(agentWallets);
   for (var i = 0; i < agents.length; i++) {
     var arr = agentWallets[agents[i]];
-    for (var j = 0; j < arr.length; j++) {
-      if (!arr[j]._fbKey) arr[j]._fbKey = _fbKey();  // v10.0 補 _fbKey
-      if (arr[j].id > maxId) maxId = arr[j].id;
-    }
+    for (var j = 0; j < arr.length; j++) { if (arr[j].id > maxId) maxId = arr[j].id; }
   }
   agentWalletNextId = maxId + 1;
 }
 
 function saveData(silent) {
-  console.log('[saveData] 函數被調用，silent=', silent, '，交易數量：', txs.length);
   try {
+    markSyncDirty();  // 標記數據已變更，加速同步
     var encrypted = encryptData(txs);
     localStorage.setItem("macau_data", encrypted);
-    console.log('[saveData] 已保存到 localStorage（加密）');
-    if (typeof syncUpload === 'function') { console.log('[saveData] 準備呼叫 syncUpload()'); syncUpload(); }
+    if (typeof syncUpload === 'function') syncUpload();
     if (!silent) showToast("已儲存 " + txs.length + " 筆","success");
   } catch(e) {
     console.error('saveData error:', e);
@@ -3686,16 +3208,12 @@ function saveData(silent) {
   }
 }
 
-// v10.0 B方案：載入時自動補 _fbKey
 function loadData(silent) {
   var d = localStorage.getItem("macau_data");
   if (!d) { if (!silent) showToast("無資料","info"); return; }
   txs = decryptData(d);
   var maxId = 0;
-  for (var i = 0; i < txs.length; i++) {
-    if (!txs[i]._fbKey) txs[i]._fbKey = _fbKey();  // v10.0 補 _fbKey
-    if (txs[i].id > maxId) maxId = txs[i].id;
-  }
+  for (var i = 0; i < txs.length; i++) { if (txs[i].id > maxId) maxId = txs[i].id; }
   nextId = maxId + 1;
   renderAll();
   renderOverview();
@@ -3703,17 +3221,25 @@ function loadData(silent) {
   if (!silent) showToast("已讀取 " + txs.length + " 筆","success");
 }
 
-// v10.0 B方案：刪除事件監聽器，使用 _fbKey
 document.addEventListener("click", function(e) {
   var btn = e.target.closest("[data-del]");
-  if (!btn) return;
+  if (!btn) {
+    // 檢查是否為編輯按鈕
+    var editBtn = e.target.closest("[data-edit]");
+    if (editBtn) {
+      e.preventDefault();
+      var eid = parseInt(editBtn.getAttribute("data-edit"));
+      editTx(eid);
+    }
+    return;
+  }
   e.preventDefault();
-  var fbKey = btn.getAttribute("data-del");
-  console.log('[Delete] 點擊刪除按鈕，fbKey:', fbKey);
-  deleteTx(fbKey);
+  var id = parseInt(btn.getAttribute("data-del"));
+  deleteTx(id);
 });
 
 function renderAll() {
+  try {
   var tbody = document.getElementById("all-body");
   tbody.innerHTML = "";
   var tbl = document.getElementById("all-table");
@@ -3734,6 +3260,8 @@ function renderAll() {
   }
   // 排序
   filtered = sortTxs(filtered.slice());
+  // 過濾已刪除項目（deleted:true 不下載時顯示）
+  filtered = filtered.filter(function(t) { return !t.deleted; });
   // ✅ 修正：先更新 KPI 卡片（即使沒有資料也要歸零）
   renderAllMiniKPI();
   if (!filtered.length) {
@@ -3772,25 +3300,28 @@ function renderAll() {
       "<td class='num'>" + drawnFmt + "</td>" +
       "<td class='num'>" + undrawnFmt + "</td>" +
       "<td>" + (t.note || "") + "</td>" +
-      "<td><button class='btn-gold' onclick='openModal(\"" + (t._fbKey||t.id) + "\")'>編輯</button> <button class='btn-red' onclick='deleteTx(\"" + (t._fbKey||t.id) + "\")'>刪除</button></td>";
+      "<td><button class='btn' style='background:#3498db;color:#fff;padding:5px 10px;font-size:12px;border-radius:6px;border:none;cursor:pointer;' data-edit='" + t.id + "'>編輯</button> <button class='btn-red' data-del='" + t.id + "'>刪除</button></td>";
     tbody.appendChild(tr);
   }
   fillAgent();
   populateVenueDropdown();
+  } catch(e) { console.error('[renderAll] error:', e); }
 }
 
 function calcTotalWallet() {
   // 計算所有代理錢包餘額（v4.9 修復）
+  // 過濾已刪除項目
+  var activeTxs = txs.filter(function(t) { return !t.deleted; });
   var agentSet = {};
   var agentTxDrawn = {};  // 每位代理的 tx.drawn（因 syncAgentDrawn 全部設成一樣，只需取一次）
-  for (var i = 0; i < txs.length; i++) {
-    var a = txs[i].agent || "";
+  for (var i = 0; i < activeTxs.length; i++) {
+    var a = activeTxs[i].agent || "";
     if (!a) continue;
     if (!agentSet[a]) agentSet[a] = { bonus: 0, cash: 0 };
-    agentSet[a].bonus += (txs[i].bonus || 0);
-    agentSet[a].cash += (txs[i].cash || 0);
+    agentSet[a].bonus += (activeTxs[i].bonus || 0);
+    agentSet[a].cash += (activeTxs[i].cash || 0);
     // 記錄此代理的 drawn（因 syncAgentDrawn 設全部交易一樣，取第一次即可）
-    if (!agentTxDrawn[a] && txs[i].drawn > 0) agentTxDrawn[a] = txs[i].drawn;
+    if (!agentTxDrawn[a] && activeTxs[i].drawn > 0) agentTxDrawn[a] = activeTxs[i].drawn;
   }
   var totalAgent = 0;
   var agents = Object.keys(agentSet);
@@ -3810,16 +3341,7 @@ function calcTotalWallet() {
     totalAgent += bal;
   }
   // 計算公基金餘額
-  var totalFund = 0;
-  for (var i = 0; i < txs.length; i++) { totalFund += (txs[i].fund || 0); }
-  var fwDep = 0, fwCDep = 0, fwWithdraw = 0;
-  for (var i = 0; i < fundWithdrawals.length; i++) {
-    var ft = fundWithdrawals[i].type;
-    if (ft === "deposit") fwDep += (fundWithdrawals[i].amount || 0);
-    else if (ft === "cash_deposit") fwCDep += (fundWithdrawals[i].amount || 0);
-    else fwWithdraw += (fundWithdrawals[i].amount || 0);
-  }
-  var fundBal = Math.max(0, totalFund + fwDep + fwCDep - fwWithdraw);
+  var fundBal = calcFundBalance();
   return totalAgent + fundBal;
 }
 
@@ -3836,7 +3358,6 @@ function closeCurrentMonth() {
   if (!confirm('確定執行 ' + now + ' 月末結算？\n\n結算後將鎖定本月資料，無法再登錄新交易。')) return;
   workingMonth = now;
   localStorage.setItem('macau_working_month', now);
-  if (typeof syncUpload === 'function') syncUpload();
   document.getElementById('month-badge').textContent = now;
   document.getElementById('month-status').textContent = '已鎖定';
   document.getElementById('month-status').style.color = '#e74c3c';
@@ -3844,325 +3365,238 @@ function closeCurrentMonth() {
   showToast('月末結算完成，' + now + ' 已鎖定', 'success');
 }
 
-// ===== v10.0 B方案：Firebase push() 鍵架構，個別路徑寫入 =====
-
-// 輔助函數：將物件格式轉為陣列（Firebase 物件 → 本地陣列）
-function _objToArray(obj) {
-  var arr = [];
-  if (obj && typeof obj === 'object') {
-    var keys = Object.keys(obj);
-    for (var i = 0; i < keys.length; i++) {
-      var v = obj[keys[i]];
-      if (v && typeof v === 'object' && !Array.isArray(v)) { v._fbKey = keys[i]; arr.push(v); }
-    }
-  }
-  return arr;
-}
-
-// 輔助函數：將陣列轉為物件（本地陣列 → Firebase 物件格式）
-function _arrToObj(arr) {
-  var obj = {};
-  for (var i = 0; i < arr.length; i++) {
-    var item = arr[i];
-    if (!item._fbKey) item._fbKey = _fbKey();
-    obj[item._fbKey] = item;
-  }
-  return obj;
-}
-
-// 輔助函數：將代理錢包物件值轉為 Firebase 物件格式
-function _awArrToObj(aw) {
-  var result = {};
-  var agents = Object.keys(aw);
-  for (var i = 0; i < agents.length; i++) {
-    var agent = agents[i];
-    var arr = aw[agent] || [];
-    if (!arr.length) continue;
-    result[agent] = {};
-    for (var j = 0; j < arr.length; j++) {
-      var item = arr[j];
-      if (!item._fbKey) item._fbKey = _fbKey();
-      result[agent][item._fbKey] = item;
-    }
-  }
-  return result;
-}
-
+// ===== 同步功能 =====
+var _lastSyncModified = 0; // 紀錄上次同步時間戳，用於增量同步
+var _syncDirty = false;     // 標記數據是否有變更，避免無謂上傳
+function markSyncDirty() { _syncDirty = true; }
 function syncUpload() {
-  if (!db) { console.log('[Sync ↑] Firebase 未初始化'); return; }
-  console.log('[Sync ↑] v10.0 B方案：分路徑個別寫入');
-
-  // v10.0 B方案：每個記錄已透過個別路徑寫入。syncUpload 作為批量備援。
-  // 使用 transaction() 安全合併整個物件（不是陣列！）
-
-  // 1. txs：交易記錄（物件格式）
-  db.ref('macau_data/txs').transaction(function(current) {
-    var fb = current || {};
-    if (Array.isArray(fb)) fb = _arrToObj(fb);
-    var local = _arrToObj(txs);
-    var localKeys = {};
-    var keys = Object.keys(local);
-    for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; localKeys[keys[i]] = true; }
-    // 刪除 fb 中存在但本地不存在的鍵
-    var fbKeys = Object.keys(fb);
-    for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
-    return fb;
-  }, function(error, committed) {
-    if (error) console.error('[Sync ↑] txs 失敗', error);
-    else if (committed) console.log('[Sync ↑] txs 同步成功');
-  });
-
-  // 2. fundWithdrawals：公基金
-  db.ref('macau_data/fundWithdrawals').transaction(function(current) {
-    var fb = current || {};
-    if (Array.isArray(fb)) fb = _arrToObj(fb);
-    var local = _arrToObj(fundWithdrawals);
-    var localKeys = {};
-    var keys = Object.keys(local);
-    for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; localKeys[keys[i]] = true; }
-    var fbKeys = Object.keys(fb);
-    for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
-    return fb;
-  }, function(error, committed) {
-    if (error) console.error('[Sync ↑] fundWithdrawals 失敗', error);
-  });
-
-  // 3. agentList（保持陣列）
-  db.ref('macau_data/agentList').transaction(function(current) {
-    if (current === null) return agentList;
-    if (!Array.isArray(current)) return agentList;
-    var s = {}; for (var i = 0; i < current.length; i++) s[current[i]] = true;
-    for (var i = 0; i < agentList.length; i++) s[agentList[i]] = true;
-    return Object.keys(s);
-  });
-
-  // 4. agentWallets（巢狀物件）
-  console.log("[Sync ↑] agentWallets transaction 開始");
-  db.ref('macau_data/agentWallets').transaction(function(current) {
-    console.log("[Sync ↑] agentWallets transaction callback，current 有資料？", !!(current && Object.keys(current).length));
-    var fb = current || {};
-    var local = _awArrToObj(agentWallets);
-    var localAgentKeys = {};
-    var agents = Object.keys(local);
-    for (var i = 0; i < agents.length; i++) {
-      var a = agents[i];
-      localAgentKeys[a] = {};
-      if (!fb[a]) fb[a] = {};
-      var keys = Object.keys(local[a]);
-      for (var j = 0; j < keys.length; j++) { fb[a][keys[j]] = local[a][keys[j]]; localAgentKeys[a][keys[j]] = true; }
-    }
-    // 刪除 fb 中存在但本地不存在的鍵（每個代理內）
-    var fbAgents = Object.keys(fb);
-    for (var i = 0; i < fbAgents.length; i++) {
-      var a = fbAgents[i];
-      if (!localAgentKeys[a]) { delete fb[a]; continue; }
-      var fbKeys = Object.keys(fb[a]);
-      for (var j = 0; j < fbKeys.length; j++) { if (!localAgentKeys[a][fbKeys[j]]) delete fb[a][fbKeys[j]]; }
-    }
-    return fb;
-  }, function(error, committed) {
-    if (error) console.error('[Sync ↑] agentWallets transaction 失敗', error);
-    else if (committed) console.log('[Sync ↑] agentWallets 同步成功');
-    else console.log('[Sync ↑] agentWallets transaction 未提交（資料未變更）');
-  });
-
-  // 5. workingMonth
-  if (workingMonth) db.ref('macau_data/workingMonth').set(workingMonth);
-
-  // 6. rmBookings（修正：同步刪除）
-  if (typeof RM !== 'undefined' && RM.bookings) {
-    db.ref('macau_data/rmBookings').transaction(function(current) {
-      // 以本地為基礎（確保刪除會同步）
-      var local = _arrToObj(RM.bookings);
-      if (!current) return local;  // Firebase 無資料，直接用本地
-      var fb = current;
-      if (Array.isArray(fb)) fb = _arrToObj(fb);  // 舊格式遷移
-      // 先將本地所有記錄覆蓋到 fb
-      var localKeys = {};
-      var lk = Object.keys(local);
-      for (var i = 0; i < lk.length; i++) { fb[lk[i]] = local[lk[i]]; localKeys[lk[i]] = true; }
-      // 再刪除 fb 中存在但本地不存在的鍵（本地已刪除的）
-      var fbKeys = Object.keys(fb);
-      for (var j = 0; j < fbKeys.length; j++) {
-        if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]];
-      }
-      return fb;
-    }, function(error, committed) {
-      if (error) console.error('[Sync ↑] rmBookings transaction 失敗', error);
-      else if (committed) console.log('[Sync ↑] rmBookings 同步成功');
-    });
+  if (!SYNC_API) return Promise.reject('未配置同步伺服器');
+  // 若數據未變更且已上傳過，跳過上傳以加快速度
+  if (!_syncDirty && _lastSyncModified > 0) {
+    return Promise.resolve({ skipped: true });
   }
-
-  // 7. archives
-  try { var a = localStorage.getItem('macau_archives'); if (a) db.ref('macau_data/archives').set(JSON.parse(a)); } catch(e) {}
-
-  console.log('[Sync ↑] 已送出');
+  var payload = {
+    password: SYNC_PASSWORD,
+    deletedIds: deletedIds,  // 上傳已刪除 ID 清單
+    txs: txs,
+    agentList: agentList,
+    agentWallets: agentWallets,
+    fundWithdrawals: fundWithdrawals,
+    workingMonth: workingMonth,
+    archives: (function(){ try { return JSON.parse(localStorage.getItem('macau_archives'))||{}; } catch(e) { return {}; } })(),
+    rm_bookings: (typeof RM !== 'undefined' && RM.bookings && RM.bookings.length > 0) ? RM.bookings : undefined,
+    rm_last_id: (typeof RM !== 'undefined' && RM.lastId && RM.lastId > 0) ? RM.lastId : undefined,
+    timestamp: Date.now()
+  };
+  return fetch(SYNC_API + '/api/sync/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-sync-password': SYNC_PASSWORD || '' },
+    body: JSON.stringify(payload)
+  }).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function(resp) {
+    _syncDirty = false; // 上傳成功，清除髒標記
+    // 上傳成功後同步更新時間戳，避免下一輪 poll 誤判為有變更
+    if (resp && resp.lastModified) _lastSyncModified = resp.lastModified;
+    console.log('[Sync ↑] 上傳成功', resp);
+    return resp;
+  }).catch(function(err) {
+    console.error('[Sync ↑] 上傳失敗', err);
+    throw err;
+  });
 }
 
 function syncDownload() {
-  // Firebase 使用即時監聽，無需手動下載
-  console.log('[Sync ↓] Firebase 使用即時監聽');
+  if (!SYNC_API) return Promise.reject('未配置同步伺服器');
+  // 先透過 /api/poll 檢查伺服器數據是否有變更，有變更才下載
+  var pollUrl = SYNC_API + '/api/poll?since=' + _lastSyncModified;
+  return fetch(pollUrl, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(pollResp) {
+      if (!pollResp || pollResp.ok === false) {
+        throw new Error(pollResp ? pollResp.error : '未知錯誤');
+      }
+      if (!pollResp.changed) {
+        console.log('[Sync ↓] 數據未變更，跳過下載');
+        return pollResp;
+      }
+      // 有變更：若 poll 回應已含數據則直接使用，否則下載全量
+      if (pollResp.data && pollResp.data.txs !== undefined) {
+        return pollResp;
+      }
+      var url = SYNC_API + '/api/sync/download';
+      return fetch(url, { headers: { 'x-sync-password': SYNC_PASSWORD || '' } })
+        .then(function(r2) {
+          if (!r2.ok) throw new Error('HTTP ' + r2.status);
+          return r2.json();
+        });
+    })
+    .then(function(data) {
+      if (data.changed === false) return data; // poll 回傳的未變更回應
+      // 處理 poll 回傳的 data 格式或 download 回傳的格式
+      var d = data.data || data;
+      if (!d || d.ok === false) {
+        throw new Error(d ? d.error : '未知錯誤');
+      }
+      // 處理伺服器下發的 deletedIds：合併並從本地陣列中移除
+      if (d.deletedIds && Array.isArray(d.deletedIds)) {
+        // 合併 deletedIds（保留本地和伺服器兩邊的 ID）
+        for (var di = 0; di < d.deletedIds.length; di++) {
+          var did = d.deletedIds[di];
+          if (deletedIds.indexOf(did) < 0) deletedIds.push(did);
+        }
+        // 將 deletedIds 存到 localStorage
+        try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
+        // 從 txs 中移除已被刪除的 ID
+        var txsFresh = [];
+        for (var i = 0; i < txs.length; i++) {
+          if (deletedIds.indexOf(txs[i].id) < 0) txsFresh.push(txs[i]);
+        }
+        txs = txsFresh;
+        // 從 fundWithdrawals 中移除
+        var fwFresh = [];
+        for (var i = 0; i < fundWithdrawals.length; i++) {
+          if (deletedIds.indexOf(fundWithdrawals[i].id) < 0) fwFresh.push(fundWithdrawals[i]);
+        }
+        fundWithdrawals = fwFresh;
+        // 從 RM.bookings 中移除
+        if (typeof RM !== 'undefined' && RM.bookings) {
+          var rmFresh = [];
+          for (var i = 0; i < RM.bookings.length; i++) {
+            if (deletedIds.indexOf(RM.bookings[i].id) < 0) rmFresh.push(RM.bookings[i]);
+          }
+          RM.bookings = rmFresh;
+        }
+        console.log('[Sync ↓] 已根據 deletedIds 清理本地資料，共 ' + deletedIds.length + ' 筆刪除紀錄');
+      }
+      // 合併 txs（按 ID 合併，不含已刪除的 ID）
+      if (d.txs !== undefined) {
+        var txMap = {};
+        for (var i = 0; i < txs.length; i++) txMap[txs[i].id] = txs[i];
+        for (var i = 0; i < d.txs.length; i++) {
+          var sItem = d.txs[i];
+          // 跳過已刪除的 ID
+          if (deletedIds.indexOf(sItem.id) >= 0) continue;
+          txMap[sItem.id] = sItem;
+        }
+        txs = [];
+        for (var tid in txMap) txs.push(txMap[tid]);
+      }
+      // agentList：只在上傳成功後才取代（避免空資料覆蓋本地資料）
+      if (d.agentList !== undefined && d.agentList.length > 0) agentList = d.agentList;
+      // agentWallets：只在上傳成功後才取代
+      if (d.agentWallets !== undefined && Object.keys(d.agentWallets).length > 0) agentWallets = d.agentWallets;
+      // 合併 fundWithdrawals（按 ID 合併，不含已刪除的 ID）
+      if (d.fundWithdrawals !== undefined) {
+        var fwMap = {};
+        for (var i = 0; i < fundWithdrawals.length; i++) fwMap[fundWithdrawals[i].id] = fundWithdrawals[i];
+        for (var i = 0; i < d.fundWithdrawals.length; i++) {
+          var sItem = d.fundWithdrawals[i];
+          if (deletedIds.indexOf(sItem.id) >= 0) continue; // 跳過已刪除的 ID
+          fwMap[sItem.id] = sItem;
+        }
+        fundWithdrawals = [];
+        for (var fid in fwMap) fundWithdrawals.push(fwMap[fid]);
+      }
+      if (d.workingMonth) workingMonth = d.workingMonth;
+      if (d.archives) localStorage.setItem('macau_archives', JSON.stringify(d.archives));
+      // 還原 RM 數據（合併策略，保留本地尚未上傳的資料）
+      if (d.rm_bookings !== undefined && typeof RM !== 'undefined') {
+        var rmMap = {};
+        for (var ri = 0; ri < RM.bookings.length; ri++) rmMap[RM.bookings[ri].id] = RM.bookings[ri];
+        for (var ri = 0; ri < d.rm_bookings.length; ri++) {
+          var sItem = d.rm_bookings[ri];
+          var lItem = rmMap[sItem.id];
+          if (lItem && lItem.deleted) {
+            rmMap[sItem.id] = lItem;
+          } else if (sItem.deleted) {
+            rmMap[sItem.id] = sItem;
+          } else {
+            rmMap[sItem.id] = sItem;
+          }
+        }
+        RM.bookings = [];
+        for (var rid in rmMap) RM.bookings.push(rmMap[rid]);
+        try { localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings)); } catch(e) {}
+        if (d.rm_last_id && RM.lastId < d.rm_last_id) RM.lastId = d.rm_last_id;
+        try { localStorage.setItem("rm_last_id", RM.lastId.toString()); } catch(e) {}
+        try { RM.render(); RM.updateQuota(); } catch(e) { console.error('RM sync refresh error:', e); }
+        console.log('[Sync ↓] RM 數據已還原（合併），共 ' + RM.bookings.length + ' 筆');
+      } else if (typeof RM !== 'undefined') {
+        // 伺服器傳回空陣列或無資料時，保留本地資料
+        console.log('[Sync ↓] 伺服器 rm_bookings 為空，保留本地資料（共 ' + RM.bookings.length + ' 筆）');
+      }
+      _lastSyncModified = d.lastModified || data.lastModified || Date.now();
+      saveData(true);
+      renderAll();
+      renderOverview();
+      renderSummary();
+      console.log('[Sync ↓] 下載並合併完成，共', d.txs ? d.txs.length : 0, '筆');
+      return data;
+    }).catch(function(err) {
+      console.error('[Sync ↓] 下載失敗', err);
+      throw err;
+    });
 }
 
 function manualSync() {
+  if (!SYNC_API) { showToast('未配置同步伺服器', 'warning'); return; }
   showLoading('正在同步…');
-  syncUpload();
-  setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 800);
+  // 強制上傳並重設時間戳，確保下載最新全量
+  _syncDirty = true;
+  _lastSyncModified = 0;
+  syncUpload().then(function() {
+    return syncDownload();
+  }).then(function() {
+    hideLoading();
+    showToast('同步完成', 'success');
+  }).catch(function(err) {
+    hideLoading();
+    showToast('同步失敗：' + (err.message || err), 'error');
+  });
 }
 
-// v10.0 B方案：Firebase push() 鍵架構 — 物件格式即時監聽
-
 function initSync() {
-  if (!db) { console.log('[Sync] Firebase 未初始化'); return; }
-  console.log('[Sync] v10.0 B方案：push() 鍵即時同步已啟動');
-
-  // v10.0 B方案：監聽物件格式資料，自動轉換為陣列（含 _fbKey）
-  // 每個數據類型獨立監聽，互不干擾，永不衝突
-
-  // 1. txs：交易記錄（物件 → 陣列）
-  db.ref('macau_data/txs').on('value', function(snapshot) {
-    try {
-      var d = snapshot.val();
-      if (!d) { txs = []; return; }
-      // v10.0：支援三種格式：物件（新）、陣列（舊，遷移中）、空
-      if (Array.isArray(d)) {
-        // 舊格式陣列：自動遷移（給所有記錄補 _fbKey 並轉為物件）
-        console.log('[Sync ↓] 偵測到舊格式 txs 陣列，自動遷移中...');
-        txs = [];
-        for (var i = 0; i < d.length; i++) {
-          if (d[i] && typeof d[i] === 'object') {
-            if (!d[i]._fbKey) d[i]._fbKey = _fbKey();
-            txs.push(d[i]);
-          }
-        }
-        // 寫回物件格式
-        var newObj = _arrToObj(txs);
-        db.ref('macau_data/txs').set(newObj);
-      } else if (typeof d === 'object') {
-        // 新格式物件：轉為陣列
-        txs = _objToArray(d);
-        if (!_migrated) { _migrated = true; console.log('[Sync ↓] 已遷移至 v10.0 物件格式'); }
-      }
-      // 更新 nextId
-      var maxId = 0;
-      for (var i = 0; i < txs.length; i++) { if (txs[i] && txs[i].id > maxId) maxId = txs[i].id; }
-      nextId = maxId + 1;
-      try { localStorage.setItem("macau_data", encryptData(txs)); } catch(e) {}
-      var pa = document.getElementById("page-all");
-      if (pa && pa.style.display === "block") renderAll();
-      var po = document.getElementById("page-overview");
-      if (po && po.style.display === "block") renderOverview();
-      var ps = document.getElementById("page-summary");
-      if (ps && ps.style.display === "block") renderSummary();
-      try { updateTotalWalletUI(); } catch(e) {}
-      console.log('[Sync ↓] txs 已同步，共 ' + txs.length + ' 筆');
-    } catch(e) { console.error('[Sync ↓] txs 錯誤:', e); }
+  if (!SYNC_API) { console.log('同步伺服器未配置'); return; }
+  console.log('同步伺服器：' + SYNC_API + '（增量同步已啟用，間隔 5 秒）');
+  // 載入本地 deletedIds（已刪除 ID 清單，用於跨設備同步刪除）
+  try {
+    var di = JSON.parse(localStorage.getItem("macau_deleted_ids"));
+    if (Array.isArray(di)) deletedIds = di;
+  } catch(e) { deletedIds = []; }
+  console.log('[Sync] 本地 deletedIds 載入：' + deletedIds.length + ' 筆');
+  // 立即執行一次同步（先上傳再下載）
+  var firstUpload = _syncDirty ? syncUpload() : Promise.resolve();
+  firstUpload.then(function() {
+    return syncDownload();
+  }).then(function() {
+    console.log('[Sync] 首次同步完成');
+  }).catch(function() {
+    console.log('[Sync] 首次同步失敗，將在 5 秒後重試');
   });
-
-  // 2. fundWithdrawals：公基金（物件 → 陣列）
-  db.ref('macau_data/fundWithdrawals').on('value', function(snapshot) {
-    try {
-      var d = snapshot.val();
-      if (!d) { fundWithdrawals = []; return; }
-      if (Array.isArray(d)) {
-        fundWithdrawals = [];
-        for (var i = 0; i < d.length; i++) {
-          if (d[i] && typeof d[i] === 'object') {
-            if (!d[i]._fbKey) d[i]._fbKey = _fbKey();
-            fundWithdrawals.push(d[i]);
-          }
-        }
-        var newObj = _arrToObj(fundWithdrawals);
-        db.ref('macau_data/fundWithdrawals').set(newObj);
-      } else if (typeof d === 'object') {
-        fundWithdrawals = _objToArray(d);
-      }
-      var maxId = 0;
-      for (var i = 0; i < fundWithdrawals.length; i++) { if (fundWithdrawals[i] && fundWithdrawals[i].id > maxId) maxId = fundWithdrawals[i].id; }
-      fundNextId = maxId + 1;
-      try { localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals)); } catch(e) {}
-      var pq = document.getElementById("page-query");
-      if (pq && pq.style.display === "block") try { doQuery(); } catch(e) {}
-      try { updateTotalWalletUI(); } catch(e) {}
-    } catch(e) { console.error('[Sync ↓] fundWithdrawals 錯誤:', e); }
-  });
-
-  // 3. agentList（保持陣列）
-  db.ref('macau_data/agentList').on('value', function(snapshot) {
-    try { var d = snapshot.val(); if (d && Array.isArray(d)) { agentList = d; fillAgent(); } } catch(e) {}
-  });
-
-  // 4. agentWallets（巢狀物件 → 巢狀陣列）
-  db.ref('macau_data/agentWallets').on('value', function(snapshot) {
-    try {
-      var d = snapshot.val();
-      console.log('[Sync ↓] agentWallets 收到資料', d ? Object.keys(d).length + ' 個代理' : '空');
-      if (!d || typeof d !== 'object') return;
-      var newAw = {};
-      var agents = Object.keys(d);
-      for (var i = 0; i < agents.length; i++) {
-        var a = agents[i];
-        var v = d[a];
-        if (Array.isArray(v)) {
-          // 舊格式陣列：自動遷移
-          newAw[a] = [];
-          for (var j = 0; j < v.length; j++) {
-            if (v[j] && typeof v[j] === 'object') {
-              if (!v[j]._fbKey) v[j]._fbKey = _fbKey();
-              newAw[a].push(v[j]);
-            }
-          }
-        } else if (typeof v === 'object') {
-          newAw[a] = _objToArray(v);
-        }
-      }
-      agentWallets = newAw;
-      // 更新 agentWalletNextId
-      var maxAWId = 0;
-      agents = Object.keys(agentWallets);
-      for (var i = 0; i < agents.length; i++) {
-        var arr = agentWallets[agents[i]];
-        for (var j = 0; j < arr.length; j++) { if (arr[j] && arr[j].id > maxAWId) maxAWId = arr[j].id; }
-      }
-      agentWalletNextId = maxAWId + 1;
-      // v10.10 同步後刷新 UI
-      try {
-        var pq = document.getElementById("page-query");
-        if (pq && pq.style.display === "block") doQuery();
-      } catch(e) {}
-    } catch(e) {}
-  });
-
- // 5. workingMonth
-  db.ref('macau_data/workingMonth').on('value', function(snapshot) {
-    try { var d = snapshot.val(); if (d) workingMonth = d; } catch(e) {}
-  });
-
-  // 6. rmBookings
-  db.ref('macau_data/rmBookings').on('value', function(snapshot) {
-    try {
-      if (typeof RM !== 'undefined') {
-        var d = snapshot.val();
-        if (!d) { RM.bookings = []; }
-        else if (Array.isArray(d)) { RM.bookings = d; }
-        else if (typeof d === 'object') { RM.bookings = _objToArray(d); }
-        RM.save(); RM.render();
-      }
-    } catch(e) {}
-  });
-
-  // 7. archives
-  db.ref('macau_data/archives').on('value', function(snapshot) {
-    try { var d = snapshot.val(); if (d) localStorage.setItem('macau_archives', JSON.stringify(d)); } catch(e) {}
-  });
-
-  console.log('[Sync] v10.0 B方案：所有監聽器已啟動');
+  // 定期同步（每 5 秒，先上傳、完成後才下載，避免競態）
+  setInterval(function() {
+    // 先上傳本地變更，並等待完成後才下載
+    var uploadPromise = _syncDirty ? syncUpload() : Promise.resolve();
+    uploadPromise.then(function() {
+      return syncDownload();
+    }).catch(function() {
+      // 上傳失敗也執行下載
+      return syncDownload();
+    });
+  }, 5000);
 }
 
 function renderSummary() {
+  try {
   var map = {};
-  for (var i = 0; i < txs.length; i++) {
-    var t = txs[i];
+  var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
+  for (var i = 0; i < _txs.length; i++) {
+    var t = _txs[i];
     var key = (t.agent || "未設定") + "|" + (t.venue || "");
     if (!map[key]) map[key] = { agent: t.agent || "未設定", venue: t.venue, vol: 0, bonus: 0, drawn: 0, cash: 0 };
     map[key].vol += toNum(t.volume) || 0;
@@ -4206,6 +3640,7 @@ function renderSummary() {
     "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(totalBonus) + "</div></div>" +
     "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領總額</div><div class='value'>" + fmt(totalFund) + "</div></div>";
   updateTotalWalletUI();
+  } catch(e) { console.error('[renderSummary] error:', e); }
 }
 
 function quickFilter(type, ev) {
@@ -4236,19 +3671,16 @@ function quickFilter(type, ev) {
 
 function fillAgent() {
   var sel = document.getElementById("q-agent");
-  // v8.2 保存當前選擇的值，避免重建下拉框時重置
-  var currentVal = sel.value;
+  var cur = sel ? sel.value : "";
   var h = "<option value=''>全部</option>";
   for (var j = 0; j < agentList.length; j++) { h += "<option value='" + agentList[j] + "'>" + agentList[j] + "</option>"; }
   h += "<option value='__FUND__'>公基金</option>";
   sel.innerHTML = h;
-  // 恢復之前選擇的值（如果該選項仍存在）
-  if (currentVal) {
-    var exists = false;
+  // 保留原本選擇
+  if (cur) {
     for (var k = 0; k < sel.options.length; k++) {
-      if (sel.options[k].value === currentVal) { exists = true; break; }
+      if (sel.options[k].value === cur) { sel.value = cur; break; }
     }
-    if (exists) sel.value = currentVal;
   }
 }
 
@@ -4354,26 +3786,28 @@ function populateVenueDropdown() {
 
 function doQuery() {
   try {
+  var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
   if (!month) month = workingMonth || nowStr().slice(0, 7);
   // 公基金查询 - 分筆流水（含累計餘額）
   if (agent === "__FUND__") {
+    var __fundWithdrawals = fundWithdrawals.filter(function(f) { return !f.deleted; });
     var allFundTxs = [], preBalance = 0, totalFund = 0;
-    for (var i = 0; i < txs.length; i++) {
-      var fv = txs[i].fund || 0;
+    for (var i = 0; i < _txs.length; i++) {
+      var fv = _txs[i].fund || 0;
       totalFund += fv;
-      if (fv > 0) allFundTxs.push({ date: txs[i].date, desc: (txs[i].agent||"") + " " + (txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: txs[i].id, _fbKey: txs[i]._fbKey });
+      if (fv > 0) allFundTxs.push({ date: _txs[i].date, desc: (_txs[i].agent||"") + " " + (_txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: _txs[i].id });
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     var totalW = 0, totalD = 0, totalCD = 0;
-    for (var i = 0; i < fundWithdrawals.length; i++) {
-      var r = fundWithdrawals[i];
+    for (var i = 0; i < __fundWithdrawals.length; i++) {
+      var r = __fundWithdrawals[i];
       if (r.type === "deposit") { totalD += (r.amount || 0); }
       else if (r.type === "cash_deposit") { totalCD += (r.amount || 0); }
       else { totalW += (r.amount || 0); }
       var typeLabel = r.type === "deposit" ? "存入" : (r.type === "cash_deposit" ? "自存現金" : "提領");
-      allFundTxs.push({ date: r.date, desc: r.note||"", amount: r.amount, type: typeLabel, rawType: r.type, source: "fund", id: r.id, _fbKey: r._fbKey });
+      allFundTxs.push({ date: r.date, desc: r.note||"", amount: r.amount, type: typeLabel, rawType: r.type, source: "fund", id: r.id });
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     // 計算上月累計（當月之前的餘額）
@@ -4385,7 +3819,7 @@ function doQuery() {
         else preBalance -= e.amount;
       }
     }
-    var balance = Math.max(0, totalFund + totalD + totalCD - totalW);
+    var balance = calcFundBalance();
     var running = preBalance;
     document.getElementById("query-kpi").innerHTML =
       "<div class='kpi-card'><div class='label'>公基金總額</div><div class='value'>" + fmt(totalFund) + "</div></div>" +
@@ -4411,7 +3845,7 @@ function doQuery() {
       if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") running += e.amount;
       else running -= e.amount;
       var tr = document.createElement("tr");
-      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(\"" + (e._fbKey||e.id) + "\")'>刪除</button>" : "<span style='color:#999;font-size:11px;'>自動</span>";
+      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(" + e.id + ")'>刪除</button>" : "<span style='color:#999;font-size:11px;'>自動</span>";
       var inVal = (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") ? fmt(e.amount) : "";
       var outVal = (e.type === "提領") ? fmt(e.amount) : "";
       var typeClr = e.type === "提領" ? "color:#e74c3c;font-weight:600;" : (e.type === "存入" ? "color:#2980b9;" : (e.type === "自存現金" ? "color:#e67e22;font-weight:600;" : "color:#D4AF37;"));
@@ -4432,8 +3866,8 @@ function doQuery() {
   var dateTo = document.getElementById("q-date-to").value;
   var volMin = toNum(document.getElementById("q-vol-min").value) || 0;
   var volMax = toNum(document.getElementById("q-vol-max").value) || 0;
-  for (var i = 0; i < txs.length; i++) {
-    var t = txs[i];
+  for (var i = 0; i < _txs.length; i++) {
+    var t = _txs[i];
     if (t.date && t.date.indexOf(month) !== 0) continue;
     if (agent && t.agent !== agent) continue;
     if (venue && t.venue !== venue) continue;
@@ -4490,10 +3924,10 @@ function doQuery() {
     var awArr = agentWallets[agent] || [];
     // 計算全部碼糧總額（不分月份）含現金寄放
     var allBonus = 0, allCash = 0, allDrawn = 0;
-    for (var n = 0; n < txs.length; n++) {
-      if (txs[n].agent === agent) {
-        allBonus += (txs[n].bonus || 0);
-        allCash += (txs[n].cash || 0);
+    for (var n = 0; n < _txs.length; n++) {
+      if (_txs[n].agent === agent) {
+        allBonus += (_txs[n].bonus || 0);
+        allCash += (_txs[n].cash || 0);
       }
     }
     for (var p = 0; p < awArr.length; p++) {
@@ -4510,21 +3944,21 @@ function doQuery() {
     var awBalance = Math.max(0, allBonus + allCash + awDep + awCDep - allDrawn);
     // 建立合併流水：全部交易 + 錢包提領（含現金寄放）
     var allLedger = [];
-    for (var p = 0; p < txs.length; p++) {
-      if (txs[p].agent !== agent) continue;
-      var bv = txs[p].bonus || 0;
-      var cv = txs[p].cash || 0;
-      if (bv > 0) allLedger.push({ date: txs[p].date, venue: txs[p].venue||"", client: txs[p].client||"", volume: toNum(txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: txs[p].id, _fbKey: txs[p]._fbKey });
-      if (cv > 0) allLedger.push({ date: txs[p].date, venue: "現金寄放", client: txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: txs[p].id, _fbKey: txs[p]._fbKey });
+    for (var p = 0; p < _txs.length; p++) {
+      if (_txs[p].agent !== agent) continue;
+      var bv = _txs[p].bonus || 0;
+      var cv = _txs[p].cash || 0;
+      if (bv > 0) allLedger.push({ date: _txs[p].date, venue: _txs[p].venue||"", client: _txs[p].client||"", volume: toNum(_txs[p].volume)||0, bonus: bv, rowType: "rolling", type: "入帳", source: "tx", id: _txs[p].id });
+      if (cv > 0) allLedger.push({ date: _txs[p].date, venue: "現金寄放", client: _txs[p].note||"", volume: 0, bonus: cv, rowType: "cash", type: "入帳", source: "tx", id: _txs[p].id });
     }
     for (var p = 0; p < awArr.length; p++) {
       var wt = awArr[p].type;
       if (wt === "deposit") {
-        allLedger.push({ date: awArr[p].date, venue: "存入", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_deposit", type: "存入", source: "wallet", id: awArr[p].id, _fbKey: awArr[p]._fbKey, note: awArr[p].note||"" });
+        allLedger.push({ date: awArr[p].date, venue: "存入", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_deposit", type: "存入", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
       } else if (wt === "cash_deposit") {
-        allLedger.push({ date: awArr[p].date, venue: "自存現金", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_cash_dep", type: "自存現金", source: "wallet", id: awArr[p].id, _fbKey: awArr[p]._fbKey, note: awArr[p].note||"" });
+        allLedger.push({ date: awArr[p].date, venue: "自存現金", client: "", volume: 0, bonus: (awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "aw_cash_dep", type: "自存現金", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
       } else {
-        allLedger.push({ date: awArr[p].date, venue: "提領", client: "", volume: 0, bonus: -(awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "withdraw", type: "提領", source: "wallet", id: awArr[p].id, _fbKey: awArr[p]._fbKey, note: awArr[p].note||"" });
+        allLedger.push({ date: awArr[p].date, venue: "提領", client: "", volume: 0, bonus: -(awArr[p].amount||0), amount: awArr[p].amount||0, rowType: "withdraw", type: "提領", source: "wallet", id: awArr[p].id, note: awArr[p].note||"" });
       }
     }
     allLedger.sort(function(a,b){ return a.date.localeCompare(b.date); });
@@ -4572,18 +4006,15 @@ function doQuery() {
       var tr2 = document.createElement("tr");
       if (e.rowType === "withdraw") {
         // 提領行：日期 | 提領(紅) | | -金額(紅) | 刪除 | 累計餘額
-        var val = (e._fbKey||e.id).toString();
-        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
         tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e74c3c;font-weight:700;'>提領" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e74c3c;font-weight:700;'>-" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "aw_deposit") {
         // 錢包存入行：日期 | 存入(藍) | | +金額(藍) | 刪除 | 累計餘額
-        var val = (e._fbKey||e.id).toString();
-        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
         tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#2980b9;font-weight:700;'>存入" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#2980b9;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "aw_cash_dep") {
         // 自存現金行：日期 | 自存現金(橙) | | +金額(橙) | 刪除 | 累計餘額
-        var val = (e._fbKey||e.id).toString();
-        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
+        var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "'," + e.id + ")\">刪除</button>";
         tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>自存現金" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "cash") {
         // 現金寄放行：日期 | 現金寄放(橙) | | +金額(橙) | 自動 | 累計餘額
@@ -4793,7 +4224,6 @@ function loadAgentList() {
 function saveAgentList() {
   agentList.sort();
   localStorage.setItem('macau_agent_list', JSON.stringify(agentList));
-  if (typeof syncUpload === 'function') syncUpload();
 }
 
 function populateAgentDropdown() {
@@ -4897,12 +4327,6 @@ document.addEventListener('keydown', function(e) {
 })();
 
 loadAgentList();
-loadFundData();
-loadAgentWallets();
-// 從 localStorage 加載工作日誌月份
-(function(){ try { var wm = localStorage.getItem("macau_working_month"); if (wm) workingMonth = wm; } catch(e) {} })();
-// 從 localStorage 加載酒店設定（防止 syncUpload 覆蓋 Firebase 資料）
-(function(){ try { loadHCConfig(); } catch(e) { console.error('loadHCConfig error:', e); } })();
 populateAgentDropdown();
 renderAll();
 renderOverview();
@@ -4910,18 +4334,17 @@ updateTotalWalletUI();
 initSync();
 
 // ===== 總覽頁渲染 =====
-var _renderingOverview = false;
 function renderOverview() {
-  // 防止並發渲染（Firebase 同步可能快速觸發多次調用）
-  if (_renderingOverview) return;
-  _renderingOverview = true;
   try {
-  // --- KPI 卡片 ---
-  var now = workingMonth || nowStr().slice(0,7);
-  var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
-  var agentSet = {};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+    // 過濾已刪除項目（deleted:true 不下載時顯示）
+    var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
+    var _rmBookings = (typeof RM !== 'undefined' && RM.bookings) ? RM.bookings : []; // deleted:true 過濾已移除
+    // --- KPI 卡片 ---
+    var now = workingMonth || nowStr().slice(0,7);
+    var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
+    var agentSet = {};
+    for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     if (t.type==="cash"){ totalCash+=(t.cash||0); }
     else { totalVol+=(t.volume||0); }
@@ -4935,20 +4358,12 @@ function renderOverview() {
   var fDep=0,fCD=0,fWit=0;
   for (var j=0;j<fundWithdrawals.length;j++){
     var f=fundWithdrawals[j];
+    // if (f.deleted) continue; // 已移除（改用 deletedIds 同步）
     if (!f.date||f.date.slice(0,7)!==now) continue;
     if (f.type==="deposit") fDep+=f.amount; else if (f.type==="cash_deposit") fCD+=f.amount; else fWit+=f.amount;
   }
-  var fundNet = totalFund+fDep+fCD-fWit;
   // 公基金累计馀额（所有时间）
-  var totalFundAll=0, fDepAll=0, fCDAll=0, fWitAll=0;
-  for (var ii=0;ii<txs.length;ii++) totalFundAll+=(txs[ii].fund||0);
-  for (var jj=0;jj<fundWithdrawals.length;jj++){
-    var ff=fundWithdrawals[jj];
-    if (ff.type==="deposit") fDepAll+=ff.amount;
-    else if (ff.type==="cash_deposit") fCDAll+=ff.amount;
-    else fWitAll+=ff.amount;
-  }
-  var fundBalance = Math.max(0, totalFundAll+fDepAll+fCDAll-fWitAll);
+  var fundBalance = calcFundBalance();
   var undrawnTotal = Math.max(0,totalBonus-totalDrawn);
 
   var grid=document.getElementById("ov-kpi-grid");
@@ -4956,16 +4371,16 @@ function renderOverview() {
   var rmUsedRolling=0;
   var roomMonth=now.slice(0,7);
   var agentsWithRolling = {};
-  for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
-  if (typeof RM!=="undefined"&&RM.bookings){
-    for (var k=0;k<RM.bookings.length;k++){
-      var b=RM.bookings[k];
+  for (var kk=0;kk<_txs.length;kk++){ var tr=_txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
+  if (_rmBookings.length > 0){
+    for (var k=0;k<_rmBookings.length;k++){
+      var b=_rmBookings[k];
       if (!b.date||b.date.slice(0,7)!==roomMonth) continue;
       if (b.status==="免費") rmUsedRolling += (b.nights||0) * (b.threshold||70);
     }
   }
   // 免費一晚計數：只計有洗碼記錄的代理
-  var rmFreeCount = typeof RM!=="undefined" ? RM.bookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免費"&&agentsWithRolling[x.agent];}).length : 0;
+  var rmFreeCount = typeof RM!=="undefined" ? _rmBookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免費"&&agentsWithRolling[x.agent];}).length : 0;
   grid.innerHTML=''+
     '<div class="kpi-card-new gold"><div class="kpi-label">本月洗碼量</div><div class="kpi-value">'+fmt(totalVol)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>'+
     '<div class="kpi-card-new green"><div class="kpi-label">剩餘轉碼</div><div class="kpi-value">'+fmt(totalVol-rmUsedRolling)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div></div>'+
@@ -4977,15 +4392,14 @@ function renderOverview() {
   var spark=document.getElementById("ov-sparkline");
   var slbl=document.getElementById("ov-sparklabels");
   var daysInMonth=new Date(parseInt(now.slice(0,4)),parseInt(now.slice(5,7)),0).getDate();
-  var daily=[], daily100=[];
+  var daily=[];
   for (var d=1;d<=daysInMonth;d++) daily.push(0);
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash") continue;
     var day=parseInt(t.date.slice(8,10))-1;
     if (day>=0&&day<daysInMonth) daily[day]+=(t.volume||0);
   }
-  for (var d=0;d<daysInMonth;d++) daily100.push(daily[d]/100);
   var maxV=Math.max.apply(null,daily)||1;
   var maxH=60;
   var sparkHTML='',lblHTML='';
@@ -4993,19 +4407,19 @@ function renderOverview() {
   for (var d=0;d<daysInMonth;d++){
     var v=daily[d];
     var h=v>0?Math.max(2,Math.round(v/maxV*maxH)):2;
-    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(daily100[d])+' (100萬)"><span>'+fmt(daily100[d])+'</span></div>';
+    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(v)+'萬 ('+fmt(v/100)+'×100萬)"><span>'+fmt(v/100)+'</span></div>';
     lblHTML+='<span>'+(d%3===0||d===0||d===daysInMonth-1?(d+1)+'日':'')+'</span>';
   }
   spark.innerHTML=sparkHTML;
   slbl.innerHTML=lblHTML;
 
   // --- Chart.js 趨勢圖（優先使用，失敗則降級到 sparkline）---
-  renderTrendChart(daily100, now);
+  renderTrendChart(daily, now);
 
   // --- 代理洗碼排行 Top 10（Chart.js 長條圖）---
   var agtVol={};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.agent) continue;
     if (!agtVol[t.agent]) agtVol[t.agent]=0;
     agtVol[t.agent]+=(t.volume||0);
@@ -5019,8 +4433,8 @@ function renderOverview() {
   // --- 場地洗碼分佈 ---
   var venueColors = ['#d4af37','#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c','#f39c12'];
   var venVol={};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.venue) continue;
     if (!venVol[t.venue]) venVol[t.venue]=0;
     venVol[t.venue]+=(t.volume||0);
@@ -5035,7 +4449,7 @@ function renderOverview() {
     var vpct=Math.round(vn.vol/maxVV*100);
     var vcol=venueColors[vi%venueColors.length];
     var shortName=vn.name.length>8?vn.name.slice(0,8)+'..':vn.name;
-    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬</div></div></div>';
+    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬 <span style="color:rgba(255,255,255,0.3);font-size:10px;">('+fmt(vn.vol/100)+'×100萬)</span></div></div></div>';
   }
   if (!venArr.length) venHTML='<div class="venue-empty">本月尚無數據</div>';
   document.getElementById("ov-venue-dist").innerHTML=venHTML;
@@ -5044,14 +4458,15 @@ function renderOverview() {
   var timeline=document.getElementById("ov-timeline");
   var entries=[];
   // 交易紀錄
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<_txs.length;i++){
+    var t=_txs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     entries.push({date:t.date,type:t.type||"rolling",desc:(t.type==="cash"?t.agent+" 現金寄放":t.agent+" — "+t.client+(t.venue?" @ "+t.venue:"")),amount:t.type==="cash"?(t.cash||0):(t.bonus||0),extra:t.type==="cash"?"dep":"pos"});
   }
-  // 公基金異動
+  // 公基金異動（過濾已刪除）
   for (var j=0;j<fundWithdrawals.length;j++){
     var f=fundWithdrawals[j];
+    // if (f.deleted) continue; // 已移除（改用 deletedIds 同步）
     if (!f.date||f.date.slice(0,7)!==now) continue;
     var ftype=f.type==="withdraw"?"提領":(f.type==="cash_deposit"?"自存現金":"存入");
     entries.push({date:f.date,type:"fund",desc:"公基金 "+ftype+(f.note?" — "+f.note:""),amount:f.amount||0,extra:f.type==="withdraw"?"neg":"dep"});
@@ -5070,306 +4485,193 @@ function renderOverview() {
   timeline.innerHTML=tlHTML||'<div class="timeline-empty">尚無本月動態</div>';
   } catch(e) {
     console.error('[renderOverview] fatal error:', e);
-  } finally {
-    _renderingOverview = false;
   }
 }
 
 // ===== Chart.js 趨勢圖 =====
 var _trendChartInst = null;
 function renderTrendChart(daily, monthLabel) {
-  var canvas = document.getElementById("ov-trend-chart");
-  var spark = document.getElementById("ov-sparkline");
-  var slbl = document.getElementById("ov-sparklabels");
-  if (!canvas) return;
-  // 檢查 Chart.js 是否可用
-  if (typeof Chart === "undefined") {
-    if (spark) spark.style.display = "";
-    if (slbl) slbl.style.display = "";
-    return;
-  }
-  // 隱藏舊版 sparkline
-  if (spark) spark.style.display = "none";
-  if (slbl) slbl.style.display = "none";
-
-  // 生成標籤（每 3 天顯示一次）
-  var labels = [];
-  for (var d = 0; d < daily.length; d++) {
-    labels.push((d + 1) % 3 === 0 || d === 0 || d === daily.length - 1 ? (d + 1) + "日" : "");
-  }
-  // 銷毀舊圖表（使用 Chart.getChart 確保正確釋放 canvas）
-  var existingChart = Chart.getChart ? Chart.getChart(canvas) : null;
-  if (existingChart) { existingChart.destroy(); }
-  if (_trendChartInst) { _trendChartInst.destroy(); _trendChartInst = null; }
-  // 重置 canvas 以確保完全釋放
-  var ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, "rgba(212,175,55,0.3)");
-  gradient.addColorStop(1, "rgba(212,175,55,0.02)");
-  _trendChartInst = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "洗碼量（100萬）",
-        data: daily,
-        borderColor: "#D4AF37",
-        backgroundColor: gradient,
-        borderWidth: 2,
-        fill: true,
-        tension: 0.3,
-        pointRadius: daily.map(function(v) { return v > 0 ? 3 : 0; }),
-        pointBackgroundColor: "#D4AF37",
-        pointBorderColor: "#1a1a2e",
-        pointBorderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "rgba(20,20,30,0.95)",
-          titleColor: "#D4AF37",
-          bodyColor: "#e0d0a0",
-          borderColor: "rgba(212,175,55,0.3)",
-          borderWidth: 1,
-          callbacks: {
-            title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
-            label: function(item) { return "洗碼量: " + fmt(item.raw) + " 萬"; }
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: { color: "#887755", font: { size: 10 }, maxRotation: 0 }
-        },
-        y: {
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: {
-            color: "#887755", font: { size: 10 },
-            callback: function(v) { return v >= 10000 ? (v/10000).toFixed(1) + "萬" : v; }
-          },
-          beginAtZero: true
-        }
-      },
-      interaction: { mode: "index", intersect: false }
+  try {
+    var canvas = document.getElementById("ov-trend-chart");
+    var spark = document.getElementById("ov-sparkline");
+    var slbl = document.getElementById("ov-sparklabels");
+    if (!canvas) return;
+    // 資料轉為 100 萬單位
+    var daily100 = daily.map(function(v) { return v / 100; });
+    var hasData = daily100.some(function(v) { return v > 0; });
+    // 檢查 Chart.js 是否可用
+    if (typeof Chart === "undefined" || !hasData) {
+      if (spark) spark.style.display = hasData ? "" : "none";
+      if (slbl) slbl.style.display = hasData ? "" : "none";
+      if (!hasData && canvas.parentElement) {
+        canvas.parentElement.innerHTML = '<canvas id="ov-trend-chart"></canvas><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(212,175,55,0.4);font-size:13px;">本月尚無洗碼數據</div>';
+      }
+      return;
     }
-  });
+    // 隱藏舊版 sparkline
+    if (spark) spark.style.display = "none";
+    if (slbl) slbl.style.display = "none";
+    // 清除可能存在的空數據提示
+    if (canvas.parentElement) {
+      var emptyMsg = canvas.parentElement.querySelector("div[style*='本月尚無']");
+      if (emptyMsg) emptyMsg.remove();
+    }
 
-
+    // 生成標籤（每 3 天顯示一次）
+    var labels = [];
+    for (var d = 0; d < daily100.length; d++) {
+      labels.push((d + 1) % 3 === 0 || d === 0 || d === daily100.length - 1 ? (d + 1) + "日" : "");
+    }
+    // 銷毀舊圖表
+    if (_trendChartInst) { _trendChartInst.destroy(); _trendChartInst = null; }
+    var ctx = canvas.getContext("2d");
+    var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, "rgba(212,175,55,0.3)");
+    gradient.addColorStop(1, "rgba(212,175,55,0.02)");
+    _trendChartInst = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "洗碼量（100萬）",
+          data: daily100,
+          borderColor: "#D4AF37",
+          backgroundColor: gradient,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: daily100.map(function(v) { return v > 0 ? 3 : 0; }),
+          pointBackgroundColor: "#D4AF37",
+          pointBorderColor: "#1a1a2e",
+          pointBorderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(20,20,30,0.95)",
+            titleColor: "#D4AF37",
+            bodyColor: "#e0d0a0",
+            borderColor: "rgba(212,175,55,0.3)",
+            borderWidth: 1,
+            callbacks: {
+              title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
+              label: function(item) { return "洗碼量: " + fmt(item.raw * 100) + " 萬 (" + fmt(item.raw) + "×100萬)"; }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: "rgba(255,255,255,0.05)" },
+            ticks: { color: "#887755", font: { size: 10 }, maxRotation: 0 }
+          },
+          y: {
+            grid: { color: "rgba(255,255,255,0.05)" },
+            ticks: {
+              color: "#887755", font: { size: 10 },
+              callback: function(v) { return fmt(v); }
+            },
+            beginAtZero: true
+          }
+        },
+        interaction: { mode: "index", intersect: false }
+      }
+    });
+  } catch(e) { console.error('[renderTrendChart] error:', e); }
 }
 
 // ===== Chart.js 代理排行圖 =====
 var _rankChartInst = null;
 function renderRankChart(agtArr) {
-  var canvas = document.getElementById("ov-rank-chart");
-  if (!canvas) return;
-  if (typeof Chart === "undefined") {
+  try {
+    var canvas = document.getElementById("ov-rank-chart");
     var panel = document.getElementById("ov-agent-rank");
-    if (!agtArr.length) { if (panel) panel.innerHTML = '<div class="rank-empty">本月尚無交易</div>'; return; }
-    var html = '';
-    var rankColors = ['#d4af37','#a0a0a0','#cd7f32','rgba(255,255,255,0.4)','rgba(255,255,255,0.3)'];
-    var maxV = agtArr[0].vol;
-    for (var r = 0; r < agtArr.length; r++) {
-      var ag = agtArr[r];
-      var pct = Math.round(ag.vol / maxV * 100);
-      html += '<div class="rank-row"><div class="rank-num">'+(r+1)+'</div><div class="rank-name">'+ag.name+'</div><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+(rankColors[r]||rankColors[4])+',rgba(212,175,55,0.3));"></div></div><div class="rank-val">'+fmt(ag.vol)+'萬</div></div></div>';
+    if (!canvas || !panel) return;
+    if (!agtArr.length) {
+      panel.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(212,175,55,0.4);font-size:13px;">本月尚無交易</div>';
+      return;
     }
-    if (panel) panel.innerHTML = html;
-    return;
-  }
-  // 雙重銷毀：Chart.getChart(canvas) 確保 Canvas 被完全釋放
-  var existingChart = Chart.getChart ? Chart.getChart(canvas) : null;
-  if (existingChart) { existingChart.destroy(); }
-  if (_rankChartInst) { _rankChartInst.destroy(); _rankChartInst = null; }
-  // 重置 canvas 確保完全釋放
-  var ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  var labels = [], data = [];
-  for (var i = agtArr.length - 1; i >= 0; i--) {
-    labels.push(agtArr[i].name);
-    data.push(agtArr[i].vol);
-  }
-  _rankChartInst = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "洗碼量（萬）",
-        data: data,
-        backgroundColor: data.map(function(v, idx) {
-          var colors = ["rgba(212,175,55,0.6)","rgba(160,160,160,0.5)","rgba(205,127,50,0.5)","rgba(255,255,255,0.25)","rgba(255,255,255,0.2)"];
-          var i = data.length - 1 - idx;
-          return colors[i] || "rgba(255,255,255,0.15)";
-        }),
-        borderColor: data.map(function(v, idx) {
-          var colors = ["#d4af37","#a0a0a0","#cd7f32","rgba(255,255,255,0.4)","rgba(255,255,255,0.3)"];
-          var i = data.length - 1 - idx;
-          return colors[i] || "rgba(255,255,255,0.2)";
-        }),
-        borderWidth: 1,
-        borderRadius: 4
-      }]
-    },
-    options: {
-      indexAxis: "y",
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "rgba(20,20,30,0.95)",
-          bodyColor: "#e0d0a0",
-          borderColor: "rgba(212,175,55,0.3)",
-          borderWidth: 1,
-          callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw) + " 萬"; } }
-        }
-      },
-      scales: {
-        x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#887755", font: { size: 9 } }, beginAtZero: true },
-        y: { grid: { display: false }, ticks: { color: "#e0d0a0", font: { size: 11 } } }
+    // 還原 canvas（若先前被空數據提示覆蓋）
+    if (!panel.querySelector("#ov-rank-chart")) {
+      panel.innerHTML = '<canvas id="ov-rank-chart"></canvas>';
+      canvas = document.getElementById("ov-rank-chart");
+    }
+    // Chart.js 不可用时降級為 HTML 條形圖
+    if (typeof Chart === "undefined") {
+      var html = '';
+      var rankColors = ['#d4af37','#a0a0a0','#cd7f32','rgba(255,255,255,0.4)','rgba(255,255,255,0.3)'];
+      var maxV = agtArr[0].vol;
+      for (var r = 0; r < agtArr.length; r++) {
+        var ag = agtArr[r];
+        var pct = Math.round(ag.vol / maxV * 100);
+        html += '<div class="rank-row"><div class="rank-num">'+(r+1)+'</div><div class="rank-name">'+ag.name+'</div><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+(rankColors[r]||rankColors[4])+',rgba(212,175,55,0.3));"></div></div><div class="rank-val">'+fmt(ag.vol)+'萬</div></div></div>';
       }
+      panel.innerHTML = html;
+      return;
     }
-  });
-
-
+    if (_rankChartInst) { _rankChartInst.destroy(); _rankChartInst = null; }
+    var labels = [], data = [];
+    for (var i = agtArr.length - 1; i >= 0; i--) {
+      labels.push(agtArr[i].name);
+      data.push(agtArr[i].vol / 100); // 轉為 100 萬單位
+    }
+    var ctx = canvas.getContext("2d");
+    _rankChartInst = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "洗碼量（100萬）",
+          data: data,
+          backgroundColor: data.map(function(v, idx) {
+            var colors = ["rgba(212,175,55,0.6)","rgba(160,160,160,0.5)","rgba(205,127,50,0.5)","rgba(255,255,255,0.25)","rgba(255,255,255,0.2)"];
+            var i = data.length - 1 - idx;
+            return colors[i] || "rgba(255,255,255,0.15)";
+          }),
+          borderColor: data.map(function(v, idx) {
+            var colors = ["#d4af37","#a0a0a0","#cd7f32","rgba(255,255,255,0.4)","rgba(255,255,255,0.3)"];
+            var i = data.length - 1 - idx;
+            return colors[i] || "rgba(255,255,255,0.2)";
+          }),
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(20,20,30,0.95)",
+            bodyColor: "#e0d0a0",
+            borderColor: "rgba(212,175,55,0.3)",
+            borderWidth: 1,
+            callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw * 100) + " 萬 (" + fmt(item.raw) + "×100萬)"; } }
+          }
+        },
+        scales: {
+          x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#887755", font: { size: 9 }, callback: function(v){ return fmt(v); } }, beginAtZero: true },
+          y: { grid: { display: false }, ticks: { color: "#e0d0a0", font: { size: 11 } } }
+        }
+      }
+    });
+  } catch(e) { console.error('[renderRankChart] error:', e); }
 }
 
 // ===== 房務系統 JS =====
 var RM = {
   bookings: [], lastId: 0, editingId: null,
-
-  getHotelSettings: function() {
-    // 優先使用 localStorage 的 HOTEL_CONFIG，如無則從 PRESET_CONFIG 生成
-    var hc = (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length) ? HOTEL_CONFIG : [];
-    if (!hc.length) { hc = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : []; }
-    if (!hc.length) {
-      return { "新濠天地摩柏斯":{ price:2000, threshold:80 }, "金沙":{ price:1900, threshold:70 } };
-    }
-    var s = {};
-    for (var i = 0; i < HOTEL_CONFIG.length; i++) {
-      var c = HOTEL_CONFIG[i];
-      var key = c.casino + c.hotel;
-      if (!s[key] || c.weekday > 0) {
-        s[key] = { price: c.weekday || 0, threshold: c.threshold || 70 };
-      }
-    }
-    return s;
-  },
-
-  populateHotelDropdown: function(casino) {
-    var sel = document.getElementById("rm-f-hotel");
-    if (!sel) return;
-    sel.innerHTML = '<option value="">' + (casino ? '請選擇酒店' : '請先選擇體系') + '</option>';
-    if (!casino) return;
-    var config = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : [];
-    if (!config.length) return;
-    var hotels = {};
-    for (var i = 0; i < config.length; i++) {
-      if (config[i].casino !== casino) continue;
-      var hn = config[i].hotel;
-      if (!hotels[hn]) hotels[hn] = true;
-    }
-    var keys = Object.keys(hotels).sort(function(a, b) { return a.localeCompare(b, 'zh'); });
-    for (var i = 0; i < keys.length; i++) {
-      sel.innerHTML += '<option value="' + keys[i] + '">' + keys[i] + '</option>';
-    }
-  },
-
-  populateRoomDropdown: function(casino, hotel) {
-    var sel = document.getElementById("rm-f-room");
-    if (!sel) return;
-    sel.innerHTML = '<option value="">請選擇房型</option>';
-    if (!casino || !hotel) return;
-    var config = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : [];
-    if (!config.length) return;
-    var rooms = {};
-    for (var i = 0; i < config.length; i++) {
-      if (config[i].casino !== casino || config[i].hotel !== hotel) continue;
-      var key = config[i].room;
-      if (!rooms[key]) rooms[key] = { code: config[i].code, weekday: config[i].weekday, threshold: config[i].threshold };
-    }
-    var keys = Object.keys(rooms);
-    for (var i = 0; i < keys.length; i++) {
-      var r = rooms[keys[i]];
-      sel.innerHTML += '<option value="' + keys[i] + '" data-code="' + r.code + '" data-price="' + r.weekday + '" data-threshold="' + r.threshold + '">' + keys[i] + ' (' + r.code + ')</option>';
-    }
-  },
-
-  populateCasinoDropdown: function() {
-    var sel = document.getElementById("rm-f-casino");
-    if (!sel) return;
-    sel.innerHTML = '<option value="">請選擇體系</option>';
-    // 使用 PRESET_CONFIG 保持三級聯動數據一致（而非 HOTEL_CONFIG，後者可能來自 localStorage 舊快取）
-    var config = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : [];
-    var casinos = {};
-    for (var i = 0; i < config.length; i++) {
-      casinos[config[i].casino] = true;
-    }
-    var order = (typeof CASINO_ORDER !== 'undefined') ? CASINO_ORDER : ['新濠天地', '新濠影滙', '金沙', '銀河', '永利', '上葡京'];
-    for (var i = 0; i < order.length; i++) {
-      if (casinos[order[i]]) {
-        sel.innerHTML += '<option value="' + order[i] + '">' + order[i] + '</option>';
-      }
-    }
-  },
-
-  onCasinoChange: function() {
-    var casino = document.getElementById("rm-f-casino").value;
-    // populateHotelDropdown 内部已处理「請先選擇體系」/「請選擇酒店」占位文字
-    this.populateHotelDropdown(casino);
-    // 清空房型和價格（酒店下拉由 populateHotelDropdown 控制）
-    document.getElementById("rm-f-room").innerHTML = '<option value="">請先選擇酒店</option>';
-    document.getElementById("rm-f-price").value = "";
-    document.getElementById("rm-f-total").value = "";
-    // 隱藏所需轉碼數顯示
-    var thrRow = document.getElementById("rm-threshold-row");
-    if (thrRow) thrRow.style.display = "none";
-  },
-
-  onHotelChange: function() {
-    var casino = document.getElementById("rm-f-casino").value;
-    var hotel = document.getElementById("rm-f-hotel").value;
-    // populateRoomDropdown 内部已处理「請選擇房型」占位
-    if (hotel) {
-      this.populateRoomDropdown(casino, hotel);
-    }
-    // 清空價格（房型下拉由 populateRoomDropdown 控制）
-    document.getElementById("rm-f-price").value = "";
-    document.getElementById("rm-f-total").value = "";
-    // 隱藏所需轉碼數顯示
-    var thrRow = document.getElementById("rm-threshold-row");
-    if (thrRow) thrRow.style.display = "none";
-  },
-
-  onRoomChange: function() {
-    // 房型選擇後，自動填入價格、門檻、顯示所需轉碼數
-    var sel = document.getElementById("rm-f-room");
-    var opt = sel.options[sel.selectedIndex];
-    var price = parseInt(opt.getAttribute("data-price"))||0;
-    var threshold = parseInt(opt.getAttribute("data-threshold"))||70;
-    document.getElementById("rm-f-price").value = price;
-    // 保存當前選擇的門檻（供 saveForm 使用）
-    this._currentThreshold = threshold;
-    // 顯示所需轉碼數（連動顯示）
-    var thrRow = document.getElementById("rm-threshold-row");
-    var thrVal = document.getElementById("rm-threshold-val");
-    if (thrRow && thrVal && sel.value) {
-      thrRow.style.display = "flex";
-      thrVal.textContent = threshold;
-    }
-    // 自動帶入狀態：選中代理有洗碼記錄預設免費，否則預設付費
-    var now = this.nowStr().slice(0,7);
-    var agent = document.getElementById("rm-f-agent").value;
-    var hasRolling = false;
-    for (var i=0;i<txs.length;i++) { if (txs[i].agent===agent && txs[i].date&&txs[i].date.slice(0,7)===now&&txs[i].type!=="cash") { hasRolling=true; break; } }
-    var statusEl = document.getElementById("rm-f-status");
-    if (statusEl) statusEl.value = hasRolling ? "免費" : "付費";
-    this.calcTotal();
+  hotelSettings: {
+    "新濠天地摩柏斯":{ price:2000, threshold:80 },
+    "銀河":{ price:1800, threshold:60 },
+    "金沙":{ price:1900, threshold:70 },
+    "永利":{ price:1850, threshold:65 },
+    "上葡京":{ price:1700, threshold:55 }
   },
 
   nowStr: function() {
@@ -5389,8 +4691,8 @@ var RM = {
   save: function() {
     localStorage.setItem("rm_bookings", JSON.stringify(this.bookings));
     localStorage.setItem("rm_last_id", this.lastId.toString());
-    // 同步到 Firebase（延遲 300ms 確保本地資料先更新完）
-    if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
+    if (typeof markSyncDirty === 'function') markSyncDirty();
+    if (typeof syncUpload === 'function') syncUpload();
   },
 
   populateAgentDropdown: function() {
@@ -5429,81 +4731,36 @@ var RM = {
   openModal: function(id) {
     this.populateAgentDropdown();
     this.populateDateSelects();
-    this.populateCasinoDropdown();
     this.editingId = id || null;
-    // 每次開表單時隱藏轉碼數顯示（新增模式；編輯模式稍後會根據資料顯示）
-    var thrRow = document.getElementById("rm-threshold-row");
-    if (thrRow) thrRow.style.display = "none";
     document.getElementById("rm-modal-title").textContent = id ? "編輯訂房" : "新增訂房";
     if (id) {
-      var b = this.bookings.find(function(x){ return x._fbKey===String(id) || x.id===id || x.id===parseInt(id); });
+      var b = this.bookings.find(function(x){ return x.id===id; });
       if (!b) return;
       document.getElementById("rm-f-agent").value = b.agent;
       document.getElementById("rm-f-client").value = b.client;
-      // 找出該酒店所屬的體系，並預選（從 PRESET_CONFIG 查找）
-      var casino = "";
-      var config = (typeof PRESET_CONFIG !== 'undefined' && PRESET_CONFIG && PRESET_CONFIG.length) ? PRESET_CONFIG : [];
-      for (var i = 0; i < config.length; i++) {
-        if (config[i].hotel === b.hotel) { casino = config[i].casino; break; }
-      }
-      // 三級聯動：體系 → 酒店 → 房型
-      if (casino) {
-        document.getElementById("rm-f-casino").value = casino;
-        this.populateHotelDropdown(casino);
-        document.getElementById("rm-f-hotel").value = b.hotel;
-        this.populateRoomDropdown(casino, b.hotel);
-      } else {
-        this.populateHotelDropdown();
-        this.populateRoomDropdown();
-      }
-      // 嘗試設定房型（兼容舊資料無 roomType 欄位）
-      if (b.roomType) {
-        try { document.getElementById("rm-f-room").value = b.roomType; } catch(e) {}
-      }
-      // 顯示所需轉碼數（從 PRESET_CONFIG 讀取對應門檻，或使用訂房紀錄中的值）
-      if (b.roomType && casino && b.hotel) {
-        var thrVal = b.threshold || 0;
-        if (!thrVal) {
-          for (var j = 0; j < config.length; j++) {
-            if (config[j].casino === casino && config[j].hotel === b.hotel && config[j].room === b.roomType) {
-              thrVal = config[j].threshold; break;
-            }
-          }
-        }
-        if (thrVal) {
-          var thrRow = document.getElementById("rm-threshold-row");
-          var thrValEl = document.getElementById("rm-threshold-val");
-          if (thrRow) thrRow.style.display = "flex";
-          if (thrValEl) thrValEl.textContent = thrVal;
-          this._currentThreshold = thrVal;
-        }
-      }
+      document.getElementById("rm-f-hotel").value = b.hotel;
       // 填入月日選擇方塊（不含年）
       var ciParts = (b.checkIn || b.date || "").split("-");
       if (ciParts.length >= 3) { document.getElementById("rm-f-checkin-mm").value = ciParts[1]; document.getElementById("rm-f-checkin-dd").value = ciParts[2]; }
-      var coParts = (b.checkOut || b.checkout || "").split("-");
+      var coParts = (b.checkOut || "").split("-");
       if (coParts.length >= 3) { document.getElementById("rm-f-checkout-mm").value = coParts[1]; document.getElementById("rm-f-checkout-dd").value = coParts[2]; }
       document.getElementById("rm-f-nights").value = b.nights || "";
       document.getElementById("rm-f-price").value = b.pricePerNight;
       document.getElementById("rm-f-total").value = b.totalCost;
       document.getElementById("rm-f-status").value = b.status;
       document.getElementById("rm-f-note").value = b.note||"";
-      // 恢復門檻（若舊資料無 threshold 則用房型預設）
+      // 恢復門檻（若舊資料無 threshold 則用酒店預設）
       var th = b.threshold || 0;
       if (!th) {
-        var rmSel = document.getElementById("rm-f-room");
-        if (rmSel && rmSel.selectedIndex >= 0) {
-          var o = rmSel.options[rmSel.selectedIndex];
-          th = parseInt(o.getAttribute("data-threshold"))||70;
-        }
+        var ho = document.getElementById("rm-f-hotel");
+        var o = ho.options[ho.selectedIndex];
+        th = parseInt(o.getAttribute("data-threshold"))||70;
       }
       this._editingThreshold = th;
     } else {
       document.getElementById("rm-f-agent").value = "";
       document.getElementById("rm-f-client").value = "";
-      document.getElementById("rm-f-casino").value = "";
-      document.getElementById("rm-f-hotel").innerHTML = '<option value="">請先選擇體系</option>';
-      document.getElementById("rm-f-room").innerHTML = '<option value="">請先選擇酒店</option>';
+      document.getElementById("rm-f-hotel").value = "";
       document.getElementById("rm-f-checkin-mm").value = "";
       document.getElementById("rm-f-checkin-dd").value = "";
       document.getElementById("rm-f-checkout-mm").value = "";
@@ -5522,20 +4779,15 @@ var RM = {
   },
 
   updatePrice: function() {
-    // 三級聯動模式下，價格由 onRoomChange() 自動填入
-    // 此函式保留供舊邏輯相容，若已選房型則從房型讀取價格
-    var roomSel = document.getElementById("rm-f-room");
-    if (roomSel && roomSel.selectedIndex >= 0 && roomSel.value) {
-      var opt = roomSel.options[roomSel.selectedIndex];
-      document.getElementById("rm-f-price").value = opt.getAttribute("data-price")||0;
-    }
+    var sel = document.getElementById("rm-f-hotel");
+    var opt = sel.options[sel.selectedIndex];
+    document.getElementById("rm-f-price").value = opt.getAttribute("data-price")||0;
     // 自動帶入狀態：選中代理有洗碼記錄預設免費，否則預設付費
     var now = this.nowStr().slice(0,7);
     var agent = document.getElementById("rm-f-agent").value;
     var hasRolling = false;
     for (var i=0;i<txs.length;i++) { if (txs[i].agent===agent && txs[i].date&&txs[i].date.slice(0,7)===now&&txs[i].type!=="cash") { hasRolling=true; break; } }
-    var statusEl = document.getElementById("rm-f-status");
-    if (statusEl) statusEl.value = hasRolling ? "免費" : "付費";
+    document.getElementById("rm-f-status").value = hasRolling ? "免費" : "付費";
     this.calcTotal();
   },
   calcNights: function() {
@@ -5561,9 +4813,7 @@ var RM = {
   saveForm: function() {
     var agent = document.getElementById("rm-f-agent").value;
     var client = document.getElementById("rm-f-client").value.trim();
-    var casino = document.getElementById("rm-f-casino").value;
     var hotel = document.getElementById("rm-f-hotel").value;
-    var roomType = document.getElementById("rm-f-room").value;
     var cimm = document.getElementById("rm-f-checkin-mm").value;
     var cidd = document.getElementById("rm-f-checkin-dd").value;
     var comm = document.getElementById("rm-f-checkout-mm").value;
@@ -5578,37 +4828,25 @@ var RM = {
     var status = document.getElementById("rm-f-status").value;
     var note = document.getElementById("rm-f-note").value.trim();
     var date = checkIn || this.nowStr();
-    // 取得門檻：優先從房型下拉讀取，否則用 _currentThreshold，最後才用酒店下拉（兼容舊邏輯）
-    var threshold = this._currentThreshold || 0;
-    var roomSel = document.getElementById("rm-f-room");
-    if (roomSel && roomSel.selectedIndex >= 0) {
-      var ropt = roomSel.options[roomSel.selectedIndex];
-      var t = parseInt(ropt.getAttribute("data-threshold"))||0;
-      if (t) threshold = t;
-    }
-    if (!threshold) {
-      var hoSel = document.getElementById("rm-f-hotel");
-      if (hoSel && hoSel.selectedIndex >= 0) {
-        var hopt = hoSel.options[hoSel.selectedIndex];
-        threshold = parseInt(hopt.getAttribute("data-threshold"))||70;
-      }
-    }
+    // 取得門檻
+    var sel = document.getElementById("rm-f-hotel");
+    var opt = sel.options[sel.selectedIndex];
+    var threshold = parseInt(opt.getAttribute("data-threshold"))||70;
     if (!agent||!client||!hotel||!checkIn||!checkout||nights<=0) {
-      showToast("請填寫所有必填欄位（體系/酒店/房型）","error"); return;
+      showToast("請填寫所有必填欄位","error"); return;
     }
     if (this.editingId) {
-      var idx = this.bookings.findIndex(function(x){ return x._fbKey===String(RM.editingId) || x.id===RM.editingId || x.id===parseInt(RM.editingId); });
-      var _k = (idx>=0 && this.bookings[idx] && this.bookings[idx]._fbKey) ? this.bookings[idx]._fbKey : _fbKey();
-      if (idx>=0) this.bookings[idx] = { id:this.bookings[idx].id, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
+      var idx = this.bookings.findIndex(function(x){ return x.id===RM.editingId; });
+      if (idx>=0) this.bookings[idx] = { id:this.editingId, date:date, agent:agent, client:client, hotel:hotel, checkIn:checkIn, checkout:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
       showToast("訂房已更新","success");
     } else {
       this.lastId++;
-      var _k = _fbKey();
-      this.bookings.push({ id:this.lastId, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
+      this.bookings.push({ id:this.lastId, date:date, agent:agent, client:client, hotel:hotel, checkIn:checkIn, checkout:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
       showToast("訂房已新增","success");
     }
     this.save();
     this.closeModal();  // 先關閉彈窗，確保一定執行
+    showToast(this.editingId ? "訂房已更新" : "訂房已新增", "success");
     this.editingId = null;
     // 後台重新渲染（即使報錯也不影響彈窗關閉）
     try { this.render(); } catch(e) { console.error("RM.render error:", e); }
@@ -5616,22 +4854,32 @@ var RM = {
   },
   delete: function(id) {
     if (!confirm("確定要刪除這筆訂房紀錄嗎？")) return;
-    var key = String(id);
-    var fbKey = null;
-    for (var i = 0; i < this.bookings.length; i++) {
-      if (String(this.bookings[i]._fbKey)===key || this.bookings[i].id===id || this.bookings[i].id===parseInt(id)) {
-        fbKey = this.bookings[i]._fbKey; break;
-      }
-    }
-    this.bookings = this.bookings.filter(function(x){ return String(x._fbKey)!==key && x.id!==id && x.id!==parseInt(id); });
-    this.save();
-    // 立即從 Firebase 刪除該筆
-    if (fbKey && typeof db !== 'undefined' && db) {
-      db.ref('macau_data/rmBookings/' + fbKey).remove(function(err){ if(err) console.error('[Sync] rmBookings remove error:', err); });
-    }
-    this.render();
-    this.updateQuota();
-    showToast("訂房已刪除","success");
+    // 真正刪除：從陣列移除，並記錄 ID 到 deletedIds
+    var idx = this.bookings.findIndex(function(x){ return x.id === id; });
+    if (idx < 0) return;
+    var deleted = this.bookings.splice(idx, 1)[0]; // 從陣列移除
+    deletedIds.push(id);                               // 記錄已刪除 ID
+    try { localStorage.setItem("macau_deleted_ids", JSON.stringify(deletedIds)); } catch(e) {}
+    // 存到 localStorage
+    try { localStorage.setItem("rm_bookings", JSON.stringify(this.bookings)); } catch(e) {}
+    try { localStorage.setItem("rm_last_id", this.lastId.toString()); } catch(e) {}
+    // 標記髒資料，確保上傳
+    if (typeof markSyncDirty === 'function') markSyncDirty();
+    // 立即上傳
+    var self = this;
+    showLoading("刪除中…");
+    var p = (typeof syncUpload === 'function') ? syncUpload() : Promise.resolve({skipped:true});
+    p.then(function() {
+      self.render();
+      self.updateQuota();
+      hideLoading();
+      if (typeof showToast === 'function') showToast("訂房已刪除","success");
+    }).catch(function() {
+      self.render();
+      self.updateQuota();
+      hideLoading();
+      if (typeof showToast === 'function') showToast("訂房已刪除，但同步失敗", "warning");
+    });
   },
 
   render: function() {
@@ -5643,6 +4891,7 @@ var RM = {
     var filtered = this.bookings.slice();
     if (month) filtered = filtered.filter(function(x){ return x.month===month; });
     if (agent) filtered = filtered.filter(function(x){ return x.agent===agent; });
+    // filtered = filtered.filter(function(x){ return !x.deleted; }); // 已移除（改用 deletedIds 同步）
     filtered.sort(function(a,b){ return b.id-a.id; });
     if (!filtered.length) {
       tbody.innerHTML = "";
@@ -5659,18 +4908,16 @@ var RM = {
       html += "<td style='color:var(--gold);font-weight:600;font-size:12px;'>"+b.agent+"</td>";
       html += "<td style='font-size:12px;'>"+b.client+"</td>";
       html += "<td style='font-size:12px;'>"+b.hotel+"</td>";
-      html += "<td style='font-size:11px;color:var(--text-secondary);'>"+(b.roomType||"")+"</td>";
       html += "<td style='font-size:11px;color:var(--text-muted);'>"+b.checkIn+"</td>";
-      html += "<td style='font-size:11px;color:var(--text-muted);'>"+(b.checkOut||b.checkout)+"</td>";
+      html += "<td style='font-size:11px;color:var(--text-muted);'>"+b.checkOut+"</td>";
       html += "<td>"+b.nights+"晚</td>";
       var th = b.threshold||70;
       html += "<td style='font-family:monospace;color:var(--gold);'>"+this.fmt(b.nights * th)+"<span style='font-size:10px;color:var(--text-muted);'>萬</span></td>";
       html += "<td style='color:var(--gold);font-weight:600;font-family:monospace;'>"+this.fmt(b.totalCost)+"</td>";
       html += "<td><span class='rm-badge "+sc+"'>"+b.status+"</span></td>";
       html += "<td>";
-      var btnKey = b._fbKey ? b._fbKey : b.id;
-      html += "<button class='rm-btn-sm rm-btn-edit' onclick='RM.openModal(\""+btnKey+"\")'>編輯</button>";
-      html += "<button class='rm-btn-sm rm-btn-del' onclick='RM.delete(\""+btnKey+"\")'>刪除</button>";
+      html += "<button class='rm-btn-sm rm-btn-edit' onclick='RM.openModal("+b.id+")'>編輯</button>";
+      html += "<button class='rm-btn-sm rm-btn-del' onclick='RM.delete("+b.id+")'>刪除</button>";
       html += "</td>";
       html += "</tr>";
     }
@@ -5680,28 +4927,25 @@ var RM = {
     var monthEl = document.getElementById("rm-filter-month");
     if (!monthEl) return;
     var month = monthEl.value || this.nowStr().substring(0,7);
+    // 過濾已刪除項目
+    var _txs = txs; // deleted:true 過濾已移除（改用 deletedIds 同步）
+    var _bookings = this.bookings.filter(function(b) { return !b.deleted; });
     var totalRolling = 0, now = month || this.nowStr().slice(0,7);
-    for (var i = 0; i < txs.length; i++) { if (txs[i].date && txs[i].date.slice(0,7) === now && txs[i].type !== "cash") { totalRolling += (txs[i].volume || 0); } }
-    // 從 hotel config 計算平均門檻（若尚未載入則用預設值 70）
+    for (var i = 0; i < _txs.length; i++) { if (_txs[i].date && _txs[i].date.slice(0,7) === now && _txs[i].type !== "cash") { totalRolling += (_txs[i].volume || 0); } }
     var avgThreshold = 70;
-    if (typeof HOTEL_CONFIG !== 'undefined' && HOTEL_CONFIG && HOTEL_CONFIG.length > 0) {
-      var sumTh = 0, cntTh = 0;
-      for (var ti = 0; ti < HOTEL_CONFIG.length; ti++) { var dt = HOTEL_CONFIG[ti].threshold || 0; if (dt > 0) { sumTh += dt; cntTh++; } }
-      if (cntTh > 0) avgThreshold = Math.round(sumTh / cntTh);
-    }
     var totalQuota = Math.floor(totalRolling / avgThreshold);
     var usedQuota = 0;
     // 已使用免費額度：只計有洗碼記錄的代理的免費房晚
     var rmAgtRolling = {};
-    for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&tr.date.slice(0,7)===now&&tr.type!=="cash"&&tr.agent){ rmAgtRolling[tr.agent]=true; } }
-    for (var i=0; i<this.bookings.length; i++)
-      if (this.bookings[i].month===month && this.bookings[i].status==="免費" && rmAgtRolling[this.bookings[i].agent])
-        usedQuota += (this.bookings[i].nights||0);
+    for (var kk=0;kk<_txs.length;kk++){ var tr=_txs[kk]; if (tr.date&&tr.date.slice(0,7)===now&&tr.type!=="cash"&&tr.agent){ rmAgtRolling[tr.agent]=true; } }
+    for (var i=0; i<_bookings.length; i++)
+      if (_bookings[i].month===month && _bookings[i].status==="免費" && rmAgtRolling[_bookings[i].agent])
+        usedQuota += (_bookings[i].nights||0);
     // 已使用轉碼數（所有免費房晚 × 門檻）
     var rmUsedRolling = 0;
-    for (var j=0; j<this.bookings.length; j++)
-      if (this.bookings[j].month===month && this.bookings[j].status==="免費")
-        rmUsedRolling += (this.bookings[j].nights||0) * (this.bookings[j].threshold||70);
+    for (var j=0; j<_bookings.length; j++)
+      if (_bookings[j].month===month && _bookings[j].status==="免費")
+        rmUsedRolling += (_bookings[j].nights||0) * (_bookings[j].threshold||70);
     // 額度使用率 = 已用轉碼數 / 總洗碼量 × 100%
     var pct = totalRolling>0 ? Math.min(100, Math.round(rmUsedRolling/totalRolling*100)) : 0;
 
@@ -5723,8 +4967,8 @@ var RM = {
     if (pctEl) pctEl.textContent = pct+"%";
     // 更新統計摘要
     var statTotal = 0;
-    for (var si = 0; si < this.bookings.length; si++) {
-      if (this.bookings[si].month === month) {
+    for (var si = 0; si < _bookings.length; si++) {
+      if (_bookings[si].month === month) {
         statTotal++;
       }
     }
@@ -5737,8 +4981,8 @@ var RM = {
       var daysInMonth = new Date(parseInt(ym.slice(0,4)), parseInt(ym.slice(5,7)), 0).getDate();
       var dayCounts = {};
       for (var di = 1; di <= daysInMonth; di++) dayCounts[di] = 0;
-      for (var bi = 0; bi < this.bookings.length; bi++) {
-        var b = this.bookings[bi];
+      for (var bi = 0; bi < _bookings.length; bi++) {
+        var b = _bookings[bi];
         if (b.month !== month) continue;
         var parts = (b.checkIn || "").split("-");
         var day = parseInt(parts[1]) || 0;
@@ -5776,10 +5020,10 @@ var RM = {
     var month = monthEl ? monthEl.value : "";
     var filtered = this.bookings.slice();
     if (month) filtered = filtered.filter(function(x){ return x.month===month; });
-    var csv = "\uFEFF日期,代理,客戶,體系,酒店,房型,入住日期,退房日期,天數,每晚單價,所需轉碼門檻,總費用,狀態,備註\n";
+    var csv = "\uFEFF日期,代理,客戶,酒店,入住日期,退房日期,天數,每晚單價,所需轉碼門檻,總費用,狀態,備註\n";
     for (var i=0; i<filtered.length; i++) {
       var b = filtered[i];
-      csv += [b.date,b.agent,b.client,(b.casino||""),b.hotel,(b.roomType||""),b.checkIn,(b.checkOut||b.checkout),b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note].join(",")+"\n";
+      csv += [b.date,b.agent,b.client,b.hotel,b.checkIn,b.checkOut,b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note].join(",")+"\n";
     }
     var blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
     var url = URL.createObjectURL(blob);
@@ -5799,21 +5043,12 @@ var RM = {
     reader.onload = function(ev) {
       var lines = ev.target.result.split("\n").filter(function(x){ return x.trim(); });
       if (lines.length<2) { showToast("CSV 無資料","error"); return; }
-      // 檢測標頭是否包含「體系」或「房型」（新格式 v7.5+）
-      var header = lines[0].trim();
-      var hasNewFormat = header.indexOf("體系") >= 0 || header.indexOf("房型") >= 0;
       var imported = 0;
       for (var i=1; i<lines.length; i++) {
         var cols = lines[i].split(",");
         if (cols.length<10) continue;
         self.lastId++;
-        if (hasNewFormat && cols.length >= 14) {
-          // 新格式：日期,代理,客戶,體系,酒店,房型,入住,退房,天數,單價,門檻,總費用,狀態,備註
-          self.bookings.push({ id:self.lastId, date:cols[0]||self.nowStr(), agent:cols[1]||"", client:cols[2]||"", casino:cols[3]||"", hotel:cols[4]||"", roomType:cols[5]||"", checkIn:cols[6]||"", checkOut:cols[7]||"", nights:parseInt(cols[8])||0, pricePerNight:parseInt(cols[9])||0, threshold:parseInt(cols[10])||70, totalCost:parseInt(cols[11])||0, status:cols[12]||"免費", month:(cols[0]||self.nowStr()).substring(0,7), note:cols[13]||"" });
-        } else {
-          // 舊格式：日期,代理,客戶,酒店,入住,退房,天數,單價,門檻,總費用,狀態,備註
-          self.bookings.push({ id:self.lastId, date:cols[0]||self.nowStr(), agent:cols[1]||"", client:cols[2]||"", casino:"", hotel:cols[3]||"", roomType:"", checkIn:cols[4]||"", checkOut:cols[5]||"", nights:parseInt(cols[6])||0, pricePerNight:parseInt(cols[7])||0, threshold:parseInt(cols[8])||70, totalCost:parseInt(cols[9])||0, status:cols[10]||"免費", month:(cols[0]||self.nowStr()).substring(0,7), note:cols[11]||"" });
-        }
+        self.bookings.push({ id:self.lastId, date:cols[0]||self.nowStr(), agent:cols[1]||"", client:cols[2]||"", hotel:cols[3]||"", checkIn:cols[4]||"", checkout:cols[5]||"", nights:parseInt(cols[6])||0, pricePerNight:parseInt(cols[7])||0, threshold:parseInt(cols[8])||70, totalCost:parseInt(cols[9])||0, status:cols[10]||"免費", month:(cols[0]||self.nowStr()).substring(0,7), note:cols[11]||"" });
         imported++;
       }
       self.save(); self.render(); self.updateQuota();
@@ -5827,7 +5062,6 @@ var RM = {
     this.load();
     this.populateAgentDropdown();
     this.populateAgentFilter();
-    this.populateCasinoDropdown();
     var monthEl = document.getElementById("rm-filter-month");
     if (monthEl) monthEl.value = this.nowStr().substring(0,7);
     this.render();
@@ -5839,9 +5073,6 @@ var RM = {
 function rmOpenModal(id){ RM.openModal(id||null); }
 function rmCloseModal(){ RM.closeModal(); }
 function rmUpdatePrice(){ RM.updatePrice(); }
-function rmOnCasinoChange(){ RM.onCasinoChange(); }
-function rmOnHotelChange(){ RM.onHotelChange(); }
-function rmOnRoomChange(){ RM.onRoomChange(); }
 function rmCalcNights(){ RM.calcNights(); }
 function rmOnDateChange(){ RM.calcNights(); }
 function rmCalcTotal(){ RM.calcTotal(); }
@@ -5854,457 +5085,15 @@ function rmHandleImport(e){ RM.handleImport(e); }
 // 啟動房務系統
 RM.init();
 
-// ===== 房務頁籤切換 =====
-function switchRoomTab(name, btn) {
-  var tabs = document.querySelectorAll('.room-tab');
-  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
-  if (btn) btn.classList.add('active');
-  var contents = document.querySelectorAll('.room-tab-content');
-  for (var j = 0; j < contents.length; j++) contents[j].classList.remove('active');
-  var content = document.getElementById('room-tab-' + name);
-  if (content) content.classList.add('active');
-  if (name === 'config' && typeof initHC === 'function') { initHC(); }
-  if (name === 'booking') { try { RM.updateQuota(); RM.render(); } catch(e) {} }
-}
-
-// 工具函式：HTML 轉義
-function escHtml(s) {
-  if (s === null || s === undefined) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ===== 酒店設定預設數據 =====
-var PRESET_CONFIG = [
-  // ===== 新濠天地 =====
-  { casino:"新濠天地", hotel:"摩珀斯", code:"MPPK", room:"摩珀斯客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"新濠天地", hotel:"摩珀斯", code:"MPPK", room:"摩珀斯套房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"新濠天地", hotel:"摩珀斯", code:"MPT",  room:"摩珀斯豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
-  { casino:"新濠天地", hotel:"摩珀斯", code:"MCPT", room:"摩珀斯2房奢房", weekday:4200, weekend:4500, special:6000, threshold:350 },
-  { casino:"新濠天地", hotel:"摩珀斯", code:"MPS",  room:"摩珀斯3房奢房", weekday:6000, weekend:6500, special:8000, threshold:1000 },
-  { casino:"新濠天地", hotel:"摩珀斯", code:"MES",  room:"摩珀斯總統套房", weekday:10000, weekend:11000, special:13000, threshold:3000 },
-  { casino:"新濠天地", hotel:"頣居", code:"NPX",  room:"頣居客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"新濠天地", hotel:"頣居", code:"NPXV", room:"頣居套房(樓床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"新濠天地", hotel:"頣居", code:"NPQV", room:"頣居豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"新濠天地", hotel:"頣居", code:"NDS",  room:"頣居套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"新濠天地", hotel:"頣居", code:"NCDS", room:"頣居豪華套房", weekday:3000, weekend:3300, special:4500, threshold:300 },
-  { casino:"新濠天地", hotel:"頣居", code:"NPS",  room:"頣居2房奢房", weekday:6000, weekend:6500, special:8000, threshold:3000 },
-  { casino:"新濠天地", hotel:"頣居", code:"NPSV", room:"頣居2房套間", weekday:8000, weekend:8500, special:10000, threshold:3000 },
-  { casino:"新濠天地", hotel:"君悅", code:"KING",  room:"君悅客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"新濠天地", hotel:"君悅", code:"TWIN",  room:"君悅客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"新濠天地", hotel:"君悅", code:"DLXX",  room:"君悅豪華套房(大床)", weekday:1890, weekend:2000, special:3900, threshold:180 },
-  { casino:"新濠天地", hotel:"君悅", code:"DLXT",  room:"君悅豪華套房(雙床)", weekday:1850, weekend:2000, special:3900, threshold:150 },
-  { casino:"新濠天地", hotel:"君悅", code:"CLDK",  room:"君悅套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:300 },
-  { casino:"新濠天地", hotel:"君悅", code:"CLDT",  room:"君悅套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:300 },
-  { casino:"新濠天地", hotel:"君悅", code:"GRSK",  room:"君悅行政奢房", weekday:4500, weekend:5000, special:6550, threshold:1000 },
-  { casino:"新濠天地", hotel:"君悅", code:"QRXS",  room:"君悅行政套房", weekday:6000, weekend:6500, special:8000, threshold:3000 },
-  { casino:"新濠天地", hotel:"君悅", code:"PREM",  room:"君悅總統套房", weekday:10000, weekend:11000, special:13000, threshold:3000 },
-  { casino:"新濠天地", hotel:"君悅", code:"DIPL",  room:"君悅外交官奢房", weekday:15000, weekend:16000, special:18000, threshold:3000 },
-  { casino:"新濠天地", hotel:"君悅", code:"PRES",  room:"君悅總統奢房", weekday:20000, weekend:22000, special:26000, threshold:3000 },
-  { casino:"新濠天地", hotel:"君悅", code:"CHHN",  room:"君悅主席套房", weekday:30000, weekend:32000, special:35000, threshold:3000 },
-  // ===== 新濠影滙 =====
-  { casino:"新濠影滙", hotel:"明星滙", code:"CRX", room:"明星滙客房", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"新濠影滙", hotel:"明星滙", code:"CRT", room:"明星滙套房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"新濠影滙", hotel:"明星滙", code:"CDX", room:"明星滙豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"新濠影滙", hotel:"明星滙", code:"CDT", room:"明星滙豪華套房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"新濠影滙", hotel:"明星滙", code:"CSS", room:"明星滙奢房", weekday:3000, weekend:3200, special:4500, threshold:300 },
-  { casino:"新濠影滙", hotel:"明星滙", code:"SDX", room:"明星滙豪華奢房", weekday:4500, weekend:5000, special:6500, threshold:1000 },
-  { casino:"新濠影滙", hotel:"巨星滙", code:"STGD", room:"巨星滙客房", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"新濠影滙", hotel:"巨星滙", code:"STGT", room:"巨星滙套房", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"新濠影滙", hotel:"巨星滙", code:"SGDL", room:"巨星滙豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
-  { casino:"新濠影滙", hotel:"巨星滙", code:"SGDT", room:"巨星滙豪華套房(雙床)", weekday:2700, weekend:3000, special:4200, threshold:150 },
-  { casino:"新濠影滙", hotel:"巨星滙", code:"SGSS", room:"巨星滙奢房", weekday:4200, weekend:4500, special:6000, threshold:350 },
-  { casino:"新濠影滙", hotel:"巨星滙", code:"SGXS", room:"巨星滙豪華奢房", weekday:6000, weekend:6500, special:8000, threshold:1000 },
-  { casino:"新濠影滙", hotel:"映星滙", code:"ESHK", room:"映星滙客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"新濠影滙", hotel:"映星滙", code:"ESHT", room:"映星滙客房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"新濠影滙", hotel:"映星滙", code:"ESDL", room:"映星滙豪華套房", weekday:3000, weekend:3200, special:4500, threshold:300 },
-  { casino:"新濠影滙", hotel:"映星滙", code:"ESDT", room:"映星滙豪華套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:300 },
-  { casino:"新濠影滙", hotel:"映星滙", code:"ESXS", room:"映星滙奢房", weekday:4500, weekend:5000, special:6500, threshold:1000 },
-  { casino:"新濠影滙", hotel:"映星滙", code:"ESPS", room:"映星滙總統套房", weekday:10000, weekend:11000, special:13000, threshold:3000 },
-  // ===== 金沙 =====
-  { casino:"金沙", hotel:"御園", code:"GYK", room:"御園客房(大床)", weekday:2000, weekend:2300, special:3500, threshold:200 },
-  { casino:"金沙", hotel:"御園", code:"GYDL", room:"御園豪華套房", weekday:3500, weekend:3800, special:5000, threshold:350 },
-  { casino:"金沙", hotel:"倫敦人", code:"LNK", room:"倫敦人客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"金沙", hotel:"倫敦人", code:"LNDL", room:"倫敦人豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
-  { casino:"金沙", hotel:"倫敦人名滙", code:"LNHK", room:"倫敦人名滙客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"金沙", hotel:"倫敦人名滙", code:"LNHD", room:"倫敦人名滙豪華套房", weekday:3000, weekend:3200, special:4500, threshold:300 },
-  // ===== 銀河 =====
-  { casino:"銀河", hotel:"銀河酒店", code:"GXK", room:"銀河客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"銀河", hotel:"銀河酒店", code:"GXT", room:"銀河客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"銀河", hotel:"銀河酒店", code:"GXDL", room:"銀河豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"銀河", hotel:"JW萬豪", code:"JWK", room:"JW萬豪客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"銀河", hotel:"JW萬豪", code:"JWDL", room:"JW萬豪豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
-  { casino:"銀河", hotel:"麗思卡爾頓", code:"RCK", room:"麗思卡爾頓客房", weekday:2000, weekend:2300, special:3500, threshold:200 },
-  { casino:"銀河", hotel:"麗思卡爾頓", code:"RCDL", room:"麗思卡爾頓豪華套房", weekday:3500, weekend:3800, special:5000, threshold:350 },
-  { casino:"銀河", hotel:"麗思卡爾頓", code:"RCPS", room:"麗思卡爾頓總統套房", weekday:15000, weekend:16000, special:18000, threshold:200 },
-  // ===== 永利 =====
-  { casino:"永利", hotel:"永利澳門", code:"WYK", room:"永利客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
-  { casino:"永利", hotel:"永利澳門", code:"WYDL", room:"永利豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
-  { casino:"永利", hotel:"永利皇宮", code:"WPK", room:"永利皇宮客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"永利", hotel:"永利皇宮", code:"WPDL", room:"永利皇宮豪華套房", weekday:3000, weekend:3200, special:4500, threshold:300 },
-  // ===== 上葡京 =====
-  { casino:"上葡京", hotel:"上葡京酒店", code:"GPK", room:"上葡京客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"上葡京", hotel:"上葡京酒店", code:"GPT", room:"上葡京客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
-  { casino:"上葡京", hotel:"上葡京酒店", code:"GPDL", room:"上葡京豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
-  { casino:"上葡京", hotel:"老佛爺", code:"KLK", room:"老佛爺客房(大床)", weekday:2000, weekend:2300, special:3500, threshold:200 },
-  { casino:"上葡京", hotel:"老佛爺", code:"KLDL", room:"老佛爺豪華套房", weekday:3500, weekend:3800, special:5000, threshold:350 }
-];
-
-var CASINO_ORDER = ['新濠天地', '新濠影滙', '金沙', '銀河', '永利', '上葡京'];
-
-// ===== 酒店設定全局狀態 =====
-var HOTEL_CONFIG = [];
-var hcEditIdx = -1;
-var hcPendingQuick = null;
-var hcInitDone = false;
-
-function initHC() {
-  if (hcInitDone) {
-    // 已初始化過，只刷新表格
-    hcPopulateFilters();
-    hcRenderTable();
-    return;
-  }
-  hcInitDone = true;
-  loadHCConfig();
-  hcPopulateFilters();
-  hcRenderTable();
-}
-
-function loadHCConfig() {
-  try {
-    var saved = localStorage.getItem('macau_hotel_config_v7');
-    if (saved) {
-      HOTEL_CONFIG = JSON.parse(saved);
-      for (var i = 0; i < HOTEL_CONFIG.length; i++) {
-        var c = HOTEL_CONFIG[i];
-        if (c.code === undefined) c.code = '';
-        if (c.weekday === undefined) c.weekday = 0;
-        if (c.weekend === undefined) c.weekend = 0;
-        if (c.special === undefined) c.special = 0;
-      }
-    }
-  } catch(e) {}
-  if (!HOTEL_CONFIG || HOTEL_CONFIG.length === 0) {
-    HOTEL_CONFIG = JSON.parse(JSON.stringify(PRESET_CONFIG));
-    saveHCConfig();
-  }
-}
-
-function saveHCConfig() {
-  localStorage.setItem('macau_hotel_config_v7', JSON.stringify(HOTEL_CONFIG));
-  // 同步到 Firebase
-  if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
-}
-
-function hcGetCasinos() {
-  var set = {};
-  for (var i = 0; i < HOTEL_CONFIG.length; i++) set[HOTEL_CONFIG[i].casino] = true;
-  return Object.keys(set).sort(function(a, b) {
-    var ia = CASINO_ORDER.indexOf(a), ib = CASINO_ORDER.indexOf(b);
-    if (ia === -1) ia = 999; if (ib === -1) ib = 999;
-    if (ia !== ib) return ia - ib;
-    return a.localeCompare(b, 'zh');
-  });
-}
-
-function hcGetHotels(casino) {
-  var set = {};
-  for (var i = 0; i < HOTEL_CONFIG.length; i++) {
-    if (!casino || HOTEL_CONFIG[i].casino === casino) set[HOTEL_CONFIG[i].hotel] = true;
-  }
-  return Object.keys(set).sort();
-}
-
-function hcPopulateFilters() {
-  var casinos = hcGetCasinos();
-  var sel1 = document.getElementById('hc-filter-casino');
-  if (!sel1) return;
-  sel1.innerHTML = '<option value="">全部體系</option>';
-  for (var i = 0; i < casinos.length; i++) sel1.innerHTML += '<option value="' + casinos[i] + '">' + casinos[i] + '</option>';
-  var hotels = hcGetHotels();
-  var sel2 = document.getElementById('hc-filter-hotel');
-  if (!sel2) return;
-  sel2.innerHTML = '<option value="">全部酒店</option>';
-  for (var i = 0; i < hotels.length; i++) sel2.innerHTML += '<option value="' + hotels[i] + '">' + hotels[i] + '</option>';
-}
-
-function hcFilter() {
-  var casino = document.getElementById('hc-filter-casino').value;
-  var hotel = document.getElementById('hc-filter-hotel').value;
-  // 更新酒店下拉選單
-  if (casino) {
-    var hotels = hcGetHotels(casino);
-    var sel2 = document.getElementById('hc-filter-hotel');
-    sel2.innerHTML = '<option value="">全部酒店</option>';
-    for (var i = 0; i < hotels.length; i++) sel2.innerHTML += '<option value="' + hotels[i] + '">' + hotels[i] + '</option>';
-  }
-  hcRenderTable(casino || null, hotel || null);
-}
-
-function hcRenderTable(filterCasino, filterHotel) {
-  var tbody = document.getElementById('hc-tbody');
-  if (!tbody) return;
-  var searchText = '';
-  try { searchText = (document.getElementById('hc-search').value || '').trim().toLowerCase(); } catch(e) {}
-  var filtered = [];
-  for (var j = 0; j < HOTEL_CONFIG.length; j++) {
-    var c = HOTEL_CONFIG[j];
-    if (filterCasino && c.casino !== filterCasino) continue;
-    if (filterHotel && c.hotel !== filterHotel) continue;
-    if (searchText) {
-      var hay = (c.casino + ' ' + c.hotel + ' ' + c.room + ' ' + (c.code||'')).toLowerCase();
-      if (hay.indexOf(searchText) === -1) continue;
-    }
-    filtered.push({ c: c, idx: j });
-  }
-  filtered.sort(function(a, b) {
-    var ca = a.c, cb = b.c;
-    if (ca.casino !== cb.casino) {
-      var ia = CASINO_ORDER.indexOf(ca.casino), ib = CASINO_ORDER.indexOf(cb.casino);
-      if (ia === -1) ia = 999; if (ib === -1) ib = 999;
-      if (ia !== ib) return ia - ib;
-      return ca.casino.localeCompare(cb.casino, 'zh');
-    }
-    if (ca.hotel !== cb.hotel) return ca.hotel.localeCompare(cb.hotel, 'zh');
-    return ca.room.localeCompare(cb.room, 'zh');
-  });
-  var countEl = document.getElementById('hc-count');
-  if (countEl) countEl.textContent = '共 ' + filtered.length + ' 項';
-  if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">尚無配置，請點「＋ 新增房型」或「🔄 重置」</td></tr>';
-  } else {
-    var html = '';
-    for (var i = 0; i < filtered.length; i++) {
-      var c = filtered[i].c, idx = filtered[i].idx;
-      html += '<tr>' +
-        '<td>' + escHtml(c.casino || '') + '</td>' +
-        '<td>' + escHtml(c.hotel || '') + '</td>' +
-        '<td class="hc-code">' + escHtml(c.code || '') + '</td>' +
-        '<td>' + escHtml(c.room || '') + '</td>' +
-        '<td style="white-space:nowrap;text-align:center;">' +
-          '<button class="btn btn-gold btn-sm" onclick="hcOpenModal(' + idx + ')">編輯</button> ' +
-          '<button class="btn btn-red btn-sm" onclick="hcDelete(' + idx + ')">✕</button>' +
-        '</td></tr>';
-    }
-    tbody.innerHTML = html;
-  }
-}
-
-function hcOpenModal(idx) {
-  hcEditIdx = (idx !== undefined && idx >= 0) ? idx : -1;
-  var sel1 = document.getElementById('hc-em-casino');
-  var casinos = hcGetCasinos();
-  sel1.innerHTML = '<option value="">請選擇體系</option>';
-  for (var i = 0; i < casinos.length; i++) sel1.innerHTML += '<option value="' + casinos[i] + '">' + casinos[i] + '</option>';
-  var sel2 = document.getElementById('hc-em-hotel');
-  sel2.innerHTML = '<option value="">請先選體系</option>';
-  var title = document.getElementById('hc-modal-title');
-  if (hcEditIdx >= 0) {
-    title.textContent = '編輯房型';
-    var c = HOTEL_CONFIG[hcEditIdx];
-    if (!c) return;
-    sel1.value = c.casino || '';
-    hcOnCasinoChange();
-    document.getElementById('hc-em-hotel').value = c.hotel || '';
-    document.getElementById('hc-em-code').value = c.code || '';
-    document.getElementById('hc-em-room').value = c.room || '';
-    document.getElementById('hc-em-weekday').value = c.weekday || '';
-    document.getElementById('hc-em-weekend').value = c.weekend || '';
-    document.getElementById('hc-em-special').value = c.special || '';
-    document.getElementById('hc-em-threshold').value = c.threshold || '';
-  } else {
-    title.textContent = '新增房型';
-    document.getElementById('hc-em-code').value = '';
-    document.getElementById('hc-em-room').value = '';
-    document.getElementById('hc-em-weekday').value = '';
-    document.getElementById('hc-em-weekend').value = '';
-    document.getElementById('hc-em-special').value = '';
-    document.getElementById('hc-em-threshold').value = '';
-  }
-  document.getElementById('hc-modal-bg').classList.add('active');
-}
-
-function hcOnCasinoChange() {
-  var casinoVal = document.getElementById('hc-em-casino').value;
-  var sel = document.getElementById('hc-em-hotel');
-  if (!casinoVal) { sel.innerHTML = '<option value="">請先選體系</option>'; return; }
-  var hotels = hcGetHotels(casinoVal);
-  sel.innerHTML = '<option value="">請選擇酒店</option>';
-  for (var i = 0; i < hotels.length; i++) sel.innerHTML += '<option value="' + hotels[i] + '">' + hotels[i] + '</option>';
-}
-
-function hcCloseModal() {
-  document.getElementById('hc-modal-bg').classList.remove('active');
-  hcEditIdx = -1;
-}
-
-function hcSaveModal() {
-  var casino = document.getElementById('hc-em-casino').value;
-  var hotel = document.getElementById('hc-em-hotel').value;
-  var code = document.getElementById('hc-em-code').value.trim();
-  var room = document.getElementById('hc-em-room').value.trim();
-  var weekday = parseFloat(document.getElementById('hc-em-weekday').value) || 0;
-  var weekend = parseFloat(document.getElementById('hc-em-weekend').value) || 0;
-  var special = parseFloat(document.getElementById('hc-em-special').value) || 0;
-  var threshold = parseFloat(document.getElementById('hc-em-threshold').value) || 0;
-  if (!casino || !hotel || !room) { showToast('請填寫體系、酒店、房型', 'error'); return; }
-  var item = { casino: casino, hotel: hotel, code: code, room: room, weekday: weekday, weekend: weekend, special: special, threshold: threshold };
-  if (hcEditIdx >= 0) {
-    HOTEL_CONFIG[hcEditIdx] = item;
-  } else {
-    HOTEL_CONFIG.push(item);
-  }
-  saveHCConfig();
-  hcPopulateFilters();
-  hcRenderTable();
-  hcCloseModal();
-  showToast(hcEditIdx >= 0 ? '已更新' : '已新增', 'success');
-}
-
-function hcDelete(idx) {
-  var c = HOTEL_CONFIG[idx];
-  if (!c) return;
-  if (!confirm('確定刪除 ' + c.casino + ' / ' + c.hotel + ' / ' + c.room + ' ？')) return;
-  HOTEL_CONFIG.splice(idx, 1);
-  saveHCConfig();
-  hcPopulateFilters();
-  hcRenderTable();
-  showToast('已刪除', 'info');
-}
-
-function hcReset() {
-  if (!confirm('確定要重置酒店配置嗎？\n手動新增的項目會被保留（不重複），但修改過的門檻會恢復預設值。')) return;
-  var presetMap = {};
-  for (var i = 0; i < PRESET_CONFIG.length; i++) {
-    var p = PRESET_CONFIG[i];
-    presetMap[p.casino + '|' + p.hotel + '|' + p.room] = p;
-  }
-  var newConfig = [], userAdded = [], usedPreset = {};
-  for (var i = 0; i < HOTEL_CONFIG.length; i++) {
-    var c = HOTEL_CONFIG[i], key = c.casino + '|' + c.hotel + '|' + c.room;
-    if (presetMap[key] && !usedPreset[key]) {
-      newConfig.push(JSON.parse(JSON.stringify(presetMap[key])));
-      usedPreset[key] = true;
-    } else if (!presetMap[key]) {
-      userAdded.push(c);
-    }
-  }
-  for (var k in presetMap) {
-    if (presetMap.hasOwnProperty(k) && !usedPreset[k]) {
-      newConfig.push(JSON.parse(JSON.stringify(presetMap[k])));
-    }
-  }
-  HOTEL_CONFIG = newConfig.concat(userAdded);
-  saveHCConfig();
-  hcPopulateFilters();
-  hcRenderTable();
-  showToast('已重置！保留 ' + userAdded.length + ' 項自訂', 'success');
-}
-
-function hcAddCasino() {
-  document.getElementById('hc-quick-title').textContent = '＋ 新增體系';
-  document.getElementById('hc-qa-label1').textContent = '體系名稱';
-  document.getElementById('hc-qa-input1').value = '';
-  document.getElementById('hc-qa-label2').textContent = '第一間酒店名稱';
-  document.getElementById('hc-qa-input2').value = '';
-  document.getElementById('hc-qa-threshold-row').style.display = 'block';
-  document.getElementById('hc-qa-threshold').value = '80';
-  hcPendingQuick = { type: 'casino' };
-  document.getElementById('hc-quick-bg').classList.add('active');
-}
-
-function hcAddHotel() {
-  var casino = document.getElementById('hc-filter-casino').value;
-  if (!casino) {
-    document.getElementById('hc-quick-title').textContent = '＋ 新增酒店（請先選擇體系）';
-    document.getElementById('hc-qa-label1').textContent = '體系名稱';
-    document.getElementById('hc-qa-input1').value = '';
-    document.getElementById('hc-qa-label2').textContent = '酒店名稱';
-    document.getElementById('hc-qa-input2').value = '';
-    document.getElementById('hc-qa-threshold-row').style.display = 'none';
-    hcPendingQuick = { type: 'hotel_casino' };
-  } else {
-    document.getElementById('hc-quick-title').textContent = '＋ 新增酒店 — ' + casino;
-    document.getElementById('hc-qa-label1').textContent = '酒店名稱';
-    document.getElementById('hc-qa-input1').value = '';
-    document.getElementById('hc-qa-label2').textContent = '第一個房型名稱（選填）';
-    document.getElementById('hc-qa-input2').value = '';
-    document.getElementById('hc-qa-threshold-row').style.display = 'block';
-    document.getElementById('hc-qa-threshold').value = '80';
-    hcPendingQuick = { type: 'hotel', casino: casino };
-  }
-  document.getElementById('hc-quick-bg').classList.add('active');
-}
-
-function hcConfirmQuick() {
-  if (!hcPendingQuick) return;
-  var type = hcPendingQuick.type;
-  var v1 = document.getElementById('hc-qa-input1').value.trim();
-  var v2 = document.getElementById('hc-qa-input2').value.trim();
-  var threshold = parseInt(document.getElementById('hc-qa-threshold').value) || 80;
-
-  if (type === 'casino') {
-    if (!v1 || !v2) { showToast('請填寫體系和酒店名稱', 'error'); return; }
-    for (var i = 0; i < HOTEL_CONFIG.length; i++) {
-      if (HOTEL_CONFIG[i].casino === v1 && HOTEL_CONFIG[i].hotel === v2) { showToast('此體系＋酒店已存在', 'error'); return; }
-    }
-    HOTEL_CONFIG.push({ casino: v1, hotel: v2, code: '', room: v2 + ' 客房', weekday: 0, weekend: 0, special: 0, threshold: threshold });
-  }
-  else if (type === 'hotel_casino') {
-    if (!v1 || !v2) { showToast('請填寫體系和酒店名稱', 'error'); return; }
-    for (var i = 0; i < HOTEL_CONFIG.length; i++) {
-      if (HOTEL_CONFIG[i].casino === v1 && HOTEL_CONFIG[i].hotel === v2) { showToast('此體系＋酒店已存在', 'error'); return; }
-    }
-    HOTEL_CONFIG.push({ casino: v1, hotel: v2, code: '', room: v2 + ' 客房', weekday: 0, weekend: 0, special: 0, threshold: 80 });
-  }
-  else if (type === 'hotel') {
-    if (!v1) { showToast('請輸入酒店名稱', 'error'); return; }
-    for (var i = 0; i < HOTEL_CONFIG.length; i++) {
-      if (HOTEL_CONFIG[i].casino === hcPendingQuick.casino && HOTEL_CONFIG[i].hotel === v1 &&
-          HOTEL_CONFIG[i].room === (v2 || v1 + ' 客房')) { showToast('此酒店＋房型已存在', 'error'); return; }
-    }
-    HOTEL_CONFIG.push({ casino: hcPendingQuick.casino, hotel: v1, code: '', room: v2 || v1 + ' 客房', weekday: 0, weekend: 0, special: 0, threshold: threshold });
-  }
-  saveHCConfig();
-  hcPopulateFilters();
-  hcRenderTable();
-  document.getElementById('hc-quick-bg').classList.remove('active');
-  hcPendingQuick = null;
-  showToast('已新增', 'success');
-}
-
-// ESC 關閉酒店設定彈窗
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    var qb = document.getElementById('hc-quick-bg');
-    if (qb && qb.classList.contains('active')) { qb.classList.remove('active'); hcPendingQuick = null; return; }
-    var mb = document.getElementById('hc-modal-bg');
-    if (mb && mb.classList.contains('active')) { hcCloseModal(); return; }
-    var hb = document.getElementById('hc-help-bg');
-    if (hb && hb.classList.contains('active')) { hb.classList.remove('active'); return; }
-  }
-});
-
 // ===== 手機版側邊欄初始化（預設隱藏）=====
 document.addEventListener('DOMContentLoaded', function() {
   function initMobileSidebar() {
     var sb = document.getElementById('sidebar');
-    var overlay = document.getElementById('sidebar-overlay');
-    if (sb) {
-      if (window.innerWidth <= 700) {
-        sb.classList.add('mobile-hidden');
-      } else {
-        sb.classList.remove('mobile-hidden');
-      }
-    }
-    // 初始化遮罩層狀態，防止手機版遮罩層阻擋按鈕點擊
-    if (overlay) {
-      if (window.innerWidth <= 700) {
-        overlay.style.display = 'none';
-        overlay.classList.remove('active');
-      } else {
-        overlay.style.display = '';
-      }
+    if (!sb) return;
+    if (window.innerWidth <= 700) {
+      sb.classList.add('mobile-hidden');
+    } else {
+      sb.classList.remove('mobile-hidden');
     }
   }
   initMobileSidebar();
@@ -6365,36 +5154,20 @@ var _MAX_UNDO = 10;
 (function() {
   var _origDeleteTx = deleteTx;
   deleteTx = function(id) {
-    console.log('[deleteTx] 函數被調用，ID:', id);
-    if (!confirm("確定刪除此筆交易？")) { console.log('[deleteTx] 使用者取消刪除'); return; }
-    showLoading("刪除中…");
+    if (!confirm("确定删除此笔交易？")) return;
+    showLoading("删除中…");
     try {
-      console.log('[deleteTx] 開始刪除，交易數量（刪除前）:', txs.length);
-      var key = String(id);
-      var deleted = null, delIndex = -1, targetFbKey = null;
+      var deleted = null, delIndex = -1;
       for (var i = 0; i < txs.length; i++) {
-        var t = txs[i];
-        if (!t) continue;
-        if (t._fbKey === key || String(t.id) === key || t.id === parseInt(id)) {
-          deleted = t; delIndex = i; targetFbKey = t._fbKey || key; break;
-        }
+        if (txs[i].id === id) { deleted = txs[i]; delIndex = i; break; }
       }
       if (deleted) {
         _undoStack.push({ tx: JSON.parse(JSON.stringify(deleted)), index: delIndex });
         if (_undoStack.length > _MAX_UNDO) _undoStack.shift();
       }
-      // v10.0 直接從 Firebase 刪除該筆記錄
-      if (db && targetFbKey && targetFbKey !== "undefined") {
-        db.ref('macau_data/txs/' + targetFbKey).set(null, function(error) {
-          if (error) console.error('[deleteTx] Firebase 刪除失敗:', error);
-        });
-      }
       var newTxs = [];
       for (var i = 0; i < txs.length; i++) {
-        var t = txs[i];
-        if (!t) continue;
-        var isMatch = (t._fbKey === targetFbKey) || (String(t.id) === String(targetFbKey)) || (t.id === parseInt(targetFbKey));
-        if (!isMatch) newTxs.push(t);
+        if (txs[i].id !== id) newTxs.push(txs[i]);
       }
       txs = newTxs;
       saveData(true);
@@ -6436,7 +5209,19 @@ var _MAX_UNDO = 10;
 function undoLastDelete() {
   if (_undoStack.length === 0) { showToast("无可撤销操作", "warning"); return; }
   var item = _undoStack.pop();
-  txs.splice(item.index, 0, item.tx);
+  // item.tx 是深拷貝，根據 ID 查找並取消刪除標記
+  var foundIdx = -1;
+  for (var i = 0; i < txs.length; i++) {
+    if (txs[i].id === item.tx.id) { foundIdx = i; break; }
+  }
+  if (foundIdx >= 0) {
+    // 仍在陣列中，取消刪除標記
+    txs[foundIdx].deleted = false;
+  } else {
+    // 已被 syncDownload 移除，重新插入
+    item.tx.deleted = false;
+    txs.push(item.tx);
+  }
   saveData(true);
   renderAll();
   renderOverview();
@@ -6552,11 +5337,12 @@ function throttle(func, limit) {
 
 console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键帮助");
 
-  // 回到顶部按钮
+  // 回到顶部按钮 — 监听 #page-scroll 滚动容器
   var btt = document.getElementById("back-to-top");
-  if (btt) {
-    window.addEventListener("scroll", function() {
-      if (window.scrollY > 300) btt.style.display = "flex";
+  var ps = document.getElementById("page-scroll");
+  if (btt && ps) {
+    ps.addEventListener("scroll", function() {
+      if (ps.scrollTop > 300) btt.style.display = "flex";
       else btt.style.display = "none";
     });
   }
@@ -6845,70 +5631,57 @@ input:focus, select:focus, textarea:focus {
   0%, 100% { box-shadow: 0 2px 12px rgba(212,175,55,0.25); }
   50% { box-shadow: 0 2px 22px rgba(212,175,55,0.55); }
 }
-/* 手机版调整到左下角 */
+/* 手机版回到顶部调整 */
 @media (max-width: 700px) {
   #back-to-top { bottom: 18px; right: 18px; width: 38px; height: 38px; font-size: 16px; }
 }
-/* ============================================================
-   手機除錯面板（v10.10）
-   ============================================================ */
-#debug-panel {
-  position: fixed;
-  bottom: 52px;
-  left: 8px;
-  width: calc(100vw - 80px);
-  max-height: 50vh;
-  background: rgba(0,0,0,0.92);
-  color: #0f0;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  line-height: 1.5;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #0f0;
-  overflow-y: auto;
-  z-index: 99999;
-  display: none;
-  white-space: pre-wrap;
-  word-break: break-all;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.7);
-}
-#debug-panel.show { display: block; }
-#debug-toggle {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  width: 38px;
-  height: 38px;
-  background: rgba(12,12,18,0.9);
-  color: #0f0;
-  border: 1px solid #0f0;
-  border-radius: 50%;
-  font-size: 18px;
-  z-index: 100000;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#debug-panel .dbg-line { padding: 2px 0; border-bottom: 1px solid rgba(0,255,0,0.08); }
-#debug-panel .dbg-err { color: #f44; }
-#debug-panel .dbg-warn { color: #fa0; }
-#debug-panel .dbg-info { color: #4af; }
-#debug-clear {
-  position: sticky;
-  top: 0;
-  background: rgba(255,0,0,0.2);
-  color: #f88;
-  border: none;
-  width: 100%;
-  padding: 4px;
-  cursor: pointer;
-  font-size: 11px;
-  text-align: center;
+
+/* ========== P1 表格横向滚动优化（手机版） ========== */
+@media (max-width: 700px) {
+  /* 表格容器添加横向滚动 */
+  #page-all > table, #page-query > table, #page-summary > table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+  /* 保持 table 内部布局 */
+  #page-all > table > thead,
+  #page-all > table > tbody,
+  #page-query > table > thead,
+  #page-query > table > tbody,
+  #page-summary > table > thead,
+  #page-summary > table > tbody {
+    display: table;
+    width: 100%;
+    min-width: 650px;
+  }
+  /* 手机版表格行内边距紧凑 */
+  #all-table td, #page-query table td,
+  #summary-table td, .room-table td {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
+  #all-table th, #page-query table th,
+  #summary-table th, .room-table th {
+    padding: 6px 8px !important;
+    font-size: 10px !important;
+  }
+  /* 手机版表格滚动条美化 */
+  #page-all > table::-webkit-scrollbar,
+  #page-query > table::-webkit-scrollbar,
+  #page-summary > table::-webkit-scrollbar {
+    height: 4px;
+  }
+  #page-all > table::-webkit-scrollbar-thumb,
+  #page-query > table::-webkit-scrollbar-thumb,
+  #page-summary > table::-webkit-scrollbar-thumb {
+    background: rgba(212,175,55,0.2);
+    border-radius: 2px;
+  }
 }
 </style>
 
-  <div id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">▲</div>
+  <div id="back-to-top" onclick="document.getElementById('page-scroll').scrollTo({top:0,behavior:'smooth'})" title="回到頂部">▲</div>
 </body>
 </html>

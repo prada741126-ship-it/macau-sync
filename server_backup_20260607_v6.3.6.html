@@ -58,15 +58,6 @@ app.use('/api', function(req, res, next) {
 });
 
 // 靜態資源（bg_logo.png, css, js 等）
-// 對 index.html 強制禁用快取，其他靜態資源允許瀏覽器快取
-app.use(function(req, res, next) {
-  if (req.url === '/index.html' || req.url === '/sw.js') {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-  }
-  next();
-});
 app.use(express.static(__dirname));
 
 // 根路徑 - 返回 HTML（禁止快取，確保客戶端總是取得最新版本）

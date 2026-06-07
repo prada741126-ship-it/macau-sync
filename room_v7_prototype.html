@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>酒店設定管理 v1.0</title>
+<style>
+:root {
+  --bg: #0d0d14;
+  --card: #161622;
+  --gold: #D4AF37;
+  --gold-dim: rgba(212,175,55,0.3);
+  --gold-glow: rgba(212,175,55,0.12);
+  --text: #e0dcd0;
+  --text-dim: #8a8a90;
+  --border: rgba(212,175,55,0.15);
+  --danger: #e74c3c;
+  --success: #2ecc71;
+  --radius: 8px;
+  --bg-input: #1a1a2e;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ===== 頂部欄 ===== */
+#topbar {
+  position: sticky; top:0; z-index: 100;
+  background: linear-gradient(180deg, #111122 0%, #0a0a14 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+}
+.topbar-left { display:flex; align-items:center; gap:12px; }
+.topbar-logo { font-size:20px; font-weight:900; color:var(--gold); letter-spacing:4px; text-shadow:0 0 20px rgba(212,175,55,0.3); }
+.topbar-version { font-size:11px; color:var(--text-dim); }
+.topbar-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* ===== 篩選/操作區 ===== */
+#filter-area {
+  padding: 10px 20px;
+  display: flex; gap:10px; align-items:center; flex-wrap:wrap;
+  border-bottom: 1px solid var(--border);
+  background: rgba(22,22,34,0.6);
+}
+.filter-group { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.filter-group select {
+  padding: 6px 10px; font-size:12px;
+  background: var(--bg-input); color:var(--text);
+  border:1px solid var(--border); border-radius:6px;
+  font-family:inherit; outline:none;
+}
+.filter-group select:focus { border-color:var(--gold); }
+#search-input {
+  padding: 6px 10px; font-size:12px; width:160px;
+  background: var(--bg-input); color:var(--text);
+  border:1px solid var(--border); border-radius:6px;
+  outline:none; font-family:inherit;
+}
+#search-input:focus { border-color:var(--gold); }
+
+/* ===== 表格區 ===== */
+#table-area { padding:14px 20px 30px; }
+.table-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px; flex-wrap:wrap; gap:8px;
+}
+.table-title { font-size:14px; font-weight:600; color:var(--gold); }
+.table-count { font-size:11px; color:var(--text-dim); }
+
+.config-table-wrap {
+  background: var(--card); border-radius:var(--radius);
+  border:1px solid var(--border); overflow:hidden;
+}
+.config-table {
+  width:100%; border-collapse:collapse; font-size:12px;
+  min-width:600px;
+}
+.config-table thead th {
+  background: rgba(212,175,55,0.08); padding:8px 10px;
+  text-align:left; font-weight:600; font-size:11px;
+  color:var(--gold); border-bottom:2px solid var(--gold-dim);
+  white-space:nowrap;
+}
+.config-table thead th.num { text-align:center; }
+.config-table tbody td {
+  padding:7px 10px; border-bottom:1px solid rgba(255,255,255,0.04);
+  vertical-align:middle; font-size:12px;
+}
+.config-table tbody tr:hover { background:rgba(212,175,55,0.03); }
+
+/* 按鈕 */
+.btn {
+  padding:6px 14px; border:1px solid transparent; border-radius:6px;
+  font-size:12px; cursor:pointer; font-family:inherit;
+  transition:all 0.2s; white-space:nowrap;
+}
+.btn-gold { background:linear-gradient(180deg,#b8941f,#8b6914); color:#fff; border-color:var(--gold-dim); }
+.btn-gold:hover { background:linear-gradient(180deg,#d4a830,#a07818); }
+.btn-ghost { background:transparent; color:var(--text-dim); border-color:var(--border); }
+.btn-ghost:hover { color:var(--gold); border-color:var(--gold-dim); }
+.btn-danger { background:transparent; color:var(--danger); border-color:rgba(231,76,60,0.3); }
+.btn-danger:hover { background:rgba(231,76,60,0.1); }
+.btn-sm { padding:5px 10px; font-size:11px; }
+
+/* ===== 彈窗 ===== */
+.modal-overlay {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.7); z-index:99990;
+  display:flex; align-items:center; justify-content:center;
+}
+.modal-overlay[style*="display:none"] { display:none !important; }
+.modal {
+  background:var(--card); border-radius:var(--radius);
+  border:1px solid var(--gold-dim); padding:20px 24px;
+  width:90%; max-width:520px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.5);
+  max-height:90vh; overflow-y:auto;
+}
+.modal-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:10px;
+}
+.modal-title { font-size:16px; font-weight:600; color:var(--gold); }
+.modal-close {
+  background:none; border:none; color:var(--text-dim); font-size:20px;
+  cursor:pointer; padding:0 4px; line-height:1;
+}
+.modal-close:hover { color:var(--danger); }
+.modal-body { margin-bottom:16px; }
+.modal-body .form-group { margin-bottom:10px; }
+.modal-body .form-group label { display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px; }
+.modal-body .form-group select,
+.modal-body .form-group input {
+  width:100%; padding:8px 10px; font-size:13px;
+  background:var(--bg-input); color:var(--text);
+  border:1px solid var(--border); border-radius:4px; outline:none; font-family:inherit;
+}
+.modal-body .form-group select:focus,
+.modal-body .form-group input:focus { border-color:var(--gold); }
+.modal-footer {
+  display:flex; justify-content:flex-end; gap:8px;
+  border-top:1px solid var(--border); padding-top:12px;
+}
+
+/* ===== Toast ===== */
+.toast-container { position:fixed; top:20px; right:20px; z-index:99999; display:flex; flex-direction:column; gap:8px; }
+.toast-item {
+  padding:10px 18px; border-radius:8px; font-size:13px;
+  color:#fff; box-shadow:0 4px 16px rgba(0,0,0,0.3);
+  animation:slideIn 0.3s ease;
+}
+.toast-success { background:rgba(46,204,113,0.9); }
+.toast-error { background:rgba(231,76,60,0.9); }
+.toast-info { background:rgba(212,175,55,0.9); color:#1a1a2e; }
+@keyframes slideIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+
+/* ===== 快速新增彈窗 ===== */
+.quick-add-overlay {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.7); z-index:99995;
+  display:flex; align-items:center; justify-content:center;
+}
+.quick-add-overlay[style*="display:none"] { display:none !important; }
+.quick-add-box {
+  background:var(--card); border:1px solid var(--gold-dim);
+  border-radius:12px; padding:24px; width:360px; max-width:90vw;
+  box-shadow:0 0 40px rgba(212,175,55,0.15);
+}
+.quick-add-box h3 { font-size:16px; color:var(--gold); margin-bottom:16px; text-align:center; }
+.quick-add-box .form-row { margin-bottom:10px; }
+.quick-add-box .form-group label { font-size:11px; color:var(--text-dim); margin-bottom:4px; display:block; }
+.quick-add-box input { width:100%; padding:8px 10px; font-size:13px; background:var(--bg-input); color:var(--text); border:1px solid var(--border); border-radius:6px; outline:none; box-sizing:border-box; }
+.quick-add-box input:focus { border-color:var(--gold); }
+
+/* ===== 響應式 ===== */
+@media (max-width:900px) {
+  #topbar { padding:10px 14px; }
+  #filter-area { padding:10px 14px; }
+  #table-area { padding:14px 10px 30px; }
+  .config-table { font-size:12px; }
+}
+@media (max-width:600px) {
+  .topbar-logo { font-size:16px; letter-spacing:2px; }
+  .filter-group { width:100%; }
+  #search-input { width:100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- 頂部欄 -->
+<div id="topbar">
+  <div class="topbar-left">
+    <span class="topbar-logo">🏨 酒店設定管理</span>
+    <span class="topbar-version">v1.0</span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-ghost" onclick="showHelp()" title="使用說明">❓</button>
+    <button class="btn btn-ghost" onclick="resetToPreset()">🔄 重置預設</button>
+    <button class="btn btn-gold" onclick="openAddModal()">＋ 新增房型</button>
+  </div>
+</div>
+
+<!-- 篩選/操作區 -->
+<div id="filter-area">
+  <div class="filter-group">
+    <select id="filter-casino" onchange="filterConfig()">
+      <option value="">全部體系</option>
+    </select>
+    <select id="filter-hotel" onchange="filterConfig()">
+      <option value="">全部酒店</option>
+    </select>
+    <input type="text" id="search-input" placeholder="搜尋房型..." oninput="filterConfig()">
+  </div>
+  <div class="filter-group">
+    <button class="btn btn-ghost btn-sm" onclick="addCasino()">＋ 新增體系</button>
+    <button class="btn btn-ghost btn-sm" onclick="addHotel()">＋ 新增酒店</button>
+  </div>
+</div>
+
+<!-- 表格區 -->
+<div id="table-area">
+  <div class="table-header">
+    <span class="table-title">📋 房型列表</span>
+    <span class="table-count" id="config-count">共 0 項</span>
+  </div>
+  <div class="config-table-wrap">
+    <table class="config-table">
+      <thead>
+        <tr>
+          <th style="width:90px;">體系</th>
+          <th style="width:90px;">酒店</th>
+          <th style="width:70px;">CODE</th>
+          <th style="min-width:130px;">房型</th>
+          <th style="width:80px;">操作</th>
+        </tr>
+      </thead>
+      <tbody id="config-tbody">
+        <tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:30px;">載入中...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 編輯彈窗 -->
+<div class="modal-overlay" id="edit-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="edit-modal-title">編輯項目</div>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>體系</label>
+        <select id="em-casino" onchange="onEditCasinoChange()">
+          <option value="">請選擇體系</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>酒店</label>
+        <select id="em-hotel">
+          <option value="">請先選體系</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>CODE</label>
+        <input type="text" id="em-code" placeholder="房型代碼">
+      </div>
+      <div class="form-group">
+        <label>房型</label>
+        <input type="text" id="em-room" placeholder="房型名稱">
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="form-group" style="flex:1; min-width:100px;">
+          <label>平日價(¥)</label>
+          <input type="number" id="em-weekday" placeholder="平日房價">
+        </div>
+        <div class="form-group" style="flex:1; min-width:100px;">
+          <label>週五/六(¥)</label>
+          <input type="number" id="em-weekend" placeholder="週末房價">
+        </div>
+        <div class="form-group" style="flex:1; min-width:100px;">
+          <label>特殊日(¥)</label>
+          <input type="number" id="em-special" placeholder="特殊日房價">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>轉碼門檻(萬)</label>
+        <input type="number" id="em-threshold" placeholder="轉碼門檻（萬）">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEditModal()">取消</button>
+      <button class="btn btn-gold" onclick="saveEditModal()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 說明彈窗 -->
+<div class="modal-overlay" id="help-modal" style="display:none;">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">💡 使用說明</div>
+      <button class="modal-close" onclick="closeHelp()">×</button>
+    </div>
+    <div class="modal-body" style="line-height:1.8; font-size:13px; color:var(--text-dim);">
+      ① 此頁面用於管理<strong style="color:var(--gold);">體系、酒店、房型、CODE、價格、轉碼門檻</strong><br>
+      ② 使用<strong style="color:var(--gold);">篩選下拉</strong>可以快速找到目標<br>
+      ③ 點擊<strong style="color:var(--gold);">「＋ 新增房型」</strong>可以新增房型<br>
+      ④ 點擊<strong style="color:var(--gold);">「編輯」</strong>可以修改全部欄位<br>
+      ⑤ 點擊<strong style="color:var(--danger);">「✕」</strong>可以刪除項目<br>
+      ⑥ 點擊<strong style="color:var(--gold);">「🔄 重置預設」</strong>恢復原始澳門酒店配置<br>
+      ⑦ 修改會自動儲存，未來將整合進發財秘籍 1.0
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-gold" onclick="closeHelp()">知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- 快速新增彈窗 -->
+<div class="quick-add-overlay" id="quick-add-overlay" style="display:none;">
+  <div class="quick-add-box">
+    <h3 id="quick-add-title">快速新增</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label id="qa-label1"></label>
+        <input id="qa-input1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label id="qa-label2"></label>
+        <input id="qa-input2">
+      </div>
+    </div>
+    <div class="form-row" id="qa-threshold-row">
+      <div class="form-group">
+        <label>轉碼門檻(萬)</label>
+        <input id="qa-threshold" type="number" value="80">
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+      <button class="btn btn-ghost" onclick="closeQuickAdd()">取消</button>
+      <button class="btn btn-gold" onclick="confirmQuickAdd()">確認新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ===== 預設酒店數據（完整保留）=====
+var PRESET_CONFIG = [
+  // ===== 新濠天地 =====
+  // 摩珀斯
+  { casino:"新濠天地", hotel:"摩珀斯", code:"MPPK", room:"摩珀斯客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"新濠天地", hotel:"摩珀斯", code:"MPPK", room:"摩珀斯套房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"新濠天地", hotel:"摩珀斯", code:"MPT",  room:"摩珀斯豪華套房", weekday:2700, weekend:3000, special:4200, threshold:150 },
+  { casino:"新濠天地", hotel:"摩珀斯", code:"MCPT", room:"摩珀斯2房奢房", weekday:4200, weekend:4500, special:6000, threshold:350 },
+  { casino:"新濠天地", hotel:"摩珀斯", code:"MPS",  room:"摩珀斯3房奢房", weekday:6000, weekend:6500, special:8000, threshold:1000 },
+  { casino:"新濠天地", hotel:"摩珀斯", code:"MES",  room:"摩珀斯總統套房", weekday:10000, weekend:11000, special:13000, threshold:3000 },
+  // 頣居
+  { casino:"新濠天地", hotel:"頣居", code:"NPX",  room:"頣居客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠天地", hotel:"頣居", code:"NPXV", room:"頣居套房(樓床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠天地", hotel:"頣居", code:"NPQV", room:"頣居豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"新濠天地", hotel:"頣居", code:"NDS",  room:"頣居套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"新濠天地", hotel:"頣居", code:"NCDS", room:"頣居豪華套房", weekday:3000, weekend:3300, special:4500, threshold:300 },
+  { casino:"新濠天地", hotel:"頣居", code:"NPS",  room:"頣居2房奢房", weekday:6000, weekend:6500, special:8000, threshold:3000 },
+  { casino:"新濠天地", hotel:"頣居", code:"NPSV", room:"頣居2房套間", weekday:8000, weekend:8500, special:10000, threshold:3000 },
+  // 君悅
+  { casino:"新濠天地", hotel:"君悅", code:"KING",  room:"君悅客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠天地", hotel:"君悅", code:"TWIN",  room:"君悅客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠天地", hotel:"君悅", code:"DLXX",  room:"君悅豪華套房(大床)", weekday:1890, weekend:2000, special:3900, threshold:180 },
+  { casino:"新濠天地", hotel:"君悅", code:"DLXT",  room:"君悅豪華套房(雙床)", weekday:1850, weekend:2000, special:3900, threshold:150 },
+  { casino:"新濠天地", hotel:"君悅", code:"CLDK",  room:"君悅套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"新濠天地", hotel:"君悅", code:"CLDT",  room:"君悅套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"新濠天地", hotel:"君悅", code:"GRSK",  room:"君悅行政奢房", weekday:4500, weekend:5000, special:6550, threshold:1000 },
+  { casino:"新濠天地", hotel:"君悅", code:"QRXS",  room:"君悅行政套房", weekday:6000, weekend:6500, special:8000, threshold:3000 },
+  { casino:"新濠天地", hotel:"君悅", code:"PREM",  room:"君悅總統套房", weekday:10000, weekend:11000, special:13000, threshold:3000 },
+  { casino:"新濠天地", hotel:"君悅", code:"DIPL",  room:"君悅外交官奢房", weekday:15000, weekend:16000, special:18000, threshold:3000 },
+  { casino:"新濠天地", hotel:"君悅", code:"PRES",  room:"君悅總統奢房", weekday:20000, weekend:22000, special:26000, threshold:3000 },
+  { casino:"新濠天地", hotel:"君悅", code:"CHHN",  room:"君悅主席套房", weekday:30000, weekend:32000, special:35000, threshold:3000 },
+
+  // ===== 新濠影滙 =====
+  // 明星滙
+  { casino:"新濠影滙", hotel:"明星滙", code:"CRX", room:"明星滙客房", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠影滙", hotel:"明星滙", code:"CRT", room:"明星滙套房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠影滙", hotel:"明星滙", code:"CDX", room:"明星滙豪華套房", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"新濠影滙", hotel:"明星滙", code:"CDT", room:"明星滙豪華套房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:180 },
+  { casino:"新濠影滙", hotel:"明星滙", code:"CSS", room:"明星滙奢房", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"新濠影滙", hotel:"明星滙", code:"SDX", room:"明星滙豪華奢房", weekday:4500, weekend:5000, special:6500, threshold:1000 },
+  // 巨星滙
+  { casino:"新濠影滙", hotel:"巨星滙", code:"SDT", room:"巨星滙套房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"新濠影滙", hotel:"巨星滙", code:"STS", room:"巨星滙套房", weekday:3000, weekend:3200, special:4500, threshold:300 },
+  { casino:"新濠影滙", hotel:"巨星滙", code:"SPS", room:"巨星滙豪華奢房", weekday:4500, weekend:5000, special:6500, threshold:1000 },
+  { casino:"新濠影滙", hotel:"巨星滙", code:"SGS", room:"巨星滙總統奢房", weekday:8000, weekend:8500, special:10000, threshold:3000 },
+  // 映星滙
+  { casino:"新濠影滙", hotel:"映星滙", code:"EDX", room:"映星滙客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"新濠影滙", hotel:"映星滙", code:"EDT", room:"映星滙客房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"新濠影滙", hotel:"映星滙", code:"EG1", room:"映星滙套房", weekday:2700, weekend:3000, special:4200, threshold:180 },
+  { casino:"新濠影滙", hotel:"映星滙", code:"ES1", room:"映星滙行政奢房", weekday:4200, weekend:4500, special:6500, threshold:300 },
+  { casino:"新濠影滙", hotel:"映星滙", code:"EO1", room:"映星滙行政套房", weekday:6000, weekend:6500, special:8000, threshold:1000 },
+  { casino:"新濠影滙", hotel:"映星滙", code:"EG2", room:"映星滙2房奢房", weekday:6000, weekend:6500, special:8000, threshold:3000 },
+  { casino:"新濠影滙", hotel:"映星滙", code:"ES2", room:"映星滙3房奢房", weekday:8000, weekend:8500, special:10000, threshold:3000 },
+  { casino:"新濠影滙", hotel:"映星滙", code:"EP3", room:"映星滙總統奢房", weekday:16000, weekend:16000, special:18000, threshold:3000 },
+
+  // ===== 金沙 =====
+  // 名滙
+  { casino:"金沙", hotel:"名滙", code:"R2",   room:"名滙客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:60 },
+  { casino:"金沙", hotel:"名滙", code:"RK",   room:"名滙客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:60 },
+  { casino:"金沙", hotel:"名滙", code:"V2",   room:"名滙豪華套房(大床)", weekday:1800, weekend:2000, special:3000, threshold:150 },
+  { casino:"金沙", hotel:"名滙", code:"VK",   room:"名滙豪華套房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:150 },
+  { casino:"金沙", hotel:"名滙", code:"LS2",  room:"名滙套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"名滙", code:"LSK",  room:"名滙套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"名滙", code:"GS2",  room:"名滙行政套房", weekday:4500, weekend:5000, special:6500, threshold:300 },
+  { casino:"金沙", hotel:"名滙", code:"GSK",  room:"名滙行政套房(雙床)", weekday:4500, weekend:5000, special:6500, threshold:300 },
+  { casino:"金沙", hotel:"名滙", code:"CS2",  room:"名滙主序套房", weekday:8000, weekend:8500, special:10000, threshold:300 },
+  { casino:"金沙", hotel:"名滙", code:"GC2",  room:"名滙總理套房", weekday:10000, weekend:11000, special:13000, threshold:300 },
+  { casino:"金沙", hotel:"名滙", code:"TS",   room:"名滙總統套房", weekday:15000, weekend:16000, special:18000, threshold:300 },
+  // 倫敦人
+  { casino:"金沙", hotel:"倫敦人", code:"KC",     room:"倫敦人客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:60 },
+  { casino:"金沙", hotel:"倫敦人", code:"TC",     room:"倫敦人客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:60 },
+  { casino:"金沙", hotel:"倫敦人", code:"KS",     room:"倫敦人套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"倫敦人", code:"TS",     room:"倫敦人套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"倫敦人", code:"DBK1",   room:"倫敦人雙床套房", weekday:4500, weekend:5000, special:6500, threshold:150 },
+  { casino:"金沙", hotel:"倫敦人", code:"DBKD2",  room:"倫敦人2房套房", weekday:6000, weekend:6500, special:8000, threshold:300 },
+  { casino:"金沙", hotel:"倫敦人", code:"DBKQD3", room:"倫敦人3房套房", weekday:8000, weekend:8500, special:10000, threshold:300 },
+  // 御園
+  { casino:"金沙", hotel:"御園", code:"CM1",  room:"御園客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:150 },
+  { casino:"金沙", hotel:"御園", code:"CG1",  room:"御園客房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:150 },
+  { casino:"金沙", hotel:"御園", code:"CGD1", room:"御園豪華套房(大床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"御園", code:"CMD1", room:"御園豪華套房(雙床)", weekday:3000, weekend:3200, special:4500, threshold:150 },
+  { casino:"金沙", hotel:"御園", code:"CK2",  room:"御園套房", weekday:4500, weekend:5000, special:6500, threshold:300 },
+  { casino:"金沙", hotel:"御園", code:"CKD2", room:"御園2房套房", weekday:6000, weekend:6500, special:8000, threshold:300 },
+  { casino:"金沙", hotel:"御園", code:"CV3",  room:"御園3房套房", weekday:8000, weekend:8500, special:10000, threshold:300 },
+  { casino:"金沙", hotel:"御園", code:"CVS4", room:"御園4房套房", weekday:10000, weekend:11000, special:13000, threshold:300 },
+
+  // ===== 銀河 =====
+  // 銀河
+  { casino:"銀河", hotel:"銀河", code:"GM01",  room:"銀河客房(大床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"銀河", hotel:"銀河", code:"GM01T", room:"銀河客房(雙床)", weekday:1200, weekend:1500, special:2200, threshold:80 },
+  { casino:"銀河", hotel:"銀河", code:"GM04",  room:"銀河豪華套房", weekday:1800, weekend:2000, special:3000, threshold:200 },
+  { casino:"銀河", hotel:"銀河", code:"GM06",  room:"銀河套房", weekday:3000, weekend:3200, special:4500, threshold:400 },
+  { casino:"銀河", hotel:"銀河", code:"GM07",  room:"銀河豪華套房", weekday:4500, weekend:5000, special:6500, threshold:400 },
+  { casino:"銀河", hotel:"銀河", code:"GM08",  room:"銀河總統套房", weekday:8000, weekend:8500, special:10000, threshold:400 },
+  // 大倉
+  { casino:"銀河", hotel:"大倉", code:"OK01", room:"大倉客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"銀河", hotel:"大倉", code:"OK02", room:"大倉客房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"銀河", hotel:"大倉", code:"OK03", room:"大倉豪華套房", weekday:2700, weekend:3000, special:4200, threshold:200 },
+  { casino:"銀河", hotel:"大倉", code:"OK05", room:"大倉套房", weekday:4200, weekend:4500, special:6000, threshold:400 },
+  { casino:"銀河", hotel:"大倉", code:"OK06", room:"大倉豪華套房", weekday:6000, weekend:6500, special:8000, threshold:400 },
+  { casino:"銀河", hotel:"大倉", code:"OK07", room:"大倉總統套房", weekday:10000, weekend:11000, special:13000, threshold:400 },
+  // 悅榕莊
+  { casino:"銀河", hotel:"悅榕莊", code:"BT01", room:"悅榕莊客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:80 },
+  { casino:"銀河", hotel:"悅榕莊", code:"BT02", room:"悅榕莊客房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:80 },
+  { casino:"銀河", hotel:"悅榕莊", code:"BT03", room:"悅榕莊套房", weekday:3000, weekend:3200, special:4500, threshold:200 },
+  { casino:"銀河", hotel:"悅榕莊", code:"BT05", room:"悅榕莊別墅", weekday:8000, weekend:8500, special:10000, threshold:400 },
+  { casino:"銀河", hotel:"悅榕莊", code:"BT06", room:"悅榕莊海景別墅", weekday:10000, weekend:11000, special:13000, threshold:400 },
+  // 萬豪
+  { casino:"銀河", hotel:"萬豪", code:"JW01", room:"萬豪客房(大床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"銀河", hotel:"萬豪", code:"JW02", room:"萬豪客房(雙床)", weekday:1500, weekend:1800, special:2700, threshold:80 },
+  { casino:"銀河", hotel:"萬豪", code:"JW03", room:"萬豪豪華套房", weekday:2700, weekend:3000, special:4200, threshold:200 },
+  { casino:"銀河", hotel:"萬豪", code:"JW05", room:"萬豪套房", weekday:4200, weekend:4500, special:6000, threshold:200 },
+  { casino:"銀河", hotel:"萬豪", code:"JW06", room:"萬豪行政套房", weekday:6000, weekend:6500, special:8000, threshold:200 },
+  { casino:"銀河", hotel:"萬豪", code:"JW08", room:"萬豪總統套房", weekday:15000, weekend:16000, special:18000, threshold:200 },
+  // 麗思卡爾頓
+  { casino:"銀河", hotel:"麗思卡爾頓", code:"RC01", room:"麗思卡爾頓客房(大床)", weekday:1800, weekend:2000, special:3000, threshold:200 },
+  { casino:"銀河", hotel:"麗思卡爾頓", code:"RC03", room:"麗思卡爾頓客房(雙床)", weekday:1800, weekend:2000, special:3000, threshold:200 },
+  { casino:"銀河", hotel:"麗思卡爾頓", code:"RC05", room:"麗思卡爾頓套房", weekday:4500, weekend:5000, special:6500, threshold:200 },
+  { casino:"銀河", hotel:"麗思卡爾頓", code:"RC06", room:"麗思卡爾頓豪華套房", weekday:8000, weekend:8500, special:10000, threshold:200 },
+  { casino:"銀河", hotel:"麗思卡爾頓", code:"RC07", room:"麗思卡爾頓總統套房", weekday:15000, weekend:16000, special:18000, threshold:200 }
+];
+
+// ===== 狀態 =====
+var hotelConfig = [];
+var currentEditIdx = -1;
+var pendingQuickAdd = null;
+
+// ===== 工具 =====
+function escHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function lockBody() { document.body.style.overflow = 'hidden'; }
+function unlockBody() { document.body.style.overflow = ''; }
+
+// ===== 資料載入/儲存 =====
+function loadConfig() {
+  try {
+    var saved = localStorage.getItem('macau_hotel_config_v7');
+    if (saved) {
+      hotelConfig = JSON.parse(saved);
+      for (var i = 0; i < hotelConfig.length; i++) {
+        var c = hotelConfig[i];
+        if (c.code === undefined) c.code = '';
+        if (c.weekday === undefined) c.weekday = 0;
+        if (c.weekend === undefined) c.weekend = 0;
+        if (c.special === undefined) c.special = 0;
+      }
+    }
+  } catch(e) {}
+  if (!hotelConfig || hotelConfig.length === 0) {
+    hotelConfig = JSON.parse(JSON.stringify(PRESET_CONFIG));
+    saveConfig();
+  }
+}
+function saveConfig() {
+  localStorage.setItem('macau_hotel_config_v7', JSON.stringify(hotelConfig));
+}
+
+function resetToPreset() {
+  if (!confirm('確定要重置酒店配置嗎？\n\n手動新增的項目會被保留（不重複），但修改過的門檻會恢復預設值。')) return;
+  var presetMap = {};
+  for (var i = 0; i < PRESET_CONFIG.length; i++) {
+    var p = PRESET_CONFIG[i];
+    presetMap[p.casino + '|' + p.hotel + '|' + p.room] = p;
+  }
+  var newConfig = [];
+  var userAdded = [];
+  for (var i = 0; i < hotelConfig.length; i++) {
+    var c = hotelConfig[i];
+    var key = c.casino + '|' + c.hotel + '|' + c.room;
+    if (presetMap[key]) {
+      newConfig.push(JSON.parse(JSON.stringify(presetMap[key])));
+      delete presetMap[key];
+    } else {
+      userAdded.push(c);
+    }
+  }
+  for (var k in presetMap) {
+    if (presetMap.hasOwnProperty(k)) {
+      newConfig.push(JSON.parse(JSON.stringify(presetMap[k])));
+    }
+  }
+  newConfig = newConfig.concat(userAdded);
+  hotelConfig = newConfig;
+  saveConfig();
+  renderConfigTable();
+  populateFilters();
+  showToast('已重置！保留 ' + userAdded.length + ' 項自訂項目', 'success');
+}
+
+// ===== 下拉選單工具 =====
+var CASINO_ORDER = ['新濠天地', '新濠影滙', '金沙', '銀河', '永利', '上葡京', '美高梅'];
+
+function getCasinos() {
+  var set = {};
+  for (var i = 0; i < hotelConfig.length; i++) {
+    set[hotelConfig[i].casino] = true;
+  }
+  return Object.keys(set).sort(function(a, b) {
+    var ia = CASINO_ORDER.indexOf(a);
+    var ib = CASINO_ORDER.indexOf(b);
+    if (ia === -1) ia = 999;
+    if (ib === -1) ib = 999;
+    if (ia !== ib) return ia - ib;
+    return a.localeCompare(b, 'zh');
+  });
+}
+
+function getHotels(casino) {
+  var set = {};
+  for (var i = 0; i < hotelConfig.length; i++) {
+    if (!casino || hotelConfig[i].casino === casino) {
+      set[hotelConfig[i].hotel] = true;
+    }
+  }
+  return Object.keys(set).sort();
+}
+
+// ===== 篩選 =====
+function populateFilters() {
+  var casinos = getCasinos();
+  var sel1 = document.getElementById('filter-casino');
+  sel1.innerHTML = '<option value="">全部體系</option>';
+  for (var i = 0; i < casinos.length; i++) {
+    sel1.innerHTML += '<option value="' + escHtml(casinos[i]) + '">' + escHtml(casinos[i]) + '</option>';
+  }
+  var hotels = getHotels();
+  var sel2 = document.getElementById('filter-hotel');
+  sel2.innerHTML = '<option value="">全部酒店</option>';
+  for (var i = 0; i < hotels.length; i++) {
+    sel2.innerHTML += '<option value="' + escHtml(hotels[i]) + '">' + escHtml(hotels[i]) + '</option>';
+  }
+}
+
+function filterConfig() {
+  var casino = document.getElementById('filter-casino').value;
+  var hotel = document.getElementById('filter-hotel').value;
+  if (casino) {
+    var hotels = getHotels(casino);
+    var sel2 = document.getElementById('filter-hotel');
+    sel2.innerHTML = '<option value="">全部酒店</option>';
+    for (var i = 0; i < hotels.length; i++) {
+      sel2.innerHTML += '<option value="' + escHtml(hotels[i]) + '">' + escHtml(hotels[i]) + '</option>';
+    }
+  }
+  renderConfigTable(casino || null, hotel || null);
+}
+
+// ===== 表格渲染 =====
+function renderConfigTable(filterCasino, filterHotel) {
+  var filtered = [];
+  var searchText = '';
+  try { searchText = (document.getElementById('search-input').value || '').trim().toLowerCase(); } catch(e) {}
+  for (var j = 0; j < hotelConfig.length; j++) {
+    var c = hotelConfig[j];
+    if (filterCasino && c.casino !== filterCasino) continue;
+    if (filterHotel && c.hotel !== filterHotel) continue;
+    if (searchText) {
+      var haystack = (c.casino + ' ' + c.hotel + ' ' + c.room + ' ' + (c.code||'')).toLowerCase();
+      if (haystack.indexOf(searchText) === -1) continue;
+    }
+    filtered.push({ c: c, origIdx: j });
+  }
+  filtered.sort(function(a, b) {
+    var c = a.c, d = b.c;
+    if (c.casino !== d.casino) {
+      var ia = CASINO_ORDER.indexOf(c.casino);
+      var ib = CASINO_ORDER.indexOf(d.casino);
+      if (ia === -1) ia = 999;
+      if (ib === -1) ib = 999;
+      if (ia !== ib) return ia - ib;
+      return c.casino.localeCompare(d.casino, 'zh');
+    }
+    if (c.hotel !== d.hotel) return c.hotel.localeCompare(d.hotel, 'zh');
+    return c.room.localeCompare(d.room, 'zh');
+  });
+  var tbody = document.getElementById('config-tbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim);padding:30px;">尚無配置，請點「＋ 新增房型」或「🔄 重置預設」</td></tr>';
+  } else {
+    var html = '';
+    for (var i = 0; i < filtered.length; i++) {
+      var c = filtered[i].c;
+      var origIdx = filtered[i].origIdx;
+      html += '<tr data-orig-idx="' + origIdx + '">' +
+        '<td>' + escHtml(c.casino || '') + '</td>' +
+        '<td>' + escHtml(c.hotel || '') + '</td>' +
+        '<td style="text-align:center;font-family:monospace;font-size:12px;color:var(--gold);">' + escHtml(c.code || '') + '</td>' +
+        '<td>' + escHtml(c.room || '') + '</td>' +
+        '<td style="text-align:center;white-space:nowrap;">' +
+          '<button class="btn btn-sm btn-gold" onclick="openEditModal(' + origIdx + ')">編輯</button> ' +
+          '<button class="btn btn-danger btn-sm" onclick="deleteConfig(' + origIdx + ')">✕</button>' +
+        '</td>' +
+      '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+  document.getElementById('config-count').textContent = '共 ' + filtered.length + ' 項';
+}
+
+function deleteConfig(origIdx) {
+  var c = hotelConfig[origIdx];
+  if (!c) return;
+  if (!confirm('確定刪除 ' + c.casino + ' / ' + c.hotel + ' / ' + c.room + ' ？')) return;
+  hotelConfig.splice(origIdx, 1);
+  saveConfig();
+  renderConfigTable();
+  populateFilters();
+  showToast('已刪除', 'info');
+}
+
+// ===== 編輯彈窗 =====
+function openAddModal() {
+  currentEditIdx = -1;
+  document.getElementById('edit-modal-title').textContent = '新增房型';
+  document.getElementById('em-casino').value = '';
+  document.getElementById('em-hotel').innerHTML = '<option value="">請先選體系</option>';
+  document.getElementById('em-code').value = '';
+  document.getElementById('em-room').value = '';
+  document.getElementById('em-weekday').value = '';
+  document.getElementById('em-weekend').value = '';
+  document.getElementById('em-special').value = '';
+  document.getElementById('em-threshold').value = '';
+  document.getElementById('edit-modal').style.display = 'flex';
+  lockBody();
+}
+
+function openEditModal(origIdx) {
+  currentEditIdx = origIdx;
+  var c = hotelConfig[origIdx];
+  if (!c) return;
+  document.getElementById('edit-modal-title').textContent = '編輯項目';
+  populateEditCasinoSelect(c.casino);
+  populateEditHotelSelect(c.casino, c.hotel);
+  document.getElementById('em-code').value = c.code || '';
+  document.getElementById('em-room').value = c.room || '';
+  document.getElementById('em-weekday').value = c.weekday || '';
+  document.getElementById('em-weekend').value = c.weekend || '';
+  document.getElementById('em-special').value = c.special || '';
+  document.getElementById('em-threshold').value = c.threshold || '';
+  document.getElementById('edit-modal').style.display = 'flex';
+  lockBody();
+}
+
+function populateEditCasinoSelect(selected) {
+  var sel = document.getElementById('em-casino');
+  var casinos = getCasinos();
+  sel.innerHTML = '<option value="">請選擇體系</option>';
+  for (var i = 0; i < casinos.length; i++) {
+    var s = casinos[i] === selected ? ' selected' : '';
+    sel.innerHTML += '<option value="' + escHtml(casinos[i]) + '"' + s + '>' + escHtml(casinos[i]) + '</option>';
+  }
+}
+
+function populateEditHotelSelect(casino, selected) {
+  var sel = document.getElementById('em-hotel');
+  if (!casino) { sel.innerHTML = '<option value="">請先選體系</option>'; return; }
+  var hotels = getHotels(casino);
+  sel.innerHTML = '<option value="">請選擇酒店</option>';
+  for (var i = 0; i < hotels.length; i++) {
+    var s = hotels[i] === selected ? ' selected' : '';
+    sel.innerHTML += '<option value="' + escHtml(hotels[i]) + '"' + s + '>' + escHtml(hotels[i]) + '</option>';
+  }
+}
+
+function onEditCasinoChange() {
+  var casinoVal = document.getElementById('em-casino').value;
+  populateEditHotelSelect(casinoVal, '');
+}
+
+function saveEditModal() {
+  var casino = document.getElementById('em-casino').value;
+  var hotel = document.getElementById('em-hotel').value;
+  var code = document.getElementById('em-code').value;
+  var room = document.getElementById('em-room').value;
+  var weekday = parseFloat(document.getElementById('em-weekday').value) || 0;
+  var weekend = parseFloat(document.getElementById('em-weekend').value) || 0;
+  var special = parseFloat(document.getElementById('em-special').value) || 0;
+  var threshold = parseFloat(document.getElementById('em-threshold').value) || 0;
+  if (!casino || !hotel || !room) {
+    showToast('請填寫體系、酒店、房型', 'error');
+    return;
+  }
+  var item = { casino: casino, hotel: hotel, code: code, room: room,
+               weekday: weekday, weekend: weekend, special: special, threshold: threshold };
+  if (currentEditIdx >= 0) {
+    hotelConfig[currentEditIdx] = item;
+  } else {
+    hotelConfig.push(item);
+  }
+  saveConfig();
+  renderConfigTable();
+  populateFilters();
+  closeEditModal();
+  showToast(currentEditIdx >= 0 ? '已更新' : '已新增', 'success');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+  unlockBody();
+  currentEditIdx = -1;
+}
+
+// ===== 新增體系 =====
+function addCasino() {
+  document.getElementById('quick-add-title').textContent = '＋ 新增體系';
+  document.getElementById('qa-label1').textContent = '體系名稱';
+  document.getElementById('qa-input1').value = '';
+  document.getElementById('qa-label2').textContent = '第一間酒店名稱';
+  document.getElementById('qa-input2').value = '';
+  document.getElementById('qa-threshold-row').style.display = 'block';
+  document.getElementById('qa-threshold').value = '80';
+  pendingQuickAdd = { type: 'casino' };
+  document.getElementById('quick-add-overlay').style.display = 'flex';
+  lockBody();
+}
+
+// ===== 新增酒店 =====
+function addHotel() {
+  var casino = document.getElementById('filter-casino').value;
+  if (!casino) {
+    document.getElementById('quick-add-title').textContent = '＋ 新增酒店（請先選擇體系）';
+    document.getElementById('qa-label1').textContent = '體系名稱';
+    document.getElementById('qa-input1').value = '';
+    document.getElementById('qa-label2').textContent = '酒店名稱';
+    document.getElementById('qa-input2').value = '';
+    document.getElementById('qa-threshold-row').style.display = 'none';
+    pendingQuickAdd = { type: 'hotel_casino' };
+  } else {
+    document.getElementById('quick-add-title').textContent = '＋ 新增酒店 — ' + casino;
+    document.getElementById('qa-label1').textContent = '酒店名稱';
+    document.getElementById('qa-input1').value = '';
+    document.getElementById('qa-label2').textContent = '第一個房型名稱（選填）';
+    document.getElementById('qa-input2').value = '';
+    document.getElementById('qa-threshold-row').style.display = 'block';
+    document.getElementById('qa-threshold').value = '80';
+    pendingQuickAdd = { type: 'hotel', casino: casino };
+  }
+  document.getElementById('quick-add-overlay').style.display = 'flex';
+  lockBody();
+}
+
+function closeQuickAdd() {
+  document.getElementById('quick-add-overlay').style.display = 'none';
+  unlockBody();
+  pendingQuickAdd = null;
+}
+
+function confirmQuickAdd() {
+  if (!pendingQuickAdd) return;
+  var type = pendingQuickAdd.type;
+
+  if (type === 'casino') {
+    var casinoName = document.getElementById('qa-input1').value.trim();
+    var hotelName = document.getElementById('qa-input2').value.trim();
+    if (!casinoName) { showToast('請輸入體系名稱', 'error'); return; }
+    if (!hotelName) { showToast('請輸入酒店名稱', 'error'); return; }
+    // 檢查重複
+    for (var i = 0; i < hotelConfig.length; i++) {
+      if (hotelConfig[i].casino === casinoName && hotelConfig[i].hotel === hotelName) {
+        showToast('此體系＋酒店已存在', 'error'); return;
+      }
+    }
+    var threshold = parseInt(document.getElementById('qa-threshold').value) || 80;
+    hotelConfig.push({ casino: casinoName, hotel: hotelName, code: '', room: hotelName + ' 客房',
+                       weekday: 0, weekend: 0, special: 0, threshold: threshold });
+    saveConfig();
+    renderConfigTable();
+    populateFilters();
+    showToast('已新增：' + casinoName + ' / ' + hotelName, 'success');
+  }
+  else if (type === 'hotel_casino') {
+    var casinoName = document.getElementById('qa-input1').value.trim();
+    var hotelName = document.getElementById('qa-input2').value.trim();
+    if (!casinoName) { showToast('請輸入體系名稱', 'error'); return; }
+    if (!hotelName) { showToast('請輸入酒店名稱', 'error'); return; }
+    for (var i = 0; i < hotelConfig.length; i++) {
+      if (hotelConfig[i].casino === casinoName && hotelConfig[i].hotel === hotelName) {
+        showToast('此體系＋酒店已存在', 'error'); return;
+      }
+    }
+    hotelConfig.push({ casino: casinoName, hotel: hotelName, code: '', room: hotelName + ' 客房',
+                       weekday: 0, weekend: 0, special: 0, threshold: 80 });
+    saveConfig();
+    renderConfigTable();
+    populateFilters();
+    showToast('已新增：' + casinoName + ' / ' + hotelName, 'success');
+  }
+  else if (type === 'hotel') {
+    var hotelName = document.getElementById('qa-input1').value.trim();
+    var roomName = document.getElementById('qa-input2').value.trim();
+    if (!hotelName) { showToast('請輸入酒店名稱', 'error'); return; }
+    for (var i = 0; i < hotelConfig.length; i++) {
+      if (hotelConfig[i].casino === pendingQuickAdd.casino &&
+          hotelConfig[i].hotel === hotelName &&
+          hotelConfig[i].room === (roomName || hotelName + ' 客房')) {
+        showToast('此酒店＋房型已存在', 'error'); return;
+      }
+    }
+    var threshold = parseInt(document.getElementById('qa-threshold').value) || 80;
+    hotelConfig.push({ casino: pendingQuickAdd.casino, hotel: hotelName,
+                       code: '', room: roomName || hotelName + ' 客房',
+                       weekday: 0, weekend: 0, special: 0, threshold: threshold });
+    saveConfig();
+    renderConfigTable();
+    populateFilters();
+    showToast('已新增：' + pendingQuickAdd.casino + ' / ' + hotelName, 'success');
+  }
+  closeQuickAdd();
+}
+
+// ===== 說明彈窗 =====
+function showHelp() {
+  document.getElementById('help-modal').style.display = 'flex';
+  lockBody();
+}
+function closeHelp() {
+  document.getElementById('help-modal').style.display = 'none';
+  unlockBody();
+}
+
+// ===== Toast =====
+function showToast(msg, type) {
+  var container = document.getElementById('toast-container');
+  var el = document.createElement('div');
+  el.className = 'toast-item toast-' + (type || 'info');
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(function() {
+    if (el.parentNode) el.parentNode.removeChild(el);
+  }, 3000);
+}
+
+// ===== ESC 快捷鍵 =====
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var qa = document.getElementById('quick-add-overlay');
+    if (qa && qa.style.display === 'flex') {
+      closeQuickAdd();
+      return;
+    }
+    var hl = document.getElementById('help-modal');
+    if (hl && hl.style.display === 'flex') {
+      closeHelp();
+      return;
+    }
+  }
+});
+
+// ===== 啟動 =====
+function init() {
+  loadConfig();
+  populateFilters();
+  renderConfigTable();
+}
+init();
+</script>
+</body>
+</html>
