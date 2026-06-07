@@ -3625,7 +3625,7 @@ function renderAll() {
       "<td class='num'>" + drawnFmt + "</td>" +
       "<td class='num'>" + undrawnFmt + "</td>" +
       "<td>" + (t.note || "") + "</td>" +
-      "<td><button class='btn-gold' onclick='openModal(" + t.id + ")' data-fbkey='" + t._fbKey + "'>編輯</button> <button class='btn-red' data-del='" + (t._fbKey || t.id) + "'>刪除</button></td>";
+      "<td><button class='btn-gold' onclick='openModal(\"" + (t._fbKey||t.id) + "\")'>編輯</button> <button class='btn-red' onclick='deleteTx(\"" + (t._fbKey||t.id) + "\")'>刪除</button></td>";
     tbody.appendChild(tr);
   }
   fillAgent();
@@ -4188,7 +4188,7 @@ function doQuery() {
     for (var i = 0; i < txs.length; i++) {
       var fv = txs[i].fund || 0;
       totalFund += fv;
-      if (fv > 0) allFundTxs.push({ date: txs[i].date, desc: (txs[i].agent||"") + " " + (txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: txs[i].id });
+      if (fv > 0) allFundTxs.push({ date: txs[i].date, desc: (txs[i].agent||"") + " " + (txs[i].client||""), amount: fv, type: "入帳", source: "tx", id: txs[i].id, _fbKey: txs[i]._fbKey });
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     var totalW = 0, totalD = 0, totalCD = 0;
@@ -4198,7 +4198,7 @@ function doQuery() {
       else if (r.type === "cash_deposit") { totalCD += (r.amount || 0); }
       else { totalW += (r.amount || 0); }
       var typeLabel = r.type === "deposit" ? "存入" : (r.type === "cash_deposit" ? "自存現金" : "提領");
-      allFundTxs.push({ date: r.date, desc: r.note||"", amount: r.amount, type: typeLabel, rawType: r.type, source: "fund", id: r.id });
+      allFundTxs.push({ date: r.date, desc: r.note||"", amount: r.amount, type: typeLabel, rawType: r.type, source: "fund", id: r.id, _fbKey: r._fbKey });
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
     // 計算上月累計（當月之前的餘額）
@@ -4236,7 +4236,7 @@ function doQuery() {
       if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") running += e.amount;
       else running -= e.amount;
       var tr = document.createElement("tr");
-      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(" + e.id + ")'>刪除</button>" : "<span style='color:#999;font-size:11px;'>自動</span>";
+      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(\"" + (e._fbKey||e.id) + "\")'>刪除</button>" : "<span style='color:#999;font-size:11px;'>自動</span>";
       var inVal = (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") ? fmt(e.amount) : "";
       var outVal = (e.type === "提領") ? fmt(e.amount) : "";
       var typeClr = e.type === "提領" ? "color:#e74c3c;font-weight:600;" : (e.type === "存入" ? "color:#2980b9;" : (e.type === "自存現金" ? "color:#e67e22;font-weight:600;" : "color:#D4AF37;"));
@@ -5258,7 +5258,7 @@ var RM = {
     if (thrRow) thrRow.style.display = "none";
     document.getElementById("rm-modal-title").textContent = id ? "編輯訂房" : "新增訂房";
     if (id) {
-      var b = this.bookings.find(function(x){ return x.id===id; });
+      var b = this.bookings.find(function(x){ return x._fbKey===String(id) || x.id===id || x.id===parseInt(id); });
       if (!b) return;
       document.getElementById("rm-f-agent").value = b.agent;
       document.getElementById("rm-f-client").value = b.client;
@@ -5419,9 +5419,9 @@ var RM = {
       showToast("請填寫所有必填欄位（體系/酒店/房型）","error"); return;
     }
     if (this.editingId) {
-      var idx = this.bookings.findIndex(function(x){ return x.id===RM.editingId; });
+      var idx = this.bookings.findIndex(function(x){ return x._fbKey===String(RM.editingId) || x.id===RM.editingId || x.id===parseInt(RM.editingId); });
       var _k = (idx>=0 && this.bookings[idx] && this.bookings[idx]._fbKey) ? this.bookings[idx]._fbKey : _fbKey();
-      if (idx>=0) this.bookings[idx] = { id:this.editingId, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
+      if (idx>=0) this.bookings[idx] = { id:this.bookings[idx].id, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
       showToast("訂房已更新","success");
     } else {
       this.lastId++;
@@ -5438,8 +5438,19 @@ var RM = {
   },
   delete: function(id) {
     if (!confirm("確定要刪除這筆訂房紀錄嗎？")) return;
-    this.bookings = this.bookings.filter(function(x){ return x.id!==id; });
+    var key = String(id);
+    var fbKey = null;
+    for (var i = 0; i < this.bookings.length; i++) {
+      if (String(this.bookings[i]._fbKey)===key || this.bookings[i].id===id || this.bookings[i].id===parseInt(id)) {
+        fbKey = this.bookings[i]._fbKey; break;
+      }
+    }
+    this.bookings = this.bookings.filter(function(x){ return String(x._fbKey)!==key && x.id!==id && x.id!==parseInt(id); });
     this.save();
+    // 立即從 Firebase 刪除該筆
+    if (fbKey && typeof db !== 'undefined' && db) {
+      db.ref('macau_data/rmBookings/' + fbKey).remove(function(err){ if(err) console.error('[Sync] rmBookings remove error:', err); });
+    }
     this.render();
     this.updateQuota();
     showToast("訂房已刪除","success");
@@ -5479,8 +5490,9 @@ var RM = {
       html += "<td style='color:var(--gold);font-weight:600;font-family:monospace;'>"+this.fmt(b.totalCost)+"</td>";
       html += "<td><span class='rm-badge "+sc+"'>"+b.status+"</span></td>";
       html += "<td>";
-      html += "<button class='rm-btn-sm rm-btn-edit' onclick='RM.openModal("+b.id+")'>編輯</button>";
-      html += "<button class='rm-btn-sm rm-btn-del' onclick='RM.delete("+b.id+")'>刪除</button>";
+      var btnKey = b._fbKey ? b._fbKey : b.id;
+      html += "<button class='rm-btn-sm rm-btn-edit' onclick='RM.openModal(\""+btnKey+"\")'>編輯</button>";
+      html += "<button class='rm-btn-sm rm-btn-del' onclick='RM.delete(\""+btnKey+"\")'>刪除</button>";
       html += "</td>";
       html += "</tr>";
     }
