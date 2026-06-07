@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v8.1</title>
+<title>澳門洗碼報表 v8.2</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3806,16 +3806,18 @@ function initSync() {
           localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
         } catch(e) { console.error('localStorage save error:', e); }
 
-        // 渲染所有頁面（確保刪除後 UI 也更新）
-        renderAll();
-        renderOverview();
-        renderSummary();
+        // v8.2 僅在對應頁面可見時才渲染，避免干擾用戶操作
+        var pageOverview = document.getElementById("page-overview");
+        if (pageOverview && pageOverview.style.display === "block") { renderOverview(); }
+        var pageAll = document.getElementById("page-all");
+        if (pageAll && pageAll.style.display === "block") { renderAll(); }
+        var pageSummary = document.getElementById("page-summary");
+        if (pageSummary && pageSummary.style.display === "block") { renderSummary(); }
         if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
         if (typeof renderAgentWallets === 'function') renderAgentWallets();
         if (typeof updateAllAgentBalances === 'function') updateAllAgentBalances();
-        // 查詢頁面也要重新渲染（否則刪除後查詢結果不會更新）
-        try { doQuery(); } catch(e) {}
-        // 公基金頁面 UI 更新
+        var pageQuery = document.getElementById("page-query");
+        if (pageQuery && pageQuery.style.display === "block") { try { doQuery(); } catch(e) {} }
         try { updateTotalWalletUI(); } catch(e) {}
         // 代理錢包餘額更新
         try {
@@ -3857,9 +3859,16 @@ function initSync() {
         if (data.rmBookings && typeof RM !== 'undefined') { RM.bookings = data.rmBookings; hasChanges = true; }
         if (hasChanges) {
           try { localStorage.setItem("macau_data", encryptData(txs)); localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals)); localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets)); } catch(e) {}
-          renderAll(); renderOverview(); renderSummary();
+          // v8.2 仅在对应页面可见时才渲染，避免干扰用户操作
+          var pageOverview = document.getElementById("page-overview");
+          if (pageOverview && pageOverview.style.display === "block") { renderOverview(); }
+          var pageAll = document.getElementById("page-all");
+          if (pageAll && pageAll.style.display === "block") { renderAll(); }
+          var pageSummary = document.getElementById("page-summary");
+          if (pageSummary && pageSummary.style.display === "block") { renderSummary(); }
           if (typeof RM !== 'undefined') { RM.updateQuota(); RM.render(); }
-          try { doQuery(); } catch(e) {}
+          var pageQuery = document.getElementById("page-query");
+          if (pageQuery && pageQuery.style.display === "block") { try { doQuery(); } catch(e) {} }
           try { updateTotalWalletUI(); } catch(e) {}
           console.log('[Shadow Sync] 對賬完成，已更新本機資料\n');
         } else {
@@ -3948,10 +3957,20 @@ function quickFilter(type, ev) {
 
 function fillAgent() {
   var sel = document.getElementById("q-agent");
+  // v8.2 保存當前選擇的值，避免重建下拉框時重置
+  var currentVal = sel.value;
   var h = "<option value=''>全部</option>";
   for (var j = 0; j < agentList.length; j++) { h += "<option value='" + agentList[j] + "'>" + agentList[j] + "</option>"; }
   h += "<option value='__FUND__'>公基金</option>";
   sel.innerHTML = h;
+  // 恢復之前選擇的值（如果該選項仍存在）
+  if (currentVal) {
+    var exists = false;
+    for (var k = 0; k < sel.options.length; k++) {
+      if (sel.options[k].value === currentVal) { exists = true; break; }
+    }
+    if (exists) sel.value = currentVal;
+  }
 }
 
 // ===== 進階篩選器 =====
