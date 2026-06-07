@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v7.7.3</title>
+<title>澳門洗碼報表 v7.7.4</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2848,7 +2848,36 @@ function validateMonthDate(dateStr, label) {
   return true;
 }
 
-function openModal() {
+function openModal(id) {
+  // 編輯模式：傳入 id
+  if (id) {
+    var tx = null;
+    for (var i = 0; i < txs.length; i++) {
+      if (txs[i].id === id) { tx = txs[i]; break; }
+    }
+    if (!tx) { showToast("找不到該筆交易！", "warning"); return; }
+    editId = id;
+    document.getElementById("modal-title").textContent = "編輯交易";
+    populateAgentDropdown();
+    document.getElementById("f-date").value = tx.date || nowStr();
+    document.getElementById("f-dow").value = getDow(tx.date || nowStr());
+    document.getElementById("f-type").value = tx.type || "rolling";
+    toggleTypeFields();
+    document.getElementById("f-agent").value = tx.agent || "";
+    document.getElementById("f-client").value = tx.client || "";
+    document.getElementById("f-venue").value = tx.venue || "";
+    document.getElementById("f-vol").value = tx.volume || "";
+    document.getElementById("f-rate").value = tx.rate || "1.24";
+    document.getElementById("f-bonus").value = tx.bonus || "";
+    document.getElementById("f-drawn").value = tx.drawn || "0";
+    document.getElementById("f-cash").value = tx.cash || "";
+    document.getElementById("f-note").value = tx.note || "";
+    calc();
+    document.getElementById("modal").classList.add("show");
+    lockBody();
+    return;
+  }
+  // 新增模式（原有邏輯）
   editId = null;
   document.getElementById("modal-title").textContent = "新增交易";
   populateAgentDropdown();
@@ -3532,7 +3561,7 @@ function renderAll() {
       "<td class='num'>" + drawnFmt + "</td>" +
       "<td class='num'>" + undrawnFmt + "</td>" +
       "<td>" + (t.note || "") + "</td>" +
-      "<td><button class='btn-red' data-del='" + t.id + "'>刪除</button></td>";
+      "<td><button class='btn-gold' onclick='openModal(" + t.id + ")'>編輯</button> <button class='btn-red' data-del='" + t.id + "'>刪除</button></td>";
     tbody.appendChild(tr);
   }
   fillAgent();
