@@ -26,7 +26,7 @@
     });
   }
   // 3. 版本變數（給登入頁版本顯示用）
-  window.APP_VERSION = 'v10.21';
+  window.APP_VERSION = 'v10.22';
 })();
 </script>
 <meta charset="UTF-8">
@@ -237,7 +237,7 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 #pw-box .pw-error { color:#e74c3c; font-size:12px; margin-top:8px; min-height:18px; display:none; }
 #pw-box .pw-attempts { color:rgba(255,255,255,0.22); font-size:11px; margin-top:4px; }
 #pw-box .pw-lock { display:none; color:#e74c3c; font-size:12px; margin:6px 0; }
-#pw-box .pw-version { font-size:10px; color:rgba(212,175,55,0.35); text-align:center; margin-top:12px; letter-spacing:2px; }
+#pw-box .pw-version { font-size:11px; color:rgba(212,175,55,0.6); text-align:center; margin-top:14px; letter-spacing:3px; font-family:'Courier New',monospace; }
 #pw-box .pw-toggle { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:rgba(212,175,55,0.4); font-size:16px; cursor:pointer; padding:4px 8px; }
 #pw-box .pw-toggle:hover { color:rgba(212,175,55,0.8); }
 #pw-box .pw-btn {
@@ -3302,6 +3302,9 @@ document.addEventListener("DOMContentLoaded", function() {
   _startLoginParticles();
   // v10.20 不再註冊 Service Worker（避免快取導致版本無法更新）
   // PWA 相關功能已停用
+  // v10.22 顯示版本號於登入頁面
+  var pv = document.getElementById('pw-version');
+  if (pv) pv.textContent = window.APP_VERSION || '';
 });
 
 // ===== 7 天自動備份功能 =====
