@@ -1,5 +1,5 @@
 // Service Worker for 澳門洗碼報表 PWA
-var CACHE_NAME = "macau-report-v10.15";
+var CACHE_NAME = "macau-report-v10.16";
 var urlsToCache = [
   "/",
   "/index.html",
