@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>澳門洗碼報表 v7.7.1</title>
+<title>澳門洗碼報表 v7.7.2</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0c0c12">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1037,17 +1037,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   flex: 1; min-width: 0; max-width: 24px;
   text-align: center; font-size: 7px; color: rgba(255,255,255,0.12);
 }
-/* 總覽頁房務迷你儀表板 */
-.ov-room-mini { display: flex; flex-direction: column; gap: 6px; }
-.ov-room-hero { display: flex; gap: 14px; align-items: baseline; }
-.ov-room-num { font-size: 20px; font-weight: 800; font-family: "Consolas", monospace; color: var(--gold); line-height: 1; }
-.ov-room-num span { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.25); margin-left: 1px; }
-.ov-room-bar-wrap { display: flex; align-items: center; gap: 6px; }
-.ov-room-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; }
-.ov-room-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; background: linear-gradient(90deg, #27ae60, #2ecc71); }
-.ov-room-bar-fill.warn { background: linear-gradient(90deg, #f39c12, #e67e22); }
-.ov-room-bar-fill.danger { background: linear-gradient(90deg, #e74c3c, #c0392b); }
-.ov-room-bar-pct { font-size: 10px; font-family: monospace; color: var(--gold); min-width: 24px; text-align: right; }
 /* 近期動態 Timeline */
 .timeline-box {
   background: rgba(12,12,22,0.95); border: 1px solid rgba(255,255,255,0.06);
@@ -1139,17 +1128,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 .venue-val { font-size: 10px; color: var(--text-muted); font-family: monospace; min-width: 36px; text-align: right; }
 .venue-empty { text-align: center; padding: 20px; color: rgba(255,255,255,0.15); font-size: 12px; }
 
-/* 總覽頁 — 房務儀表板滿寬 */
-.ov-room-wide {
-  background: rgba(14,12,5,0.9); border: 1px solid rgba(212,175,55,0.1);
-  border-radius: 10px; padding: 12px 16px; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 20px;
-}
-.ov-room-wide .ov-room-hero { gap: 24px; }
-.ov-room-wide .ov-room-num { font-size: 26px; }
-.ov-room-wide .ov-room-bar-wrap { flex: 1; max-width: 320px; }
-.ov-room-wide .ov-room-bar-track { height: 8px; }
-
 /* ===== 桌面端大氣佈局 ===== */
 @media (min-width: 1024px) {
   #page-scroll { padding: 24px 32px; }
@@ -1170,9 +1148,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
   .ov-panel { border-radius: 14px; }
   .ov-panel-head { padding: 12px 16px; font-size: 14px; }
   .ov-panel-body { padding: 10px 14px; }
-  .ov-room-wide { padding: 18px 22px; border-radius: 14px; }
-  .ov-room-wide .ov-room-num { font-size: 32px; }
-  .ov-room-wide .ov-room-bar-track { height: 10px; }
   .timeline-box { border-radius: 14px; }
   .timeline-title { padding: 12px 18px; font-size: 14px; }
   .timeline-item { padding: 10px 18px; }
@@ -1187,8 +1162,6 @@ tbody tr:hover { background: rgba(212,175,55,0.08); }
 @media (max-width: 700px) {
   .charts-row { grid-template-columns: 1fr; }
   .ov-two-col { grid-template-columns: 1fr; }
-  .ov-room-wide { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .ov-room-wide .ov-room-bar-wrap { max-width: none; width: 100%; }
 
   /* ===== 手機版全局優化 ===== */
   /* 防止內容溢出 */
@@ -1877,20 +1850,6 @@ tbody tr:hover {
       <div class="ov-panel">
         <div class="ov-panel-head"><span>📍</span> 場地洗碼分佈</div>
         <div class="ov-panel-body" id="ov-venue-dist"></div>
-      </div>
-    </div>
-    <!-- 房務額度儀表板（滿寬） -->
-    <div class="ov-room-wide">
-      <div class="chart-title" style="margin-bottom:0;">免費房間額度</div>
-      <div class="ov-room-hero">
-        <div class="ov-room-num" id="ov-rm-rolling">0<span>萬</span></div>
-        <div class="ov-room-num" id="ov-rm-used">0<span>晚</span></div>
-      </div>
-      <div class="ov-room-bar-wrap">
-        <div class="ov-room-bar-track">
-          <div class="ov-room-bar-fill" id="ov-rm-progress" style="width:0%;"></div>
-        </div>
-        <div class="ov-room-bar-pct" id="ov-rm-pct">0%</div>
       </div>
     </div>
     <!-- 近期動態 -->
@@ -4657,32 +4616,6 @@ function renderOverview() {
   if (!venArr.length) venHTML='<div class="venue-empty">本月尚無數據</div>';
   document.getElementById("ov-venue-dist").innerHTML=venHTML;
 
-  // --- 房務迷你儀表板 ---
-  var rmRolling=document.getElementById("ov-rm-rolling");
-  var rmUsed=document.getElementById("ov-rm-used");
-  var rmProg=document.getElementById("ov-rm-progress");
-  var rmPct=document.getElementById("ov-rm-pct");
-  if (rmRolling){
-    var rmTotalNights=0,rmFreeNights=0;
-    var roomMonth=nowStr().slice(0,7);
-    if (typeof RM!=="undefined"&&RM.bookings){
-      for (var k=0;k<RM.bookings.length;k++){
-        var b=RM.bookings[k];
-        if (!b.date||b.date.slice(0,7)!==roomMonth) continue;
-        rmTotalNights+=(b.nights||0);
-        if (b.status==="免費") rmFreeNights+=(b.nights||0);
-      }
-    }
-    rmRolling.innerHTML=fmt(totalVol)+'<span>萬</span>';
-    rmUsed.innerHTML=rmFreeNights+'<span>晚</span>';
-    // Use first agent's threshold (just for visual)
-    var quota=totalVol>0?Math.floor(totalVol/55):0; // rough estimate
-    var pct=quota>0?Math.min(100,Math.round(rmFreeNights/quota*100)):0;
-    rmProg.style.width=pct+'%';
-    rmProg.className='ov-room-bar-fill'+(pct>=80?'':' warn')+(pct>=90?' danger':'');
-    rmPct.textContent=pct+'%';
-  }
-
   // --- 近期動態 Timeline ---
   var timeline=document.getElementById("ov-timeline");
   var entries=[];
@@ -6340,20 +6273,6 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
   box-shadow: 0 0 30px rgba(212,175,55,0.28);
 }
 
-/* 房务仪表板加强 */
-.ov-room-wide {
-  background: linear-gradient(180deg, rgba(20,12,8,0.96), rgba(16,8,4,0.98)) !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-}
-.ov-room-bar-track {
-  height: 8px !important;
-  border-radius: 4px !important;
-}
-.ov-room-bar-fill {
-  border-radius: 4px !important;
-  transition: width 0.6s ease !important;
-}
-
 /* 桌面版进一步优化 */
 @media (min-width: 1024px) {
   .quick-actions { gap: 16px; margin-bottom: 18px; }
@@ -6369,7 +6288,6 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
   .timeline-item { padding: 10px 20px; }
   .month-bar { padding: 12px 24px; border-radius: 16px; }
   .total-wallet { padding: 8px 22px; border-radius: 14px; }
-  .ov-room-wide { padding: 18px 24px; border-radius: 16px; }
 }
 
 /* 手机版优化 */
