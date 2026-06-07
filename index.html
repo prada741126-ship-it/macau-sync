@@ -2631,17 +2631,19 @@ function isModalOpen() {
 var lastDeleted = null;
 // v10.0 B方案：使用 _fbKey 精準刪除（修復舊資料相容）
 function deleteTx(fbKey) {
+  try {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
   // 保存副本供撤銷
   var found = false;
+  var targetFbKey = fbKey;
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
     if (!t) continue;
     if (t._fbKey === fbKey || String(t.id) === String(fbKey) || t.id === parseInt(fbKey) || String(t._fbKey) === String(fbKey)) {
       lastDeleted = t;
       lastDeleted.fbKey = t._fbKey || fbKey;
-      fbKey = t._fbKey || fbKey;  // 統一使用 _fbKey，若無則用原 fbKey
+      targetFbKey = t._fbKey || fbKey;
       found = true;
       break;
     }
@@ -2652,15 +2654,17 @@ function deleteTx(fbKey) {
     return;
   }
   // v10.0 直接從 Firebase 刪除該筆記錄
-  if (db && fbKey && fbKey !== "undefined") {
-    db.ref('macau_data/txs/' + fbKey).set(null);
+  if (db && targetFbKey && String(targetFbKey) !== "undefined") {
+    db.ref('macau_data/txs/' + targetFbKey).set(null, function(error) {
+      if (error) { console.error('[deleteTx] Firebase 刪除失敗:', error); }
+    });
   }
   // 本地移除（精準比對）
   var newTxs = [];
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
     if (!t) continue;
-    var isMatch = (t._fbKey === fbKey) || (String(t.id) === String(fbKey)) || (t.id === parseInt(fbKey));
+    var isMatch = (t._fbKey === targetFbKey) || (String(t.id) === String(targetFbKey)) || (t.id === parseInt(targetFbKey));
     if (!isMatch) newTxs.push(t);
   }
   txs = newTxs;
@@ -2671,6 +2675,11 @@ function deleteTx(fbKey) {
   updateTotalWalletUI();
   if (lastDeleted) showUndoToast();
   setTimeout(hideLoading, 300);
+  } catch(e) {
+    hideLoading();
+    console.error('[deleteTx] 錯誤:', e);
+    showToast("刪除失敗：" + (e.message||e), "error");
+  }
 }
 function showUndoToast() {
   var container = document.getElementById("toast-container");
@@ -3373,6 +3382,7 @@ function saveFundForm() {
 }
 // v10.0 B方案：使用 _fbKey 刪除公基金
 function deleteFund(id) {
+  try {
   if (!confirm("確定刪除？")) return;
   var key = String(id);
   var fbKey = null;
@@ -3385,10 +3395,18 @@ function deleteFund(id) {
     }
   }
   fundWithdrawals = newArr;
-  if (db && fbKey) db.ref('macau_data/fundWithdrawals/' + fbKey).set(null);
+  if (db && fbKey) {
+    db.ref('macau_data/fundWithdrawals/' + fbKey).set(null, function(error) {
+      if (error) console.error('[deleteFund] Firebase 刪除失敗:', error);
+    });
+  }
   saveFundData(true);
   doQuery();
   updateTotalWalletUI();
+  } catch(e) {
+    console.error('[deleteFund] 錯誤:', e);
+    showToast("刪除失敗：" + (e.message||e), "error");
+  }
 }
 function saveFundData(silent) {
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
