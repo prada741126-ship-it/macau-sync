@@ -1,7 +1,7 @@
 {
-  "version": "11.2.3",
-  "buildDate": "2026-06-09",
+  "version": "11.2.4",
+  "buildDate": "2026-06-07",
   "buildNumber": 1,
-  "previousVersion": "11.2.2",
-  "description": "v11.2.3 — 修復查詢功能月份篩選問題：q-month 改為下拉選單，預設顯示全部月份"
+  "previousVersion": "11.2.3",
+  "description": "v11.2.4 — 修復查詢功能：公基金/代理碼糧的「上月累計」及月份篩選正確處理 skipMonthFilter"
 }

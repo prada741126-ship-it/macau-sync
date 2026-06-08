@@ -125,13 +125,15 @@ function doQuery() {
       allFundTxs.push({ date: r.date, desc: r.note||"", amount: r.amount, type: typeLabel, rawType: r.type, source: "fund", id: r.id, _fbKey: r._fbKey });
     }
     allFundTxs.sort(function(a,b){ return a.date.localeCompare(b.date); });
-    // 計算上月累計（當月之前的餘額）
+    // 計算上月累計（當月之前的餘額）— 非全部月份時才計算
     preBalance = 0;
-    for (var i = 0; i < allFundTxs.length; i++) {
-      var e = allFundTxs[i];
-      if (e.date < month + "-01") {
-        if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") preBalance += e.amount;
-        else preBalance -= e.amount;
+    if (!skipMonthFilter) {
+      for (var i = 0; i < allFundTxs.length; i++) {
+        var e = allFundTxs[i];
+        if (e.date < month + "-01") {
+          if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") preBalance += e.amount;
+          else preBalance -= e.amount;
+        }
       }
     }
     var balance = Math.max(0, totalFund + totalD + totalCD - totalW);
@@ -144,8 +146,8 @@ function doQuery() {
       "<button class='btn btn-primary' style='margin-left:10px;' onclick='openFundModal()'>＋ 提領</button>";
     var tbody = document.getElementById("query-body");
     tbody.innerHTML = "";
-    // 上月累計行
-    if (preBalance > 0) {
+    // 上月累計行（非全部月份且 preBalance > 0 時才顯示）
+    if (!skipMonthFilter && preBalance > 0) {
       var pr = document.createElement("tr");
       pr.style.cssText = "background:rgba(201,168,76,0.08);";
       pr.innerHTML = "<td>" + month + "-01</td><td style='color:var(--gold-light);font-weight:600;'>上月累計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-weight:700;color:var(--gold-light);'>" + fmt(preBalance) + "</td>";
@@ -156,7 +158,7 @@ function doQuery() {
     tbody.appendChild(hr);
     for (var i = 0; i < allFundTxs.length; i++) {
       var e = allFundTxs[i];
-      if (e.date < month + "-01") continue;
+      if (!skipMonthFilter && e.date < month + "-01") continue;
       if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") running += e.amount;
       else running -= e.amount;
       var tr = document.createElement("tr");
@@ -277,11 +279,13 @@ function doQuery() {
       }
     }
     allLedger.sort(function(a,b){ return a.date.localeCompare(b.date); });
-    // 計算上月累計
+    // 計算上月累計（非全部月份時才計算）
     var preRunning = 0;
-    for (var p = 0; p < allLedger.length; p++) {
-      if (allLedger[p].date < month + "-01") {
-        preRunning += allLedger[p].bonus;
+    if (!skipMonthFilter) {
+      for (var p = 0; p < allLedger.length; p++) {
+        if (allLedger[p].date < month + "-01") {
+          preRunning += allLedger[p].bonus;
+        }
       }
     }
     var running = preRunning;
@@ -304,8 +308,8 @@ function doQuery() {
         "<button class='btn btn-primary' onclick=\"openAgentWalletModal('" + agent + "')\">＋ 異動</button>" +
       "</div></td>";
     tbody.appendChild(kpiRow);
-    // 上月累計行
-    if (preRunning > 0) {
+    // 上月累計行（非全部月份且 preRunning > 0 時才顯示）
+    if (!skipMonthFilter && preRunning > 0) {
       var pr = document.createElement("tr");
       pr.style.cssText = "background:rgba(201,168,76,0.08);";
       pr.innerHTML = "<td>" + month + "-01</td><td style='color:var(--gold-light);font-weight:600;'>上月累計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-weight:700;color:var(--gold-light);'>" + fmt(preRunning) + "</td><td></td>";
@@ -316,7 +320,7 @@ function doQuery() {
     tbody.appendChild(thRow);
     for (var q = 0; q < allLedger.length; q++) {
       var e = allLedger[q];
-      if (e.date < month + "-01") continue;
+      if (!skipMonthFilter && e.date < month + "-01") continue;
       running += e.bonus;
       var tr2 = document.createElement("tr");
       if (e.rowType === "withdraw") {
