@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<!-- BUILD: v11.1.5 (2026-06-09 #006) — 修復手機版水平滑動 + 靜默解密避免初始化錯誤Toast -->
+<!-- BUILD: v11.1.6 (2026-06-09 #007) — 徹底修復房務系統桌面版顯示 + 手機版表格水平滾動 -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.1.5</title>
+<title>澳門洗碼報表 v11.1.6</title>
 <style>
 
 /* === base.css === */
@@ -2139,25 +2139,25 @@ select {
 
 /* 桌面版：房务系统填满剩余空间 */
 @media (min-width: 701px) {
-  #page-room {
+  #page-room.active {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 140px);
     overflow: hidden;
   }
-  #page-room .rm-dashboard { margin-bottom: 14px; }
-  #page-room .rm-stats-row { margin-bottom: 14px; }
-  #page-room .rm-chart-wrap { margin-bottom: 14px; }
-  #page-room .room-controls { flex-shrink: 0; }
-  #page-room .room-table-wrap {
+  #page-room.active .rm-dashboard { margin-bottom: 14px; }
+  #page-room.active .rm-stats-row { margin-bottom: 14px; }
+  #page-room.active .rm-chart-wrap { margin-bottom: 14px; }
+  #page-room.active .room-controls { flex-shrink: 0; }
+  #page-room.active .room-table-wrap {
     flex: 1;
     min-height: 300px;
     max-height: calc(100vh - 500px);
     overflow-y: auto;
   }
-  #page-room .room-table { font-size: 13px; }
-  #page-room .room-table th { padding: 8px 10px; font-size: 11px; }
-  #page-room .room-table td { padding: 9px 10px; }
+  #page-room.active .room-table { font-size: 13px; }
+  #page-room.active .room-table th { padding: 8px 10px; font-size: 11px; }
+  #page-room.active .room-table td { padding: 9px 10px; }
   #room-tab-config.active { display: flex; flex-direction: column; flex: 1; min-height: 0; }
   .hc-panel { flex: 1; min-height: 0; }
   .hc-table-wrap { max-height: calc(100vh - 350px); }
@@ -2962,6 +2962,7 @@ h1::after {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x pan-y;
+    position: relative;
   }
 
   .table-scroll table {
@@ -3575,7 +3576,7 @@ h1::after {
     <span class="sb-label">折疊選單</span>
   </div>
   <!-- v11.1.2 版本號顯示 -->
-  <div class="sb-version" id="sb-version">v11.1.5</div>
+  <div class="sb-version" id="sb-version">v11.1.6</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
@@ -3706,19 +3707,21 @@ h1::after {
       <span id="tx-count" style="margin-left:auto;font-size:12px;color:#777;font-weight:600;"></span>
     </div>
     <div id="all-msg" style="text-align:center;padding:30px;color:#999;display:none;">尚無資料</div>
-    <table id="all-table" style="display:none;">
-      <thead><tr>
-        <th class="sortable" data-sort="type" onclick="sortTable('all', this)">類型</th>
-        <th class="sortable" data-sort="date" onclick="sortTable('all', this)">日期</th>
-        <th class="sortable" data-sort="agent" onclick="sortTable('all', this)">代理</th>
-        <th>客戶</th><th>地點</th>
-        <th class="num sortable" data-sort="volume" onclick="sortTable('all', this)">洗碼量(萬)</th>
-        <th class="num sortable" data-sort="comm" onclick="sortTable('all', this)">佣金</th>
-        <th class="num sortable" data-sort="bonus" onclick="sortTable('all', this)">碼糧</th>
-        <th class="num">已提</th><th class="num">未提</th><th>備註</th><th>操作</th>
-      </tr></thead>
-      <tbody id="all-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table id="all-table" style="display:none;">
+        <thead><tr>
+          <th class="sortable" data-sort="type" onclick="sortTable('all', this)">類型</th>
+          <th class="sortable" data-sort="date" onclick="sortTable('all', this)">日期</th>
+          <th class="sortable" data-sort="agent" onclick="sortTable('all', this)">代理</th>
+          <th>客戶</th><th>地點</th>
+          <th class="num sortable" data-sort="volume" onclick="sortTable('all', this)">洗碼量(萬)</th>
+          <th class="num sortable" data-sort="comm" onclick="sortTable('all', this)">佣金</th>
+          <th class="num sortable" data-sort="bonus" onclick="sortTable('all', this)">碼糧</th>
+          <th class="num">已提</th><th class="num">未提</th><th>備註</th><th>操作</th>
+        </tr></thead>
+        <tbody id="all-body"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="page" id="page-query">
@@ -3757,26 +3760,30 @@ h1::after {
     </div>
     <div class="filter-tags" id="filter-tags"></div>
     <div id="query-kpi" class="kpi-box"></div>
-    <table>
-      <thead><tr>
-        <th>日期</th><th>代理</th><th>地點</th>
-        <th class="num">洗碼量(萬)</th><th class="num">碼糧</th>
-        <th class="num">已提</th><th class="num">未提</th><th>備註</th>
-      </tr></thead>
-      <tbody id="query-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>日期</th><th>代理</th><th>地點</th>
+          <th class="num">洗碼量(萬)</th><th class="num">碼糧</th>
+          <th class="num">已提</th><th class="num">未提</th><th>備註</th>
+        </tr></thead>
+        <tbody id="query-body"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="page" id="page-summary">
     <div id="summary-kpi" class="kpi-box"></div>
     <div id="summary-msg" style="display:none;"></div>
-    <table id="summary-table">
-      <thead><tr>
-        <th>代理</th><th>地點</th><th class="num">洗碼總量(萬)</th>
-        <th class="num">碼糧總額</th><th class="num">已提</th><th class="num">未提</th>
-      </tr></thead>
-      <tbody id="summary-body"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table id="summary-table">
+        <thead><tr>
+          <th>代理</th><th>地點</th><th class="num">洗碼總量(萬)</th>
+          <th class="num">碼糧總額</th><th class="num">已提</th><th class="num">未提</th>
+        </tr></thead>
+        <tbody id="summary-body"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="page" id="page-room">
@@ -6281,6 +6288,7 @@ function renderSummary() {
     "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(totalBonus) + "</div></div>" +
     "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領總額</div><div class='value'>" + fmt(totalFund) + "</div></div>";
   updateTotalWalletUI();
+  setTimeout(checkTableScroll, 150);
 }
 
 function quickFilter(type, ev) {
@@ -6682,6 +6690,7 @@ function doQuery() {
     totalRow.innerHTML = "<td></td><td style='color:#e6edf3;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
     tbody.appendChild(totalRow);
   }
+  setTimeout(checkTableScroll, 150);
   } catch(e) {
     console.error('[doQuery] error:', e);
     showToast('查詢失敗：' + (e.message||e), 'error');
