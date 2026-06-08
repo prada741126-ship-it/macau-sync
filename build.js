@@ -107,6 +107,8 @@ template = template.replace(/v\d+\.\d+(\.\d+)?/g, (match) => {
   // 只替換標題中的版本號
   return `v${version.version}`;
 });
+// Replace version badge text
+template = template.replace(/id="version-badge"[^>]*>v[\d.]+/, `id="version-badge" style="position:fixed;bottom:4px;left:8px;font-size:10px;color:rgba(255,255,255,0.18);z-index:1;pointer-events:none;">v${version.version}`);
 
 // ===== 輸出到 dist/ =====
 const distDir = path.join(ROOT, 'dist');
