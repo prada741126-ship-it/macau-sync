@@ -2635,9 +2635,28 @@ var nextId = 1;
 var fundNextId = 1;
 // v10.0 B方案：Firebase push() 鍵架構
 var _migrated = false;      // 是否已完成 Firebase 物件格式遷移
+var _syncConnected = true;  // v10.26 Firebase 連接狀態監控
 function _fbKey() {
   if (db && db.ref) { try { return db.ref('macau_data/x').push().key; } catch(e) {} }
   return 'L' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+// v10.26 同步寫入重試封裝（指數退避，最多 3 次）
+function _syncSet(ref, data) {
+  if (!db) return;
+  var attempt = 0, maxRetries = 3;
+  function trySet() {
+    ref.set(data, function(error) {
+      if (error && attempt < maxRetries) {
+        attempt++;
+        var delay = Math.pow(2, attempt) * 500;
+        console.warn('[Sync] set 失敗，第 ' + attempt + '/' + maxRetries + ' 次重試，延遲 ' + delay + 'ms', error);
+        setTimeout(trySet, delay);
+      } else if (error) {
+        console.error('[Sync] set 最終失敗（已重試 ' + maxRetries + ' 次）', error);
+      }
+    });
+  }
+  trySet();
 }
 var sortState = { table: "", col: "", asc: true };
 
@@ -2879,11 +2898,9 @@ function deleteTx(fbKey) {
     showToast("找不到該筆交易，可能已被刪除", "warning");
     return;
   }
-  // v10.0 直接從 Firebase 刪除該筆記錄
+  // v10.26 使用重試封裝刪除 Firebase 記錄
   if (db && targetFbKey && String(targetFbKey) !== "undefined") {
-    db.ref('macau_data/txs/' + targetFbKey).set(null, function(error) {
-      if (error) { console.error('[deleteTx] Firebase 刪除失敗:', error); }
-    });
+    _syncSet(db.ref('macau_data/txs/' + targetFbKey), null);
   }
   // 本地移除（精準比對）
   var newTxs = [];
@@ -2926,8 +2943,8 @@ function showUndoToast() {
 function undoDelete() {
   if (!lastDeleted) return;
   txs.push(lastDeleted);
-  // 寫入 Firebase
-  if (db && lastDeleted.fbKey) db.ref('macau_data/txs/' + lastDeleted.fbKey).set(lastDeleted);
+  // v10.26 重試封裝寫入 Firebase
+  if (db && lastDeleted.fbKey) _syncSet(db.ref('macau_data/txs/' + lastDeleted.fbKey), lastDeleted);
   saveData(true);
   renderAll();
   renderOverview();
@@ -3277,11 +3294,11 @@ function saveForm() {
     }
   }
   showLoading("儲存中…");
-  // v10.0 B方案：直接寫入 Firebase 個別路徑（永不覆蓋其他記錄）
+  // v10.26 B方案：使用重試封裝寫入 Firebase 個別路徑
   if (db && fbKey) {
     var targetObj = null;
     for (var i = 0; i < txs.length; i++) { if (txs[i]._fbKey === fbKey) { targetObj = txs[i]; break; } }
-    if (targetObj) db.ref('macau_data/txs/' + fbKey).set(targetObj);
+    if (targetObj) _syncSet(db.ref('macau_data/txs/' + fbKey), targetObj);
   }
   saveData(true);
   closeModal();
@@ -3594,8 +3611,8 @@ function saveFundForm() {
   var fbKey = _fbKey();
   var rec = { _fbKey: fbKey, id: fundNextId++, date: date, type: type, amount: amount, note: note };
   fundWithdrawals.push(rec);
-  // v10.0 直接寫入 Firebase
-  if (db && fbKey) db.ref('macau_data/fundWithdrawals/' + fbKey).set(rec);
+  // v10.26 重試封裝寫入 Firebase
+  if (db && fbKey) _syncSet(db.ref('macau_data/fundWithdrawals/' + fbKey), rec);
   saveFundData(true);
   closeFundModal();
   doQuery();
@@ -3619,9 +3636,7 @@ function deleteFund(id) {
   }
   fundWithdrawals = newArr;
   if (db && fbKey) {
-    db.ref('macau_data/fundWithdrawals/' + fbKey).set(null, function(error) {
-      if (error) console.error('[deleteFund] Firebase 刪除失敗:', error);
-    });
+    _syncSet(db.ref('macau_data/fundWithdrawals/' + fbKey), null);
   }
   saveFundData(true);
   doQuery();
@@ -4330,6 +4345,23 @@ function initSync() {
   });
 
   console.log('[Sync] v10.0 B方案：所有監聽器已啟動');
+
+  // v10.26 Firebase 連接監控 + 重連補償同步
+  db.ref('.info/connected').on('value', function(snap) {
+    var wasConnected = _syncConnected;
+    _syncConnected = snap.val() === true;
+    if (_syncConnected && !wasConnected) {
+      console.log('[Sync] 偵測到重新連線，1.5 秒後觸發補償同步…');
+      setTimeout(function() {
+        console.log('[Sync] 執行重連補償同步');
+        if (typeof syncUpload === 'function') syncUpload();
+      }, 1500);
+    } else if (!_syncConnected) {
+      console.warn('[Sync] Firebase 連接已斷開');
+    }
+  });
+
+  console.log('[Sync] v10.26 連接監控已啟動');
 }
 
 function renderSummary() {
@@ -5785,16 +5817,11 @@ var RM = {
       showToast("訂房已新增","success");
     }
     this.save();
-    // v10.26 直接寫入 Firebase 同步（確保即時同步，不等 syncUpload 延遲）
+    // v10.26 使用重試封裝直接寫入 Firebase 同步（確保即時同步）
     if (typeof db !== 'undefined' && db && _k) {
       try {
         var syncBooking = this.bookings.find(function(x){ return x._fbKey === _k; });
-        if (syncBooking) {
-          db.ref('macau_data/rmBookings/' + _k).set(syncBooking, function(err){
-            if (err) console.error('[Sync] rmBookings set error:', err);
-            else console.log('[Sync] rmBookings 訂房即時同步成功');
-          });
-        }
+        if (syncBooking) _syncSet(db.ref('macau_data/rmBookings/' + _k), syncBooking);
       } catch(e) { console.error('[Sync] rmBookings set error:', e); }
     }
     this.closeModal();  // 先關閉彈窗，確保一定執行
@@ -5814,9 +5841,9 @@ var RM = {
     }
     this.bookings = this.bookings.filter(function(x){ return String(x._fbKey)!==key && x.id!==id && x.id!==parseInt(id); });
     this.save();
-    // 立即從 Firebase 刪除該筆
+    // v10.26 重試封裝刪除 Firebase 記錄
     if (fbKey && typeof db !== 'undefined' && db) {
-      db.ref('macau_data/rmBookings/' + fbKey).remove(function(err){ if(err) console.error('[Sync] rmBookings remove error:', err); });
+      _syncSet(db.ref('macau_data/rmBookings/' + fbKey), null);
     }
     this.render();
     this.updateQuota();
