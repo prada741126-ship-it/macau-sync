@@ -3,6 +3,29 @@
 
 'use strict';
 
+// ===== v11.1 设计系统颜色常量（供 JS 内联样式使用）=====
+var UI_COLORS = {
+  textPrimary:   '#e6edf3',   // --text-primary
+  textSecondary: '#8b949e',   // --text-secondary
+  textMuted:    '#6e7681',   // --text-muted
+  danger:        '#f85149',   // --danger (vermilion red)
+  warning:       '#f0a500',   // --warning (amber)
+  success:       '#2dd4a0',   // --success (green)
+  info:          '#58a6ff',   // --info (blue)
+  techCyan:      '#00d4ff',   // --tech-cyan
+  skyBlue:       '#0095ff',   // --sky-blue
+  electricViolet:'#7c3aed',   // --electric-violet
+  goldSoft:      '#c9a84c',   // --gold-soft
+  goldMuted:     'rgba(201,168,76,0.08)',
+  bgElevated:   '#161b22',   // --bg-elevated
+  bgSurface:     '#0d1117',   // --bg-surface
+  borderSubtle:  'rgba(255,255,255,0.06)',
+  dangerDim:     'rgba(248,81,73,0.08)',
+  warningDim:    'rgba(240,165,0,0.08)',
+  successDim:    'rgba(45,212,15,0.08)',
+  infoDim:       'rgba(88,166,255,0.08)'
+};
+
 // Production mode: set to false to disable verbose logging
 const PRODUCTION = false;
 

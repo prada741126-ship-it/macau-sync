@@ -1,7 +1,7 @@
 {
-  "version": "11.0.0",
-  "buildDate": "2026-06-08",
+  "version": "11.1.0",
+  "buildDate": "2026-06-09",
   "buildNumber": 1,
-  "previousVersion": "10.26",
-  "description": "模块化重构 - 从单文件拆分为多文件模块架构"
+  "previousVersion": "11.0.0",
+  "description": "UI 视觉重构 v11.1 — 70% 现代科技感 + 30% 中国风，深色科技仪表板风格"
 }

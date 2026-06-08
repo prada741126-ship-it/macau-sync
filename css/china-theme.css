@@ -1,244 +1,405 @@
-/* 快速操作按钮加强 */
-.quick-actions { gap: 12px; margin-bottom: 16px; }
-.qa-btn {
-  background: linear-gradient(135deg, rgba(26,18,10,0.92), rgba(18,10,6,0.96)) !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-  position: relative; overflow: hidden;
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-}
-.qa-btn::before {
-  content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.06), transparent);
-  transition: left 0.5s ease;
-}
-.qa-btn:hover::before { left: 100%; }
-.qa-btn:hover {
-  border-color: rgba(212,175,55,0.55) !important;
-  box-shadow: 0 4px 20px rgba(212,175,55,0.18);
-  transform: translateY(-2px);
-}
-.qa-btn-icon {
-  background: rgba(212,175,55,0.12) !important;
-  box-shadow: 0 0 20px rgba(212,175,55,0.15) !important;
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-}
-.qa-btn:hover .qa-btn-icon {
-  background: rgba(212,175,55,0.22) !important;
-  transform: scale(1.12);
-}
+/* ============================================================
+   v11.1 — 中国风主题 (China Theme)
+   隐性 · 克制 · 高级 · 只占 30%
+   ============================================================ */
 
-/* KPI卡片加强 - 装饰性边角 + hover */
-.kpi-grid { gap: 12px; margin-bottom: 16px; }
-.kpi-card-new {
-  position: relative; overflow: hidden;
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-}
-.kpi-card-new::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-gold, rgba(184,134,11,0.12)), transparent);
-  border-radius: 14px 14px 0 0;
-}
-.kpi-card-new::after {
-  content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-gold, rgba(184,134,11,0.10)), transparent);
-}
-.kpi-card-new:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 0 1px var(--border-gold, rgba(184,134,11,0.15));
-}
-.kpi-label {
-  font-size: 11px !important;
-  color: var(--text-secondary, #9090a8) !important;
-  letter-spacing: 1.2px !important;
-  margin-bottom: 6px !important;
-}
-.kpi-value {
-  font-size: 30px !important;
-  color: var(--gold-light, #D4A844) !important;
-  text-shadow: 0 0 16px var(--gold-faint);
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-}
-.kpi-card-new:hover .kpi-value {
-  text-shadow: 0 0 20px var(--gold-faint);
-}
+/* ============================================================
+   核心原则：
+   - 不使用传统图腾（龙纹、祥云、牡丹、古典纹样）
+   - 不大量使用书法背景
+   - 不大面积红金主视觉
+   - 不厚重发光、厚阴影、俗艳渐变
+   - 中国风只作为「背景气质」与「细节修饰」
+   ============================================================ */
 
-/* 图表容器加强 */
-.chart-full, .ov-panel, .chart-box {
-  background: rgba(18,10,6,0.92) !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-  position: relative; overflow: hidden;
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-}
-.chart-full::before, .ov-panel::before, .chart-box::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.45), transparent);
-}
-.chart-full:hover, .ov-panel:hover, .chart-box:hover {
-  border-color: rgba(212,175,55,0.38) !important;
-}
-.chart-title {
-  font-size: 11px !important;
-  letter-spacing: 1.5px !important;
-  color: rgba(212,175,55,0.65) !important;
-  text-transform: uppercase;
-  margin-bottom: 12px !important;
-}
+/* ============================================================
+   极淡山水线稿背景纹理 (0.8% 透明度 · 只在 body 和 card 上)
+   ============================================================ */
 
-/* 时间线加强 */
-.timeline-box {
-  background: rgba(18,10,6,0.92) !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-}
-.timeline-box:hover {
-  border-color: rgba(212,175,55,0.38) !important;
-}
-.timeline-dot {
-  box-shadow: 0 0 10px currentColor;
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-}
-.timeline-item:hover .timeline-dot { transform: scale(1.35); }
-.timeline-item {
-  transition: color var(--trans-fast), background var(--trans-base), border-color var(--trans-base);
-}
-.timeline-item:hover { background: rgba(212,175,55,0.035); }
-
-/* 月份栏加强 */
-.month-bar {
-  background: linear-gradient(135deg, rgba(24,12,8,0.97), rgba(16,6,4,0.98)) !important;
-  border: 1px solid rgba(212,175,55,0.32) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.32);
-}
-
-/* 总钱包加强 */
-.total-wallet {
-  background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(184,134,11,0.13)) !important;
-  border: 1px solid rgba(212,175,55,0.42) !important;
-  box-shadow: 0 0 20px rgba(212,175,55,0.18);
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-}
-.total-wallet:hover {
-  border-color: rgba(212,175,55,0.65) !important;
-  box-shadow: 0 0 30px rgba(212,175,55,0.28);
-}
-
-/* 桌面版进一步优化 */
-@media (min-width: 1024px) {
-  .quick-actions { gap: 16px; margin-bottom: 18px; }
-  .qa-btn { padding: 16px 28px; font-size: 15px; border-radius: 14px; }
-  .qa-btn-icon { width: 36px; height: 36px; font-size: 18px; border-radius: 10px; }
-  .kpi-grid { gap: 16px; margin-bottom: 18px; }
-  .kpi-card-new { padding: 20px 26px; border-radius: 16px; }
-  .kpi-value { font-size: 34px !important; }
-  .kpi-label { font-size: 12px !important; letter-spacing: 1.5px !important; }
-  .chart-full, .ov-panel { padding: 18px 22px; border-radius: 16px; }
-  .timeline-box { padding: 0; border-radius: 16px; }
-  .timeline-title { padding: 12px 20px; font-size: 14px; }
-  .timeline-item { padding: 10px 20px; }
-  .month-bar { padding: 12px 24px; border-radius: 16px; }
-  .total-wallet { padding: 8px 22px; border-radius: 14px; }
-}
-
-/* 手机版优化 */
-@media (max-width: 700px) {
-  .quick-actions { gap: 8px; margin-bottom: 12px; }
-  .qa-btn { padding: 10px 14px; font-size: 12px; border-radius: 10px; }
-  .qa-btn-icon { width: 28px; height: 28px; font-size: 14px; border-radius: 8px; }
-  .kpi-grid { gap: 8px; margin-bottom: 12px; }
-  .kpi-card-new { padding: 12px 14px; border-radius: 12px; }
-  .kpi-value { font-size: 22px !important; }
-  .chart-full, .ov-panel { padding: 10px 12px; border-radius: 12px; }
-  .timeline-item { padding: 6px 12px; }
-}
-
-/* ========== P1 美化：全部交易页 ========== */
-/* 工具栏按钮统一中国风色系 */
-#page-all .toolbar .btn:not(.btn-primary) {
-  background: linear-gradient(135deg, rgba(26,18,10,0.92), rgba(18,10,6,0.96)) !important;
-  color: #c8b890 !important;
-  border: 1px solid rgba(212,175,55,0.22) !important;
-  transition: all 0.25s ease;
-}
-#page-all .toolbar .btn:not(.btn-primary):hover {
-  border-color: rgba(212,175,55,0.55) !important;
-  color: #f0d060 !important;
-  box-shadow: 0 2px 12px rgba(212,175,55,0.12);
-}
-/* 表格斑马纹 + 行 hover 高亮 */
-#all-table tbody tr:nth-child(even) { background: rgba(212,175,55,0.03) !important; }
-#all-table tbody tr:nth-child(odd) { background: rgba(18,10,6,0.92) !important; }
-#all-table tbody tr:hover {
-  background: rgba(212,175,55,0.1) !important;
-  box-shadow: inset 3px 0 0 rgba(212,175,55,0.5);
-}
-/* 表头排序箭头 + hover */
-#all-table th.sortable { cursor: pointer; user-select: none; position: relative; }
-#all-table th.sortable:hover { color: #f0d060 !important; }
-#all-table th.sortable.sort-asc::after { content: " ▲"; font-size: 9px; color: var(--gold-light); }
-#all-table th.sortable.sort-desc::after { content: " ▼"; font-size: 9px; color: var(--gold-light); }
-/* 空状态引导 */
-#all-msg {
-  background: linear-gradient(180deg, rgba(212,175,55,0.04), transparent) !important;
-  border: 1px dashed rgba(212,175,55,0.2) !important;
-  border-radius: 12px !important;
-  padding: 40px 20px !important;
-  font-size: 14px !important;
-  color: rgba(212,175,55,0.5) !important;
-}
-#all-msg::before {
-  content: "📋"; display: block; font-size: 36px; margin-bottom: 10px;
-}
-/* 输入框金色 focus 发光（全局） */
-input:focus, select:focus, textarea:focus {
-  border-color: rgba(212,175,55,0.55) !important;
-  box-shadow: 0 0 0 3px rgba(212,175,55,0.1) !important;
-  outline: none;
-}
-/* ========== P1 美化：统计页 ========== */
-#summary-table th { position: relative; }
-#summary-table tbody tr:hover {
-  background: rgba(212,175,55,0.08) !important;
-}
-#summary-table tbody td:first-child {
-  color: var(--gold-light) !important; font-weight: 600;
-}
-/* ========== P1 美化：查询页 ========== */
-#query-kpi .kpi-card {
-  background: rgba(22,14,8,0.96) !important;
-  border: 1px solid rgba(212,175,55,0.25) !important;
-  animation: cardGlow 4s ease-in-out infinite;
-}
-
-/* ========== P2 回到顶部按钮 ========== */
-#back-to-top {
+/* 主体背景：极淡墨色雾感纹理 */
+body::after {
+  content: "";
   position: fixed;
-  bottom: 28px;
-  right: 28px;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.006;
+  background-image:
+    /* 极淡山水线稿感 — 用 CSS 渐变模拟 */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 60px,
+      rgba(201,168,76,0.04) 60px,
+      rgba(201,168,76,0.04) 61px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 80px,
+      rgba(201,168,76,0.03) 80px,
+      rgba(201,168,76,0.03) 81px
+    );
+}
+
+
+/* ============================================================
+   窗棂几何线条 (Subtle Geometric Lines)
+   只在卡片顶部/底部作为 1px 细线
+   ============================================================ */
+
+/* 卡片顶部细线 — 窗棂感 (克制) */
+.card::before,
+.kpi-card-new::before,
+.ov-panel::before,
+.chart-full::before,
+.chart-box::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.12), transparent);
+  opacity: 0;
+  transition: opacity var(--trans-base), left 0.4s var(--ease-out), right 0.4s var(--ease-out);
+}
+
+.card:hover::before,
+.kpi-card-new:hover::before,
+.ov-panel:hover::before,
+.chart-full:hover::before,
+.chart-box:hover::before {
+  opacity: 1;
+  left: 10%;
+  right: 10%;
+}
+
+
+/* ============================================================
+   印章感小元素 (Seal Style Small Accents)
+   只用于 .sb-logo-title 和 h1 的小装饰
+   ============================================================ */
+
+/* 侧边栏 Logo — 极淡印章感 (底部 1px 线) */
+.sb-logo {
+  position: relative;
+}
+
+.sb-logo::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+}
+
+/* 页面标题 — 极克制装饰 */
+h1 {
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 26px;
+  letter-spacing: 4px;
+  font-weight: 700;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  display: inline-block;
+  width: 100%;
+  position: relative;
+}
+
+/* 移除旧版强金色 text-shadow */
+h1::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 30%;
+  right: 30%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent);
+}
+
+
+/* ============================================================
+   黛金与朱砂红点缀 (Muted Gold & Vermilion Accents)
+   只用于：active 状态、KPI 数值、状态指示
+   比例 < 5-10%
+   ============================================================ */
+
+/* Sidebar active — 科技青 + 极淡金边框 */
+.sb-item.active {
+  color: var(--tech-cyan);
+  background: rgba(0,212,255,0.03);
+  border-left-color: var(--tech-cyan);
+}
+
+/* KPI 数值 — 用 text-primary 为主， gold-soft 只在特殊 KPI */
+.kpi-card-new.gold .kpi-value { color: var(--gold-soft); }
+
+/* 成功/危险状态 — 用 Fintech 标准色，不是中式红绿 */
+.status-success, .status-new, .rm-badge.free {
+  background: var(--success-dim);
+  color: var(--success);
+  border: 1px solid rgba(45,212,160,0.2);
+}
+
+.status-error, .status-overdue {
+  background: var(--danger-dim);
+  color: var(--danger);
+  border: 1px solid rgba(248,81,73,0.2);
+}
+
+/* 中国红只在「危险操作」按钮使用，且是低饱和版本 */
+.btn-red, .btn-danger {
+  background: rgba(192,57,43,0.08);
+  color: var(--vermilion);
+  border-color: rgba(192,57,43,0.15);
+}
+
+
+/* ============================================================
+   东方留白比例 (Eastern White Space)
+   ============================================================ */
+
+/* 卡片内部 padding 加大，营造「留白」感 */
+.card,
+.kpi-card-new,
+.ov-panel,
+.chart-full,
+.chart-box {
+  padding: var(--sp-4) var(--sp-5);
+}
+
+/* 段落间距使用 8px system */
+.page > * + * {
+  margin-top: var(--sp-3);
+}
+
+
+/* ============================================================
+   密码保护遮罩 — 移除 heavy gold，改为深色科技感
+   ============================================================ */
+#pw-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(13,17,23,0.97) 0%, rgba(10,10,15,0.99) 100%);
   z-index: 9999;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(212,175,55,0.85), rgba(184,134,11,0.9));
-  color: #1a1206;
-  font-size: 18px;
-  border: 1px solid rgba(212,175,55,0.5);
-  box-shadow: 0 2px 12px rgba(212,175,55,0.25);
-  cursor: pointer;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform var(--trans-base), box-shadow var(--trans-smooth), color var(--trans-fast), background var(--trans-base);
-  animation: backTopPulse 2.5s ease-in-out infinite;
 }
-#back-to-top:hover {
-  transform: scale(1.12);
-  box-shadow: 0 4px 20px rgba(212,175,55,0.45);
+
+#pw-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  text-align: center;
+  max-width: 420px;
+  width: 92%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
 }
-@keyframes backTopPulse {
-  0%, 100% { box-shadow: 0 2px 12px rgba(212,175,55,0.25); }
-  50% { box-shadow: 0 2px 22px rgba(212,175,55,0.55); }
+
+/* 移除旧版 heavy gold 渐变，改为极淡科技感 */
+#pw-box::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent);
 }
-/* 手机版调整到左下角 */
-@media (max-width: 700px) {
-  #back-to-top { bottom: 18px; right: 18px; width: 38px; height: 38px; font-size: 16px; }
+
+/* 移除了 pw-corners 的重型金色边框装饰 */
+
+#pw-box .pw-emblem-text {
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 10px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  text-align: center;
+  /* 不使用金色渐变 */
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+}
+
+#pw-box .pw-subtitle {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 4px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+#pw-box .pw-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+  /* 不使用金色渐变 */
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+}
+
+#pw-box .pw-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px auto 20px;
+  max-width: 180px;
+}
+
+#pw-box .pw-divider::before,
+#pw-box .pw-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+}
+
+#pw-box .pw-divider span {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+#pw-box .pw-input-wrap { position: relative; margin-bottom: 14px; }
+
+#pw-box .pw-input-wrap .pw-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+#pw-box input {
+  width: 100%;
+  padding: 14px 16px 14px 42px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  letter-spacing: 1px;
+  outline: none;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+#pw-box input:focus {
+  border-color: var(--tech-cyan);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.06);
+}
+
+#pw-box .pw-error {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 8px;
+  min-height: 18px;
+  display: none;
+}
+
+#pw-box .pw-attempts {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+#pw-box .pw-lock {
+  display: none;
+  color: var(--danger);
+  font-size: 12px;
+  margin: 6px 0;
+}
+
+#pw-box .pw-version {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 14px;
+  letter-spacing: 2px;
+  font-family: "SF Mono", "Courier New", monospace;
+}
+
+#pw-box .pw-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+#pw-box .pw-toggle:hover { color: var(--text-secondary); }
+
+/* 登录按钮 — 科技青色 (不是红色) */
+#pw-box .pw-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+  background: var(--tech-cyan);
+  color: var(--bg-base);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+#pw-box .pw-btn:hover {
+  background: #00b8e6;
+  box-shadow: 0 4px 16px rgba(0,212,255,0.25);
+  transform: translateY(-1px);
+}
+
+/* 移除旧版 pw-btn 的金色流光 */
+#pw-box .pw-btn::after { display: none; }
+
+
+/* ============================================================
+   动画关键帧 (移除旧版中式动画)
+   ============================================================ */
+
+/* 保留：dataFlow — 用于 KPI 卡片 hover 数据流动感 */
+@keyframes dataFlow {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* 保留：borderShimmer — 窗棂线条感 (克制) */
+@keyframes borderShimmer {
+  0%   { opacity: 0.3; }
+  50%  { opacity: 0.7; }
+  100% { opacity: 0.3; }
+}
+
+/* 移除：goldShimmer, borderGlowPulse, cardGlow, flameFlicker, sideGlow */
+/* 这些动画过于中式/俗艳，已删除 */
+
+
+/* ============================================================
+   登录页面粒子 (极淡 · 科技感)
+   ============================================================ */
+#pw-particles {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  /* 使用 JS 绘制，CSS 只需确保不影响 */
 }
