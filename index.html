@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<!-- BUILD: v11.1.3 (2026-06-08 #005) — 修復 hc-modal-bg CSS 缺失導致頁面全覆蓋 -->
+<!-- BUILD: v11.1.5 (2026-06-09 #006) — 修復手機版水平滑動 + 靜默解密避免初始化錯誤Toast -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.1.4</title>
+<title>澳門洗碼報表 v11.1.5</title>
 <style>
 
 /* === base.css === */
@@ -1374,6 +1374,7 @@ body::before {
 .table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
   border-radius: var(--radius-md);
   position: relative;
 }
@@ -1531,7 +1532,7 @@ select {
   inset: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+  touch-action: auto;
   padding: 20px 10px 60px 10px;
 }
 
@@ -1928,7 +1929,7 @@ select {
 }
 .rm-select:focus, .rm-input:focus { border-color: var(--tech-cyan); outline: none; }
 .room-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-.room-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.room-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
 .room-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .room-table th {
   padding: 6px 8px;
@@ -2960,6 +2961,7 @@ h1::after {
     border-radius: var(--radius-sm);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
   }
 
   .table-scroll table {
@@ -3178,6 +3180,7 @@ h1::after {
     position: relative;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
   }
 
   .room-table {
@@ -3572,7 +3575,7 @@ h1::after {
     <span class="sb-label">折疊選單</span>
   </div>
   <!-- v11.1.2 版本號顯示 -->
-  <div class="sb-version" id="sb-version">v11.1.4</div>
+  <div class="sb-version" id="sb-version">v11.1.5</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
@@ -4442,7 +4445,7 @@ function encryptData(obj) {
     return 'ENC:' + encrypted;
   } catch(e) { console.error('加密失敗', e); return JSON.stringify(obj); }
 }
-function decryptData(str) {
+function decryptData(str, silent) {
   if (!str) return [];
   // 向下相容：如果不是 ENC: 開頭，視為舊版未加密資料
   if (str.indexOf('ENC:') !== 0) {
@@ -4453,7 +4456,11 @@ function decryptData(str) {
   try {
     var decrypted = CryptoJS.AES.decrypt(str.substring(4), pw).toString(CryptoJS.enc.Utf8);
     return JSON.parse(decrypted);
-  } catch(e) { console.error('解密失敗', e); showToast('密碼錯誤或資料損毀', 'error'); return []; }
+  } catch(e) {
+    console.error('解密失敗', e);
+    if (!silent) showToast('密碼錯誤或資料損毀', 'error');
+    return [];
+  }
 }
 function encryptWallets(obj) {
   var pw = getSessionPw();
@@ -5472,7 +5479,7 @@ function saveFundData(silent) {
 function loadFundData(silent) {
   var d = localStorage.getItem("macau_fund_data");
   if (!d) return;
-  fundWithdrawals = decryptData(d);
+  fundWithdrawals = decryptData(d, silent);
   var maxId = 0;
   for (var i = 0; i < fundWithdrawals.length; i++) {
     if (!fundWithdrawals[i]._fbKey) fundWithdrawals[i]._fbKey = _fbKey();  // v11.1.2 補 _fbKey
@@ -5634,7 +5641,7 @@ function saveAgentWalletsLocalOnly() {
 function loadAgentWallets(silent) {
   var d = localStorage.getItem("macau_agent_wallets");
   if (!d) return;
-  agentWallets = decryptWallets(d);
+  agentWallets = decryptWallets(d, silent);
   var maxId = 0;
   var agents = Object.keys(agentWallets);
   for (var i = 0; i < agents.length; i++) {
@@ -7016,8 +7023,8 @@ document.addEventListener('keydown', function(e) {
 })();
 
 loadAgentList();
-loadFundData();
-loadAgentWallets();
+loadFundData(true);
+loadAgentWallets(true);
 // 從 localStorage 加載工作日誌月份
 (function(){ try { var wm = localStorage.getItem("macau_working_month"); if (wm) workingMonth = wm; } catch(e) {} })();
 // 從 localStorage 加載酒店設定（防止 syncUpload 覆蓋 Firebase 資料）
