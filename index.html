@@ -774,22 +774,22 @@ tr.row-warning td { color: #f39c12; }
 .rm-btn-sm { padding: 3px 8px; font-size: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; margin-right: 4px; }
 .rm-btn-edit { background: #3498db; color: #fff; }
 .rm-btn-del  { background: #e74c3c; color: #fff; }
-.empty-state { text-align: center; padding: 30px 20px; color: var(--text-muted); }
-.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: .7; }
-.empty-state .empty-title { color: var(--gold); font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-.empty-state .empty-desc { color: #887755; font-size: 13px; margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
-.empty-state .empty-action { padding: 10px 24px; border: 1px solid var(--gold); border-radius: 8px; background: rgba(212,175,55,.1); color: var(--gold); font-size: 14px; cursor: pointer; transition: all .2s; }
-.empty-state .empty-action:hover { background: rgba(212,175,55,.2); box-shadow: 0 0 15px rgba(212,175,55,.2); }
+/* 空白狀態（v10.26 統一樣式） */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 20px; text-align: center; min-height: 160px; }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 14px; opacity: 0.65; }
+.empty-state .empty-title { color: var(--gold-light); font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.empty-state .empty-desc { color: #887755; font-size: 13px; margin-bottom: 18px; max-width: 300px; line-height: 1.6; }
+.empty-state .empty-action { padding: 9px 22px; border: 1px solid var(--gold-border-strong); border-radius: var(--radius-sm); background: rgba(212,175,55,.08); color: var(--gold-light); font-size: 14px; cursor: pointer; transition: all var(--trans-base); display: inline-flex; align-items: center; gap: 6px; }
+.empty-state .empty-action:hover { background: rgba(212,175,55,.18); box-shadow: var(--shadow-gold); transform: translateY(-1px); }
+/* 錯誤恢復（v10.26 新增） */
+.error-recovery { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 30px 20px; text-align: center; }
+.error-recovery .err-icon { font-size: 40px; margin-bottom: 4px; }
+.error-recovery .err-title { color: var(--danger); font-size: 16px; font-weight: 600; }
+.error-recovery .err-desc { color: var(--text-muted); font-size: 13px; line-height: 1.5; max-width: 280px; }
+.error-recovery .err-retry { padding: 8px 20px; border: 1px solid rgba(231,76,60,0.3); border-radius: 8px; background: rgba(231,76,60,0.08); color: var(--danger); font-size: 13px; cursor: pointer; transition: all var(--trans-base); }
+.error-recovery .err-retry:hover { background: rgba(231,76,60,0.15); transform: translateY(-1px); }
 
-/* 快捷鍵幫助面板 */
-#kb-help-bg { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-overlay); z-index:10000; backdrop-filter:blur(6px); }
-#kb-help-bg.show { display:flex; align-items:center; justify-content:center; animation:fadeIn .2s ease; }
-#kb-help { background:linear-gradient(180deg, #1a1a1e, #121218); border-radius:var(--radius-lg); padding:28px 32px; width:520px; max-width:92vw; max-height:80vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.8); border:1px solid rgba(212,175,55,.2); }
-#kb-help h3 { color:var(--gold); font-size:18px; margin-bottom:16px; letter-spacing:1px; }
-#kb-help table { width:100%; border-collapse:collapse; margin:0; box-shadow:none; border:none; }
-#kb-help td { padding:8px 12px; font-size:13px; border-bottom:1px solid rgba(255,255,255,.04); color:var(--text-secondary); }
-#kb-help td:first-child { color:var(--gold); font-family:monospace; font-weight:600; white-space:nowrap; }
-#kb-help .section-title { color:var(--gold); font-size:12px; font-weight:700; letter-spacing:1px; margin:12px 0 6px; display:block; }
+/* v10.26 快捷鍵幫助面板（已遷移至 #shortcut-help-modal） */
 
 /* 数字跳动动画 */
 @keyframes countUp { 0%{transform:translateY(100%);opacity:0}100%{transform:translateY(0);opacity:1} }
@@ -1665,17 +1665,6 @@ tr.row-warning td { color: #f39c12; }
   letter-spacing: 2px; text-shadow: 0 0 10px rgba(212,175,55,0.3);
 }
 
-/* 空白狀態 */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 60px 20px; text-align: center; min-height: 200px;
-}
-.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.7; }
-.empty-state .empty-title { color: var(--gold-light); font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-.empty-state .empty-desc { color: #887755; font-size: 13px; margin-bottom: 20px; max-width: 300px; line-height: 1.6; }
-.empty-state .empty-action { padding: 10px 24px; border: 1px solid var(--gold-light); border-radius: 8px; background: rgba(212,175,55,0.1); color: var(--gold-light); font-size: 14px; cursor: pointer; transition: all 0.2s; }
-.empty-state .empty-action:hover { background: rgba(212,175,55,0.2); box-shadow: 0 0 15px rgba(212,175,55,0.2); }
-
 /* ============================================================
    手機版全面修正：防止溢出與完美排版（v5.9.1）
    ============================================================ */
@@ -2182,6 +2171,7 @@ tbody tr:hover {
     <button class="topbar-btn primary" onclick="openModal()">＋ 新增</button>
     <button class="topbar-btn" onclick="showBackupModal()" title="備份管理">📦</button>
     <button class="topbar-btn" onclick="manualSync()">🔄 同步</button>
+    <button class="topbar-btn" onclick="openShortcutHelp()" title="快捷鍵幫助 (?)">⌨️</button>
   </div>
   </div>
 
@@ -2962,7 +2952,29 @@ function showToast(msg, type) {
   el.textContent = icon + msg;
   el.onclick = function() { el.remove(); };
   container.appendChild(el);
-  setTimeout(function() { if (el.parentNode) el.remove(); }, 3000);
+  setTimeout(function() { if (el.parentNode) el.remove(); }, 3500);
+}
+
+// v10.26 增強：帶操作按鈕的 Toast
+function showToastAction(msg, type, actionLabel, actionFn) {
+  type = type || "info";
+  var icons = { success: "✅ ", warning: "⚠️ ", error: "❌ ", info: "ℹ️ " };
+  var container = document.getElementById("toast-container");
+  var el = document.createElement("div");
+  el.className = "toast toast-" + type;
+  el.style.display = "flex"; el.style.alignItems = "center"; el.style.justifyContent = "space-between"; el.style.gap = "8px";
+  el.innerHTML = '<span>' + (icons[type]||"ℹ️ ") + msg + '</span><button style="padding:3px 10px;border:1px solid currentColor;border-radius:6px;background:rgba(255,255,255,0.1);color:inherit;font-size:12px;cursor:pointer;font-weight:600;">' + actionLabel + '</button>';
+  el.querySelector("button").onclick = function(e) { e.stopPropagation(); el.remove(); if (typeof actionFn === "function") actionFn(); };
+  el.onclick = function() { el.remove(); };
+  container.appendChild(el);
+  setTimeout(function() { if (el.parentNode) el.remove(); }, 5000);
+}
+
+// v10.26 全局錯誤邊界：帶重試按鈕的錯誤提示
+function showErrorRecovery(elOrId, title, desc, retryFn) {
+  var el = typeof elOrId === "string" ? document.getElementById(elOrId) : elOrId;
+  if (!el) return;
+  el.innerHTML = '<div class="error-recovery"><div class="err-icon">⚠️</div><div class="err-title">' + (title||"發生錯誤") + '</div><div class="err-desc">' + (desc||"請檢查網路連線後重新整理") + '</div><button class="err-retry" onclick="(' + retryFn.toString() + ')()">🔄 重試</button></div>';
 }
 
 // ===== 排序功能 =====
@@ -3020,17 +3032,16 @@ document.addEventListener("keydown", function(e) {
     if (navItems[idx]) showPage(pages[idx], navItems[idx]);
     return;
   }
-  // ? 鍵顯示快捷鍵幫助
+  // ? 鍵顯示快捷鍵幫助（v10.26 統一使用 shortcut-help-modal）
   if (e.key === "?" && !isModalOpen()) {
     e.preventDefault();
-    var bg = document.getElementById("kb-help-bg");
-    if (bg) bg.classList.toggle("show");
+    openShortcutHelp();
     return;
   }
   // Escape 關閉彈窗
   if (e.key === "Escape") {
-    var kbBg = document.getElementById("kb-help-bg");
-    if (kbBg && kbBg.classList.contains("show")) { kbBg.classList.remove("show"); return; }
+    var scHelp = document.getElementById("shortcut-help-modal");
+    if (scHelp && scHelp.classList.contains("show")) { closeShortcutHelp(); return; }
     if (document.getElementById("modal").classList.contains("show")) closeModal();
     else if (document.getElementById("fund-modal").classList.contains("show")) closeFundModal();
     else if (document.getElementById("agent-wallet-modal").classList.contains("show")) closeAgentWalletModal();
@@ -3699,36 +3710,77 @@ function showBackupModal() {
   }
   // 反序顯示（最新在上）
   list.reverse();
-  // 建立備份對話框
+  // 計算備份總大小
+  var totalSize = 0;
+  for (var s = 0; s < list.length; s++) {
+    var b = localStorage.getItem("macau_backup_" + list[s]);
+    if (b) totalSize += b.length;
+  }
+  var sizeKB = (totalSize / 1024).toFixed(1);
+  var lastBackup = localStorage.getItem("macau_last_backup_date") || "無";
+
+  // 建立備份對話框（v10.26 增強版）
   var bg = document.createElement("div");
   bg.className = "modal-bg show";
   bg.id = "backup-modal";
   bg.onclick = function(e) { if (e.target === bg) { document.body.removeChild(bg); unlockBody(); } };
-  var inner = '<div class="modal"><h3>📦 備份管理</h3>';
-  inner += '<p style="font-size:12px;color:#888;margin:0 0 10px;">自動保留最近 7 天備份，點擊日期可還原</p>';
-  inner += '<div style="max-height:300px;overflow-y:auto;">';
+  var inner = '<div class="modal" style="max-width:520px;"><h3>📦 備份管理</h3>';
+  inner += '<div style="display:flex;gap:12px;margin-bottom:10px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;">';
+  inner += '<span>📊 ' + list.length + ' 份備份</span><span>💾 ' + sizeKB + ' KB</span><span>🕐 上次備份：' + lastBackup + '</span>';
+  inner += '</div>';
+  inner += '<p style="font-size:11px;color:var(--text-muted);margin:0 0 12px;">自動保留最近 7 天備份，點擊日期可還原該日資料</p>';
+  inner += '<div style="max-height:280px;overflow-y:auto;">';
   for (var i = 0; i < list.length; i++) {
     var d = list[i];
-    // 計算該備份有多少筆交易
     var txCount = 0;
+    var bkSize = 0;
     try {
       var bd = JSON.parse(localStorage.getItem("macau_backup_" + d) || "{}");
+      bkSize = (JSON.stringify(bd).length / 1024).toFixed(1);
       if (bd.macau_data) {
         var decrypted = decryptData(bd.macau_data);
         if (Array.isArray(decrypted)) txCount = decrypted.length;
       }
     } catch(e) {}
-    inner += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:4px 0;background:rgba(255,255,255,0.03);border-radius:6px;cursor:pointer;" onclick="if(confirm(\'確定要從 ' + d + ' 的備份還原嗎？\\n目前資料將被覆蓋！\')){closeBackupModal();restoreFromBackup(\'' + d + '\');}">';
-    inner += '<span style="font-size:13px;">📅 ' + d + ' <span style="font-size:10px;color:#888;">（' + txCount + ' 筆交易）</span></span>';
-    inner += '<span style="font-size:11px;color:#f39c12;">🔄 點擊還原</span>';
+    var isLatest = (i === 0) ? ' <span style="font-size:10px;color:var(--success);">最新</span>' : '';
+    inner += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin:4px 0;background:rgba(255,255,255,0.025);border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,0.04);transition:all var(--trans-base);cursor:default;" onmouseenter="this.style.background=\'rgba(212,175,55,0.06)\';this.style.borderColor=\'rgba(212,175,55,0.15)\';" onmouseleave="this.style.background=\'rgba(255,255,255,0.025)\';this.style.borderColor=\'rgba(255,255,255,0.04)\';">';
+    inner += '<div><span style="font-size:13px;font-weight:500;">📅 ' + d + '</span>' + isLatest + '<br><span style="font-size:10px;color:var(--text-muted);">' + txCount + ' 筆交易 · ' + bkSize + ' KB</span></div>';
+    inner += '<button onclick="event.stopPropagation();if(confirm(\'⚠️ 確定要從 ' + d + ' 的備份還原嗎？\\n\\n📋 包含 ' + txCount + ' 筆交易\\n📦 目前資料將被覆蓋！\\n🔄 還原後會自動重新整理\\n\\n確定繼續？\')){closeBackupModal();restoreFromBackup(\'' + d + '\');}" style="padding:6px 14px;border:1px solid var(--gold-border-strong);border-radius:var(--radius-sm);background:rgba(212,175,55,0.08);color:var(--gold-light);font-size:12px;cursor:pointer;font-weight:600;transition:all var(--trans-base);">🔄 還原</button>';
     inner += '</div>';
   }
   inner += '</div>';
-  inner += '<div style="margin-top:12px;text-align:right;"><button class="btn" onclick="closeBackupModal()">關閉</button> <button class="btn btn-green" onclick="closeBackupModal();doBackup();_cleanOldBackups();showToast(\'手動備份完成！\',\'success\');" style="min-height:32px;">🔄 立即備份</button></div>';
+  inner += '<div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap;">';
+  inner += '<button class="btn" onclick="closeBackupModal()" style="min-height:32px;">關閉</button>';
+  inner += '<button class="btn btn-sm" onclick="exportBackupJSON()" style="min-height:32px;background:rgba(52,152,219,0.15);border:1px solid rgba(52,152,219,0.3);color:var(--blue);">📥 匯出備份</button>';
+  inner += '<button class="btn btn-green" onclick="closeBackupModal();doBackup();_cleanOldBackups();showToast(\'手動備份完成！\',\'success\');" style="min-height:32px;">🔄 立即備份</button>';
+  inner += '</div>';
   inner += '</div>';
   bg.innerHTML = inner;
   document.body.appendChild(bg);
   lockBody();
+}
+
+// v10.26 匯出所有備份為 JSON 檔案
+function exportBackupJSON() {
+  var list = getBackupList();
+  if (list.length === 0) { showToast("尚無備份紀錄", "info"); return; }
+  var exportData = {};
+  for (var i = 0; i < list.length; i++) {
+    var raw = localStorage.getItem("macau_backup_" + list[i]);
+    if (raw) {
+      try { exportData[list[i]] = JSON.parse(raw); } catch(e) {}
+    }
+  }
+  var blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "macau_backups_" + nowStr() + ".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("備份已匯出（" + list.length + " 份）", "success");
 }
 
 function closeBackupModal() {
@@ -7061,47 +7113,7 @@ function filterTxsByTime(txs) {
 }
 </script>
 
-<!-- 快捷鍵幫助面板 v6.0 按 ? 顯示 -->
-<div id="kb-help-bg" onclick="if(event.target===this)this.classList.remove('show')">
-  <div id="kb-help">
-    <h3>⌨️ 鍵盤快捷鍵</h3>
-    <span class="section-title">交易操作</span>
-    <table><tr><td>Ctrl + N</td><td>新增交易</td></tr><tr><td>Ctrl + S</td><td>儲存資料</td></tr><tr><td>Ctrl + Z</td><td>復原刪除</td></tr><tr><td>Escape</td><td>關閉彈窗 / 面板</td></tr></table>
-    <span class="section-title">頁面導航</span>
-    <table><tr><td>Ctrl + 1~5</td><td>切換 總覽 | 交易 | 查詢 | 統計 | 房務</td></tr></table>
-    <span class="section-title">其他</span>
-    <table><tr><td>?</td><td>顯示 / 隱藏此幫助面板</td></tr></table>
-    <div style="text-align:right;margin-top:16px;">
-      <button class="btn btn-gold" onclick="document.getElementById('kb-help-bg').classList.remove('show')">關閉</button>
-    </div>
-  </div>
-</div>
 
-
-
-<!-- v6.0 键盘快捷键帮助面板 -->
-<div class="modal-bg" id="shortcut-help-modal">
-<div class="modal-scroll">
-<div class="modal">
-  <h3>⌨️ 键盘快捷键指南</h3>
-  <div style="padding:8px 0;">
-    <div class="shortcut-row"><span style="color:#b8b0a0;">新增交易</span><span class="shortcut-key">Ctrl + N</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">保存数据</span><span class="shortcut-key">Ctrl + S</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">快速搜索</span><span class="shortcut-key">Ctrl + F</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">总览页面</span><span class="shortcut-key">Ctrl + 1</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">全部交易</span><span class="shortcut-key">Ctrl + 2</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">查询页面</span><span class="shortcut-key">Ctrl + 3</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">统计页面</span><span class="shortcut-key">Ctrl + 4</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">房务系统</span><span class="shortcut-key">Ctrl + 5</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">关闭弹窗</span><span class="shortcut-key">Esc</span></div>
-    <div class="shortcut-row"><span style="color:#b8b0a0;">显示帮助</span><span class="shortcut-key">?</span></div>
-  </div>
-  <div style="text-align:right;margin-top:16px;">
-    <button onclick="closeShortcutHelp()" style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 20px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">关闭</button>
-  </div>
-</div>
-</div>
-</div>
 
 
 <!-- ========== 总览页加强美化 v6.3-enhanced ========== -->
