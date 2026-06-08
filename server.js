@@ -11,10 +11,13 @@ console.log('[START] __dirname=' + __dirname);
 
 const DB_FILE = path.join(__dirname, 'db.json');
 
-// 嘗試 index.html，不存在則用 macau_report.html
-var HTML_FILE = path.join(__dirname, 'index.html');
+// 嘗試使用 dist/index.html（v11.0+ 構建產物），不存在則用根 index.html
+var HTML_FILE = path.join(__dirname, 'dist', 'index.html');
 if (!fs.existsSync(HTML_FILE)) {
-  HTML_FILE = path.join(__dirname, 'macau_report.html');
+  HTML_FILE = path.join(__dirname, 'index.html');
+  if (!fs.existsSync(HTML_FILE)) {
+    HTML_FILE = path.join(__dirname, 'macau_report.html');
+  }
 }
 console.log('[START] HTML_FILE=' + HTML_FILE + ', exists=' + fs.existsSync(HTML_FILE));
 

@@ -1,0 +1,7 @@
+{
+  "version": "11.0.0",
+  "buildDate": "2026-06-08",
+  "buildNumber": 1,
+  "previousVersion": "10.26",
+  "description": "模块化重构 - 从单文件拆分为多文件模块架构"
+}
