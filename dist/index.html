@@ -3004,6 +3004,21 @@ h1::after {
   .table-scroll.scrollable::after { opacity: 1; }
   .table-scroll.scrolled-end::after { opacity: 0; }
 
+  /* 手機版：反轉表格列順序，將操作按鈕移到左側 */
+  #all-table,
+  #query-table,
+  #summary-table {
+    direction: rtl;
+  }
+  #all-table th,
+  #all-table td,
+  #query-table th,
+  #query-table td,
+  #summary-table th,
+  #summary-table td {
+    direction: ltr;
+  }
+
 
   /* ============================================================
      表单
