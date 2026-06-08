@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<!-- BUILD: v11.1.2 (2026-06-08 #004) -->
+<!-- BUILD: v11.1.3 (2026-06-08 #005) — 修復 hc-modal-bg CSS 缺失導致頁面全覆蓋 -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.1.2</title>
+<title>澳門洗碼報表 v11.1.3</title>
 <style>
 
 /* === base.css === */
@@ -2091,6 +2091,51 @@ select {
 }
 .hc-table tr:hover { background: rgba(0,212,255,0.03); }
 
+/* --- 酒店設定彈窗 (v11.1.3 從 GOLDEN 恢復) --- */
+#hc-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2001; justify-content: center; align-items: center; }
+#hc-modal-bg.active { display: flex; }
+#hc-help-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2001; justify-content: center; align-items: center; }
+#hc-help-bg.active { display: flex; }
+.hc-modal {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
+  padding: 20px 22px; width: 90%; max-width: 520px;
+  max-height: 85vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(0,212,255,0.04);
+}
+.hc-modal h3 { color: var(--gold-soft); font-size: 16px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,212,255,0.12); }
+.hc-modal .hc-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.hc-modal .hc-group { flex: 1; min-width: 100px; }
+.hc-modal .hc-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.hc-modal .hc-group input, .hc-modal .hc-group select {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  background: var(--bg-surface); color: var(--text-primary);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+  outline: none; font-family: inherit;
+}
+.hc-modal .hc-group input:focus, .hc-modal .hc-group select:focus { border-color: var(--tech-cyan); }
+.hc-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-subtle); }
+
+/* --- 快速新增彈窗 --- */
+#hc-quick-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2005; justify-content: center; align-items: center; }
+#hc-quick-bg.active { display: flex; }
+.hc-quick-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
+  padding: 22px; width: 380px; max-width: 90vw;
+  box-shadow: var(--shadow-lg);
+}
+.hc-quick-box h3 { color: var(--gold-soft); font-size: 16px; margin-bottom: 14px; text-align: center; }
+.hc-quick-box .hc-group { margin-bottom: 10px; }
+.hc-quick-box .hc-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.hc-quick-box .hc-group input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  background: var(--bg-surface); color: var(--text-primary);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+  outline: none; font-family: inherit;
+}
+.hc-quick-box .hc-group input:focus { border-color: var(--tech-cyan); }
+
 /* 桌面版：房务系统填满剩余空间 */
 @media (min-width: 701px) {
   #page-room {
@@ -3527,7 +3572,7 @@ h1::after {
     <span class="sb-label">折疊選單</span>
   </div>
   <!-- v11.1.2 版本號顯示 -->
-  <div class="sb-version" id="sb-version">v11.1.2</div>
+  <div class="sb-version" id="sb-version">v11.1.3</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
