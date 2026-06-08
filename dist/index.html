@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<!-- BUILD: v11.2.2 (2026-06-09 #013) — 修復電腦版側邊欄點擊無反應 + 統一使用 showPage() -->
+<!-- BUILD: v11.2.3 (2026-06-09 #001) -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.2.2</title>
+<title>澳門洗碼報表 v11.2.3</title>
 <style>
 
 /* === base.css === */
 /* ============================================================
-   v11.1.2 — 设计令牌 (Design Tokens)
+   v11.2.3 — 设计令牌 (Design Tokens)
    70% 现代科技感 + 30% 中国风
    深色科技仪表板风格 · Fintech/SaaS Dashboard
    ============================================================ */
@@ -230,7 +230,7 @@ body::before {
 
 /* === layout.css === */
 /* ============================================================
-   v11.1.2 — 布局样式 (Layout)
+   v11.2.3 — 布局样式 (Layout)
    现代科技感 70% + 中国风 30%
    Fintech Dashboard · 高精度 · 冷静 · 专业
    ============================================================ */
@@ -1097,7 +1097,7 @@ body::before {
 
 /* === components.css === */
 /* ============================================================
-   v11.1.2 — 组件样式 (Components)
+   v11.2.3 — 组件样式 (Components)
    现代科技感 70% + 中国风 30%
    高精度 · 低阴影 · 细描边 · Fintech Dashboard 风格
    ============================================================ */
@@ -1374,7 +1374,6 @@ body::before {
 .table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x pan-y;
   border-radius: var(--radius-md);
   position: relative;
 }
@@ -1532,7 +1531,7 @@ select {
   inset: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  touch-action: auto;
+  touch-action: pan-y;
   padding: 20px 10px 60px 10px;
 }
 
@@ -1741,8 +1740,8 @@ select {
 }
 
 /* ============================================================
-   房务系统 — 桌面端基础样式 (v11.1.2 从 GOLDEN 恢复)
-   注：v11.1.2 模块化拆分时遗漏，导致 rm-modal-bg 和
+   房务系统 — 桌面端基础样式 (v11.2.3 从 GOLDEN 恢复)
+   注：v11.2.3 模块化拆分时遗漏，导致 rm-modal-bg 和
    .rm-* 样式全部缺失 → 模态框始终可见（遮挡全页面）
    ============================================================ */
 
@@ -1929,7 +1928,7 @@ select {
 }
 .rm-select:focus, .rm-input:focus { border-color: var(--tech-cyan); outline: none; }
 .room-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-.room-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
+.room-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .room-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .room-table th {
   padding: 6px 8px;
@@ -2092,72 +2091,27 @@ select {
 }
 .hc-table tr:hover { background: rgba(0,212,255,0.03); }
 
-/* --- 酒店設定彈窗 (v11.1.3 從 GOLDEN 恢復) --- */
-#hc-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2001; justify-content: center; align-items: center; }
-#hc-modal-bg.active { display: flex; }
-#hc-help-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2001; justify-content: center; align-items: center; }
-#hc-help-bg.active { display: flex; }
-.hc-modal {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
-  padding: 20px 22px; width: 90%; max-width: 520px;
-  max-height: 85vh; overflow-y: auto;
-  box-shadow: var(--shadow-lg), 0 0 30px rgba(0,212,255,0.04);
-}
-.hc-modal h3 { color: var(--gold-soft); font-size: 16px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(0,212,255,0.12); }
-.hc-modal .hc-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-.hc-modal .hc-group { flex: 1; min-width: 100px; }
-.hc-modal .hc-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-.hc-modal .hc-group input, .hc-modal .hc-group select {
-  width: 100%; padding: 8px 10px; font-size: 13px;
-  background: var(--bg-surface); color: var(--text-primary);
-  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
-  outline: none; font-family: inherit;
-}
-.hc-modal .hc-group input:focus, .hc-modal .hc-group select:focus { border-color: var(--tech-cyan); }
-.hc-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-subtle); }
-
-/* --- 快速新增彈窗 --- */
-#hc-quick-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2005; justify-content: center; align-items: center; }
-#hc-quick-bg.active { display: flex; }
-.hc-quick-box {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
-  padding: 22px; width: 380px; max-width: 90vw;
-  box-shadow: var(--shadow-lg);
-}
-.hc-quick-box h3 { color: var(--gold-soft); font-size: 16px; margin-bottom: 14px; text-align: center; }
-.hc-quick-box .hc-group { margin-bottom: 10px; }
-.hc-quick-box .hc-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-.hc-quick-box .hc-group input {
-  width: 100%; padding: 8px 10px; font-size: 13px;
-  background: var(--bg-surface); color: var(--text-primary);
-  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
-  outline: none; font-family: inherit;
-}
-.hc-quick-box .hc-group input:focus { border-color: var(--tech-cyan); }
-
 /* 桌面版：房务系统填满剩余空间 */
 @media (min-width: 701px) {
-  #page-room.active {
+  #page-room {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 140px);
     overflow: hidden;
   }
-  #page-room.active .rm-dashboard { margin-bottom: 14px; }
-  #page-room.active .rm-stats-row { margin-bottom: 14px; }
-  #page-room.active .rm-chart-wrap { margin-bottom: 14px; }
-  #page-room.active .room-controls { flex-shrink: 0; }
-  #page-room.active .room-table-wrap {
+  #page-room .rm-dashboard { margin-bottom: 14px; }
+  #page-room .rm-stats-row { margin-bottom: 14px; }
+  #page-room .rm-chart-wrap { margin-bottom: 14px; }
+  #page-room .room-controls { flex-shrink: 0; }
+  #page-room .room-table-wrap {
     flex: 1;
     min-height: 300px;
     max-height: calc(100vh - 500px);
     overflow-y: auto;
   }
-  #page-room.active .room-table { font-size: 13px; }
-  #page-room.active .room-table th { padding: 8px 10px; font-size: 11px; }
-  #page-room.active .room-table td { padding: 9px 10px; }
+  #page-room .room-table { font-size: 13px; }
+  #page-room .room-table th { padding: 8px 10px; font-size: 11px; }
+  #page-room .room-table td { padding: 9px 10px; }
   #room-tab-config.active { display: flex; flex-direction: column; flex: 1; min-height: 0; }
   .hc-panel { flex: 1; min-height: 0; }
   .hc-table-wrap { max-height: calc(100vh - 350px); }
@@ -2221,7 +2175,7 @@ select {
 
 /* === china-theme.css === */
 /* ============================================================
-   v11.1.2 — 中国风主题 (China Theme)
+   v11.2.3 — 中国风主题 (China Theme)
    隐性 · 克制 · 高级 · 只占 30%
    ============================================================ */
 
@@ -2628,7 +2582,7 @@ h1::after {
 
 /* === mobile.css === */
 /* ============================================================
-   v11.1.2 — 移动端样式 (Mobile)
+   v11.2.3 — 移动端样式 (Mobile)
    现代科技感 70% + 中国风 30%
    ============================================================ */
 
@@ -2666,10 +2620,6 @@ h1::after {
   }
 
   #sidebar:not(.mobile-hidden) { left: 0; }
-  /* 強制電腦版側邊欄顯示，不受 .mobile-hidden 影響 */
-  @media (min-width: 701px) {
-    #sidebar { display: flex !important; }
-  }
 
   .topbar-toggle { display: block; font-size: 20px; padding: 4px; cursor: pointer; color: var(--text-muted); }
   .topbar-toggle:hover { color: var(--tech-cyan); }
@@ -2966,7 +2916,6 @@ h1::after {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x pan-y;
-    position: relative;
   }
 
   .table-scroll table {
@@ -3536,23 +3485,23 @@ h1::after {
 
   <!-- 導航 -->
   <nav class="sb-nav" id="sb-nav">
-    <div class="sb-item active" data-label="總覽" data-page="overview" onclick="showPage('overview', this)">
+    <div class="sb-item active" data-label="總覽" data-page="overview">
       <span class="sb-icon">🏠</span>
       <span class="sb-label">總覽</span>
     </div>
-    <div class="sb-item" data-label="全部交易" data-page="all" onclick="showPage('all', this)">
+    <div class="sb-item" data-label="全部交易" data-page="all">
       <span class="sb-icon">📋</span>
       <span class="sb-label">全部交易</span>
     </div>
-    <div class="sb-item" data-label="查詢" data-page="query" onclick="showPage('query', this)">
+    <div class="sb-item" data-label="查詢" data-page="query">
       <span class="sb-icon">🔍</span>
       <span class="sb-label">查詢</span>
     </div>
-    <div class="sb-item" data-label="統計" data-page="summary" onclick="showPage('summary', this)">
+    <div class="sb-item" data-label="統計" data-page="summary">
       <span class="sb-icon">📈</span>
       <span class="sb-label">統計</span>
     </div>
-    <div class="sb-item" data-label="房務系統" data-page="room" onclick="showPage('room', this)">
+    <div class="sb-item" data-label="房務系統" data-page="room">
       <span class="sb-icon">🏨</span>
       <span class="sb-label">房務系統</span>
     </div>
@@ -3579,12 +3528,12 @@ h1::after {
     <span class="sb-icon">◀</span>
     <span class="sb-label">折疊選單</span>
   </div>
-  <!-- v11.1.2 版本號顯示 -->
-  <div class="sb-version" id="sb-version">v11.1.6</div>
+  <!-- v11.2.3 版本號顯示 -->
+  <div class="sb-version" id="sb-version">v11.2.3</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
-  <div id="sidebar-overlay" onclick="toggleMobileSidebar()" style="display:none;"></div>
+  <div id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
   <!-- 手機版底部導航 -->
   <div class="mobile-bottom-nav" id="mobile-bottom-nav">
@@ -3711,21 +3660,19 @@ h1::after {
       <span id="tx-count" style="margin-left:auto;font-size:12px;color:#777;font-weight:600;"></span>
     </div>
     <div id="all-msg" style="text-align:center;padding:30px;color:#999;display:none;">尚無資料</div>
-    <div class="table-scroll">
-      <table id="all-table" style="display:none;">
-        <thead><tr>
-          <th class="sortable" data-sort="type" onclick="sortTable('all', this)">類型</th>
-          <th class="sortable" data-sort="date" onclick="sortTable('all', this)">日期</th>
-          <th class="sortable" data-sort="agent" onclick="sortTable('all', this)">代理</th>
-          <th>客戶</th><th>地點</th>
-          <th class="num sortable" data-sort="volume" onclick="sortTable('all', this)">洗碼量(萬)</th>
-          <th class="num sortable" data-sort="comm" onclick="sortTable('all', this)">佣金</th>
-          <th class="num sortable" data-sort="bonus" onclick="sortTable('all', this)">碼糧</th>
-          <th class="num">已提</th><th class="num">未提</th><th>備註</th><th>操作</th>
-        </tr></thead>
-        <tbody id="all-body"></tbody>
-      </table>
-    </div>
+    <table id="all-table" style="display:none;">
+      <thead><tr>
+        <th class="sortable" data-sort="type" onclick="sortTable('all', this)">類型</th>
+        <th class="sortable" data-sort="date" onclick="sortTable('all', this)">日期</th>
+        <th class="sortable" data-sort="agent" onclick="sortTable('all', this)">代理</th>
+        <th>客戶</th><th>地點</th>
+        <th class="num sortable" data-sort="volume" onclick="sortTable('all', this)">洗碼量(萬)</th>
+        <th class="num sortable" data-sort="comm" onclick="sortTable('all', this)">佣金</th>
+        <th class="num sortable" data-sort="bonus" onclick="sortTable('all', this)">碼糧</th>
+        <th class="num">已提</th><th class="num">未提</th><th>備註</th><th>操作</th>
+      </tr></thead>
+      <tbody id="all-body"></tbody>
+    </table>
   </div>
 
   <div class="page" id="page-query">
@@ -3735,7 +3682,7 @@ h1::after {
       <label>地點：</label>
       <select id="q-venue" style="min-width:100px;"><option value="">全部</option></select>
       <label>月份：</label>
-      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;">
+      <select id="q-month" style="min-width:100px;"><option value="__ALL__">全部月份</option></select>
       <button class="btn btn-primary" onclick="doQuery()" style="padding:6px 14px;">查詢</button>
       <button class="btn" onclick="toggleAdvFilter()" style="padding:6px 10px;font-size:11px;" id="btn-adv-filter">⚙ 進階</button>
       <button class="btn" onclick="showSavedFilters()" style="padding:6px 10px;font-size:11px;" title="儲存的篩選">📌</button>
@@ -3764,30 +3711,26 @@ h1::after {
     </div>
     <div class="filter-tags" id="filter-tags"></div>
     <div id="query-kpi" class="kpi-box"></div>
-    <div class="table-scroll">
-      <table>
-        <thead><tr>
-          <th>日期</th><th>代理</th><th>地點</th>
-          <th class="num">洗碼量(萬)</th><th class="num">碼糧</th>
-          <th class="num">已提</th><th class="num">未提</th><th>備註</th>
-        </tr></thead>
-        <tbody id="query-body"></tbody>
-      </table>
-    </div>
+    <table>
+      <thead><tr>
+        <th>日期</th><th>代理</th><th>地點</th>
+        <th class="num">洗碼量(萬)</th><th class="num">碼糧</th>
+        <th class="num">已提</th><th class="num">未提</th><th>備註</th>
+      </tr></thead>
+      <tbody id="query-body"></tbody>
+    </table>
   </div>
 
   <div class="page" id="page-summary">
     <div id="summary-kpi" class="kpi-box"></div>
     <div id="summary-msg" style="display:none;"></div>
-    <div class="table-scroll">
-      <table id="summary-table">
-        <thead><tr>
-          <th>代理</th><th>地點</th><th class="num">洗碼總量(萬)</th>
-          <th class="num">碼糧總額</th><th class="num">已提</th><th class="num">未提</th>
-        </tr></thead>
-        <tbody id="summary-body"></tbody>
-      </table>
-    </div>
+    <table id="summary-table">
+      <thead><tr>
+        <th>代理</th><th>地點</th><th class="num">洗碼總量(萬)</th>
+        <th class="num">碼糧總額</th><th class="num">已提</th><th class="num">未提</th>
+      </tr></thead>
+      <tbody id="summary-body"></tbody>
+    </table>
   </div>
 
   <div class="page" id="page-room">
@@ -4264,12 +4207,12 @@ h1::after {
 <script>
 
 /* === config.js === */
-// js/config.js - v11.1.2
+// js/config.js - v11.2.3
 // Non-overlapping extraction
 
 'use strict';
 
-// ===== v11.1.2 设计系统颜色常量（供 JS 内联样式使用）=====
+// ===== v11.2.3 设计系统颜色常量（供 JS 内联样式使用）=====
 var UI_COLORS = {
   textPrimary:   '#e6edf3',   // --text-primary
   textSecondary: '#8b949e',   // --text-secondary
@@ -4308,21 +4251,21 @@ const PRODUCTION = false;
 var txs = [];
 var fundWithdrawals = [];
 var agentWallets = {};
-var editId = null;          // v11.1.2 B方案：editId 現在儲存 _fbKey（字串）而非數字 id
+var editId = null;          // v11.2.3 B方案：editId 現在儲存 _fbKey（字串）而非數字 id
 var nextId = 1;
 var fundNextId = 1;
 var agentWalletNextId = 1;
 var agentList = [];
 var nextId = 1;
 var fundNextId = 1;
-// v11.1.2 B方案：Firebase push() 鍵架構
+// v11.2.3 B方案：Firebase push() 鍵架構
 var _migrated = false;      // 是否已完成 Firebase 物件格式遷移
-var _syncConnected = true;  // v11.1.2 Firebase 連接狀態監控
+var _syncConnected = true;  // v11.2.3 Firebase 連接狀態監控
 function _fbKey() {
   if (db && db.ref) { try { return db.ref('macau_data/x').push().key; } catch(e) {} }
   return 'L' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
-// v11.1.2 同步寫入重試封裝（指數退避，最多 3 次）
+// v11.2.3 同步寫入重試封裝（指數退避，最多 3 次）
 function _syncSet(ref, data) {
   if (!db) return;
   var attempt = 0, maxRetries = 3;
@@ -4342,7 +4285,7 @@ function _syncSet(ref, data) {
 }
 var sortState = { table: "", col: "", asc: true };
 
-// ===== 同步配置（v11.1.2 安全強化）=====
+// ===== 同步配置（v11.2.3 安全強化）=====
 // 密碼不再寫死在程式碼中，改為 Base64 編碼 + 記憶體變數
 var _pwEncoded = 'bWFjYXU4ODg=';  // btoa('macau888')
 var SYNC_PASSWORD = '';  // 將在使用者輸入後設定
@@ -4354,10 +4297,10 @@ var SYNC_API = (function() {
   return 'https://macau-sync.onrender.com';
 })();
 
-// ===== 核心工具函数（v11.1.2 修復）=====
+// ===== 核心工具函数（v11.2.3 修復）=====
 
 /* === storage.js === */
-// storage.js - v11.1.2 localStorage 持久化层
+// storage.js - v11.2.3 localStorage 持久化层
 // 统一管理所有 localStorage key 常量
 
 var STORAGE_KEYS = {
@@ -4380,7 +4323,7 @@ var STORAGE_KEYS = {
 };
 
 /* === utils.js === */
-// js/utils.js - v11.1.2
+// js/utils.js - v11.2.3
 // Non-overlapping extraction
 
 function getDow(ds) {
@@ -4429,10 +4372,10 @@ function calcFund(comm, bonus) {
   return comm - bonus;
 }
 
-// ===== AES 加密/解密（v11.1.2 安全強化）=====
+// ===== AES 加密/解密（v11.2.3 安全強化）=====
 
 /* === crypto.js === */
-// js/crypto.js - v11.1.2
+// js/crypto.js - v11.2.3
 // Non-overlapping extraction
 
 function getSessionPw() {
@@ -4456,7 +4399,7 @@ function encryptData(obj) {
     return 'ENC:' + encrypted;
   } catch(e) { console.error('加密失敗', e); return JSON.stringify(obj); }
 }
-function decryptData(str, silent) {
+function decryptData(str) {
   if (!str) return [];
   // 向下相容：如果不是 ENC: 開頭，視為舊版未加密資料
   if (str.indexOf('ENC:') !== 0) {
@@ -4467,11 +4410,7 @@ function decryptData(str, silent) {
   try {
     var decrypted = CryptoJS.AES.decrypt(str.substring(4), pw).toString(CryptoJS.enc.Utf8);
     return JSON.parse(decrypted);
-  } catch(e) {
-    console.error('解密失敗', e);
-    if (!silent) showToast('密碼錯誤或資料損毀', 'error');
-    return [];
-  }
+  } catch(e) { console.error('解密失敗', e); showToast('密碼錯誤或資料損毀', 'error'); return []; }
 }
 function encryptWallets(obj) {
   var pw = getSessionPw();
@@ -4497,7 +4436,7 @@ function decryptWallets(str) {
 // ===== 手機彈窗滾動鎖定 =====
 
 /* === toast.js === */
-// js/ui/toast.js - v11.1.2
+// js/ui/toast.js - v11.2.3
 // Non-overlapping extraction
 
 function lockBody() { document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden"; }
@@ -4517,7 +4456,7 @@ function showToast(msg, type) {
   setTimeout(function() { if (el.parentNode) el.remove(); }, 3500);
 }
 
-// v11.1.2 增強：帶操作按鈕的 Toast
+// v11.2.3 增強：帶操作按鈕的 Toast
 function showToastAction(msg, type, actionLabel, actionFn) {
   type = type || "info";
   var icons = { success: "✅ ", warning: "⚠️ ", error: "❌ ", info: "ℹ️ " };
@@ -4532,7 +4471,7 @@ function showToastAction(msg, type, actionLabel, actionFn) {
   setTimeout(function() { if (el.parentNode) el.remove(); }, 5000);
 }
 
-// v11.1.2 全局錯誤邊界：帶重試按鈕的錯誤提示
+// v11.2.3 全局錯誤邊界：帶重試按鈕的錯誤提示
 function showErrorRecovery(elOrId, title, desc, retryFn) {
   var el = typeof elOrId === "string" ? document.getElementById(elOrId) : elOrId;
   if (!el) return;
@@ -4542,7 +4481,7 @@ function showErrorRecovery(elOrId, title, desc, retryFn) {
 // ===== 排序功能 =====
 
 /* === transactions.js === */
-// data/transactions.js - v11.1.2 交易 CRUD
+// data/transactions.js - v11.2.3 交易 CRUD
 // Merged: delete + form + monthly-close
 
 function sortTable(tableId, thEl) {
@@ -4582,7 +4521,7 @@ function sortTxs(arr) {
   });
 }
 
-// ===== 鍵盤快捷鍵 (v11.1.2 強化版) =====
+// ===== 鍵盤快捷鍵 (v11.2.3 強化版) =====
 
 var _draftTimer = null;
 
@@ -4716,9 +4655,9 @@ document.addEventListener("DOMContentLoaded", function() {
   _setupDraftAutoSave();
   _autoBackupCheck();
   _startLoginParticles();
-  // v11.1.2 不再註冊 Service Worker（避免快取導致版本無法更新）
+  // v11.2.3 不再註冊 Service Worker（避免快取導致版本無法更新）
   // PWA 相關功能已停用
-  // v11.1.2 顯示版本號於登入頁面
+  // v11.2.3 顯示版本號於登入頁面
   var pv = document.getElementById('pw-version');
   if (pv) pv.textContent = window.APP_VERSION || '';
 });
@@ -4739,10 +4678,10 @@ function closeCurrentMonth() {
   showToast('月末結算完成，' + now + ' 已鎖定', 'success');
 }
 
-// ===== v11.1.2 B方案：Firebase push() 鍵架構，個別路徑寫入 =====
+// ===== v11.2.3 B方案：Firebase push() 鍵架構，個別路徑寫入 =====
 
 /* === auth.js === */
-// js/auth.js - v11.1.2
+// js/auth.js - v11.2.3
 // Non-overlapping extraction
 
 document.addEventListener("keydown", function(e) {
@@ -4750,6 +4689,8 @@ document.addEventListener("keydown", function(e) {
   if (e.ctrlKey && e.key === "n") { e.preventDefault(); if (!isModalOpen()) openModal(); return; }
   // Ctrl+S 儲存
   if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveData(true); showToast("已儲存 " + txs.length + " 筆","success"); return; }
+  // Ctrl+Z 復原
+  if (e.ctrlKey && e.key === "z") { e.preventDefault(); undoDelete(); return; }
   // Ctrl+1~5 切換頁面
   if (e.ctrlKey && e.key >= "1" && e.key <= "5") {
     e.preventDefault();
@@ -4759,7 +4700,7 @@ document.addEventListener("keydown", function(e) {
     if (navItems[idx]) showPage(pages[idx], navItems[idx]);
     return;
   }
-  // ? 鍵顯示快捷鍵幫助（v11.1.2 統一使用 shortcut-help-modal）
+  // ? 鍵顯示快捷鍵幫助（v11.2.3 統一使用 shortcut-help-modal）
   if (e.key === "?" && !isModalOpen()) {
     e.preventDefault();
     openShortcutHelp();
@@ -4782,17 +4723,22 @@ function isModalOpen() {
     document.getElementById("agent-mgr-modal").classList.contains("show");
 }
 
-// v11.1.2 B方案：使用 _fbKey 精準刪除（修復舊資料相容）
+// ===== 刪除撤銷 =====
+var lastDeleted = null;
+// v11.2.3 B方案：使用 _fbKey 精準刪除（修復舊資料相容）
 function deleteTx(fbKey) {
   try {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
+  // 保存副本供撤銷
   var found = false;
   var targetFbKey = fbKey;
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
     if (!t) continue;
     if (t._fbKey === fbKey || String(t.id) === String(fbKey) || t.id === parseInt(fbKey) || String(t._fbKey) === String(fbKey)) {
+      lastDeleted = t;
+      lastDeleted.fbKey = t._fbKey || fbKey;
       targetFbKey = t._fbKey || fbKey;
       found = true;
       break;
@@ -4803,7 +4749,7 @@ function deleteTx(fbKey) {
     showToast("找不到該筆交易，可能已被刪除", "warning");
     return;
   }
-  // v11.1.2 使用重試封裝刪除 Firebase 記錄
+  // v11.2.3 使用重試封裝刪除 Firebase 記錄
   if (db && targetFbKey && String(targetFbKey) !== "undefined") {
     _syncSet(db.ref('macau_data/txs/' + targetFbKey), null);
   }
@@ -4821,6 +4767,7 @@ function deleteTx(fbKey) {
   renderOverview();
   renderSummary();
   updateTotalWalletUI();
+  if (lastDeleted) showUndoToast();
   setTimeout(hideLoading, 300);
   } catch(e) {
     hideLoading();
@@ -4828,11 +4775,40 @@ function deleteTx(fbKey) {
     showToast("刪除失敗：" + (e.message||e), "error");
   }
 }
+function showUndoToast() {
+  var container = document.getElementById("toast-container");
+  var el = document.createElement("div");
+  el.className = "toast toast-warning";
+  el.style.cssText = "cursor:pointer;flex-direction:column;gap:6px;";
+  el.innerHTML = "<span>已刪除 1 筆交易</span><button style='padding:4px 12px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:6px;color:#fff;cursor:pointer;font-size:12px;'>↩ 撤銷</button>";
+  el.querySelector("button").onclick = function(e) {
+    e.stopPropagation();
+    undoDelete();
+    el.remove();
+  };
+  el.onclick = function() { el.remove(); };
+  container.appendChild(el);
+  setTimeout(function() { if (el.parentNode) el.remove(); }, 5000);
+}
+// v11.2.3 B方案：撤銷時寫入 Firebase
+function undoDelete() {
+  if (!lastDeleted) return;
+  txs.push(lastDeleted);
+  // v11.2.3 重試封裝寫入 Firebase
+  if (db && lastDeleted.fbKey) _syncSet(db.ref('macau_data/txs/' + lastDeleted.fbKey), lastDeleted);
+  saveData(true);
+  renderAll();
+  renderOverview();
+  renderSummary();
+  updateTotalWalletUI();
+  showToast("已恢復交易！","success");
+  lastDeleted = null;
+}
 
 // ===== 月度管理 =====
 
 /* === auth-navigation.js === */
-// js/auth-navigation.js - v11.1.2
+// js/auth-navigation.js - v11.2.3
 // Non-overlapping extraction
 
 var workingMonth = ""; // 當前工作日誌月份，如 "2026-06"
@@ -4922,18 +4898,19 @@ document.addEventListener("touchstart", resetSession);
 // ===== 安全防護結束 =====
 
 function showPage(name, sidebarEl) {
-  // 強制關閉手機版側邊欄
+  // 強制關閉手機版側邊欄（放在最前面，確保一定執行）
   var sb = document.getElementById("sidebar");
   var overlay = document.getElementById("sidebar-overlay");
-  if (sb && window.innerWidth <= 700) {
+  if (sb) {
     sb.classList.add("mobile-hidden");
+    // 不直接操作 style.transform，讓 CSS 控制
   }
   if (overlay) {
     overlay.classList.remove("active");
     overlay.style.display = "none";
+    overlay.style.opacity = "0";
   }
 
-  // 隱藏所有頁面
   var pages = document.querySelectorAll(".page");
   for (var i = 0; i < pages.length; i++) {
     pages[i].style.display = "none";
@@ -4953,19 +4930,20 @@ function showPage(name, sidebarEl) {
     var titles = { overview:"總覽", all: "全部交易", query: "查詢", summary: "統計", room: "房務系統" };
     tt.textContent = titles[name] || name;
   }
-  // 觸發各頁面更新
-  if (name === "overview") { setTimeout(function(){ try{ renderOverview(); }catch(e){} }, 50); }
-  if (name === "all") { try { renderAll(); } catch(e) {} }
-  if (name === "summary") { try { renderSummary(); } catch(e) {} }
-  if (name === "query") { try { fillAgent(); doQuery(); updateTotalWalletUI(); } catch(e) {} }
-  if (name === "room") { try { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } switchRoomTab("booking", document.querySelector('.room-tab')); } catch(e) {} }
+  // 觸發各頁面更新（加 try-catch 避免單一頁面錯誤導致頁面卡住）
+  if (name === "overview") { setTimeout(function(){ var tp=document.getElementById("page-overview"); if(tp&&tp.style.display==="block"){ try{ renderOverview(); }catch(e){ console.error("renderOverview error:",e); } } }, 50); }
+  if (name === "all") { try { renderAll(); } catch(e) { console.error("renderAll error:", e); } }
+  if (name === "summary") { try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); } }
+  if (name === "query") { try { fillAgent(); populateMonthDropdown(); doQuery(); updateTotalWalletUI(); } catch(e) { console.error("query page error:", e); } }
+  if (name === "room") { try { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } switchRoomTab("booking", document.querySelector('.room-tab')); } catch(e) { console.error("room page error:", e); } }
+  // v11.2.3 檢查表格滾動狀態
   setTimeout(checkTableScroll, 200);
 }
 
 // ===== Sidebar toggle =====
 
 /* === navigation.js === */
-// js/navigation.js - v11.1.2
+// js/navigation.js - v11.2.3
 // Non-overlapping extraction
 
 function toggleSidebar() {
@@ -5016,7 +4994,7 @@ function validateMonthDate(dateStr, label) {
   return true;
 }
 
-// v11.1.2 B方案：openModal 接受 _fbKey（字串）或數字 id（向後兼容）
+// v11.2.3 B方案：openModal 接受 _fbKey（字串）或數字 id（向後兼容）
 function openModal(id) {
   // 編輯模式：傳入 id（_fbKey 或數字 id）
   if (id) {
@@ -5121,7 +5099,7 @@ function calc() {
   document.getElementById("f-undrawn").value = Math.max(0, bonus - drawn);
 }
 
-// v11.1.2 B方案：使用 _fbKey 直接寫入 Firebase 個別路徑
+// v11.2.3 B方案：使用 _fbKey 直接寫入 Firebase 個別路徑
 function saveForm() {
   var date = document.getElementById("f-date").value;
   var type = document.getElementById("f-type").value;
@@ -5179,7 +5157,7 @@ function saveForm() {
     }
   }
   showLoading("儲存中…");
-  // v11.1.2 B方案：使用重試封裝寫入 Firebase 個別路徑
+  // v11.2.3 B方案：使用重試封裝寫入 Firebase 個別路徑
   if (db && fbKey) {
     var targetObj = null;
     for (var i = 0; i < txs.length; i++) { if (txs[i]._fbKey === fbKey) { targetObj = txs[i]; break; } }
@@ -5199,7 +5177,7 @@ function saveForm() {
 // ===== 自動儲存草稿功能 =====
 
 /* === backup.js === */
-// js/data/backup.js - v11.1.2
+// js/data/backup.js - v11.2.3
 // Non-overlapping extraction
 
 function _autoBackupCheck() {
@@ -5284,7 +5262,7 @@ function showBackupModal() {
   var sizeKB = (totalSize / 1024).toFixed(1);
   var lastBackup = localStorage.getItem("macau_last_backup_date") || "無";
 
-  // 建立備份對話框（v11.1.2 增強版）
+  // 建立備份對話框（v11.2.3 增強版）
   var bg = document.createElement("div");
   bg.className = "modal-bg show";
   bg.id = "backup-modal";
@@ -5325,7 +5303,7 @@ function showBackupModal() {
   lockBody();
 }
 
-// v11.1.2 匯出所有備份為 JSON 檔案
+// v11.2.3 匯出所有備份為 JSON 檔案
 function exportBackupJSON() {
   var list = getBackupList();
   if (list.length === 0) { showToast("尚無備份紀錄", "info"); return; }
@@ -5357,7 +5335,7 @@ function closeBackupModal() {
 // ===== 全域載入動畫 =====
 
 /* === fund.js === */
-// js/data/fund.js - v11.1.2
+// js/data/fund.js - v11.2.3
 // Non-overlapping extraction
 
 function showLoading(msg) {
@@ -5393,7 +5371,7 @@ function closeFundModal() {
   document.getElementById("fund-modal").classList.remove("show");
   unlockBody();
 }
-// v11.1.2 B方案：公基金使用 _fbKey
+// v11.2.3 B方案：公基金使用 _fbKey
 function saveFundForm() {
   if (window._savingFund) return;
   window._savingFund = true;
@@ -5407,7 +5385,7 @@ function saveFundForm() {
   var fbKey = _fbKey();
   var rec = { _fbKey: fbKey, id: fundNextId++, date: date, type: type, amount: amount, note: note };
   fundWithdrawals.push(rec);
-  // v11.1.2 重試封裝寫入 Firebase
+  // v11.2.3 重試封裝寫入 Firebase
   if (db && fbKey) _syncSet(db.ref('macau_data/fundWithdrawals/' + fbKey), rec);
   saveFundData(true);
   closeFundModal();
@@ -5416,7 +5394,7 @@ function saveFundForm() {
   showToast("已儲存！","success");
   window._savingFund = false;
 }
-// v11.1.2 B方案：使用 _fbKey 刪除公基金
+// v11.2.3 B方案：使用 _fbKey 刪除公基金
 function deleteFund(id) {
   try {
   if (!confirm("確定刪除？")) return;
@@ -5444,23 +5422,17 @@ function deleteFund(id) {
 }
 function saveFundData(silent) {
   localStorage.setItem("macau_fund_data", encryptData(fundWithdrawals));
-  // v11.1.2 移除全局锁，改用 deviceId 回音过滤
-  if (typeof syncUpload === 'function') {
-    showToast('同步中…', 'info');
-    syncUpload(function(success) {
-      if (success) showToast('同步成功', 'success');
-      else showToast('同步完成（部分失敗）', 'warning');
-    });
-  }
+  // v11.2.3 移除全局锁，改用 deviceId 回音过滤
+  if (typeof syncUpload === 'function') syncUpload();
 }
-// v11.1.2 B方案：載入時自動補 _fbKey
+// v11.2.3 B方案：載入時自動補 _fbKey
 function loadFundData(silent) {
   var d = localStorage.getItem("macau_fund_data");
   if (!d) return;
-  fundWithdrawals = decryptData(d, silent);
+  fundWithdrawals = decryptData(d);
   var maxId = 0;
   for (var i = 0; i < fundWithdrawals.length; i++) {
-    if (!fundWithdrawals[i]._fbKey) fundWithdrawals[i]._fbKey = _fbKey();  // v11.1.2 補 _fbKey
+    if (!fundWithdrawals[i]._fbKey) fundWithdrawals[i]._fbKey = _fbKey();  // v11.2.3 補 _fbKey
     if (fundWithdrawals[i].id > maxId) maxId = fundWithdrawals[i].id;
   }
   fundNextId = maxId + 1;
@@ -5469,7 +5441,7 @@ function loadFundData(silent) {
 // ===== 代理錢包 =====
 
 /* === agent-wallets.js === */
-// js/data/agent-wallets.js - v11.1.2
+// js/data/agent-wallets.js - v11.2.3
 // Non-overlapping extraction
 
 function openAgentWalletModal(agentName) {
@@ -5500,7 +5472,7 @@ function closeAgentWalletModal() {
   document.getElementById("agent-wallet-modal").classList.remove("show");
   unlockBody();
 }
-// v11.1.2 B方案：代理錢包使用 _fbKey
+// v11.2.3 B方案：代理錢包使用 _fbKey
 function saveAgentWalletForm() {
   var date = document.getElementById("aw-date").value;
   var type = document.getElementById("aw-type").value;
@@ -5515,7 +5487,7 @@ function saveAgentWalletForm() {
     var fbKey = _fbKey();
     var rec = { _fbKey: fbKey, id: agentWalletNextId++, date: date, type: type, amount: amount, note: note };
     agentWallets[agent].push(rec);
-    // v11.1.2 直接寫入 Firebase
+    // v11.2.3 直接寫入 Firebase
     if (db && fbKey) db.ref('macau_data/agentWallets/' + agent + '/' + fbKey).set(rec);
     saveAgentWallets(true);
     syncAgentDrawn(agent);
@@ -5528,7 +5500,7 @@ function saveAgentWalletForm() {
     try { closeAgentWalletModal(); } catch(e2) {}
   }
 }
-// v11.1.2 代理錢包刪除：簡化邏輯，統一走 syncUpload transaction
+// v11.2.3 代理錢包刪除：簡化邏輯，統一走 syncUpload transaction
 function deleteAgentWallet(agent, id) {
   console.log('[deleteAgentWallet] === 開始 === agent=' + agent + ' id=' + id);
   if (!confirm("確定刪除？")) { console.log('[deleteAgentWallet] 使用者取消'); return; }
@@ -5551,7 +5523,7 @@ function deleteAgentWallet(agent, id) {
   saveAgentWalletsLocalOnly();
   console.log('[deleteAgentWallet] 已儲存到 localStorage');
 
-  // v11.1.2 簡化策略：繞過 transaction，直接 set Firebase
+  // v11.2.3 簡化策略：繞過 transaction，直接 set Firebase
   if (db) {
     try {
       if (newArr.length === 0) {
@@ -5580,10 +5552,7 @@ function deleteAgentWallet(agent, id) {
 
   // 安全網：同時也呼叫 syncUpload（備援）
   console.log('[deleteAgentWallet] 同時呼叫 syncUpload() 作為備援');
-  syncUpload(function(success) {
-    if (success) showToast('同步成功', 'success');
-    else showToast('同步完成（部分失敗）', 'warning');
-  });
+  syncUpload();
 
   syncAgentDrawn(agent);
   try { doQuery(); } catch(e) { console.error('[deleteAgentWallet] doQuery 錯誤:', e); }
@@ -5612,29 +5581,23 @@ function syncAgentDrawn(agent) {
 }
 function saveAgentWallets(silent) {
   localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
-  if (typeof syncUpload === 'function') setTimeout(function() {
-    showToast('同步中…', 'info');
-    syncUpload(function(success) {
-      if (success) showToast('同步成功', 'success');
-      else showToast('同步完成（部分失敗）', 'warning');
-    });
-  }, 300);
+  if (typeof syncUpload === 'function') setTimeout(syncUpload, 300);
 }
-// v11.1.2 僅存本地（不觸發 syncUpload）
+// v11.2.3 僅存本地（不觸發 syncUpload）
 function saveAgentWalletsLocalOnly() {
   localStorage.setItem("macau_agent_wallets", encryptWallets(agentWallets));
 }
-// v11.1.2 B方案：載入時自動補 _fbKey
+// v11.2.3 B方案：載入時自動補 _fbKey
 function loadAgentWallets(silent) {
   var d = localStorage.getItem("macau_agent_wallets");
   if (!d) return;
-  agentWallets = decryptWallets(d, silent);
+  agentWallets = decryptWallets(d);
   var maxId = 0;
   var agents = Object.keys(agentWallets);
   for (var i = 0; i < agents.length; i++) {
     var arr = agentWallets[agents[i]];
     for (var j = 0; j < arr.length; j++) {
-      if (!arr[j]._fbKey) arr[j]._fbKey = _fbKey();  // v11.1.2 補 _fbKey
+      if (!arr[j]._fbKey) arr[j]._fbKey = _fbKey();  // v11.2.3 補 _fbKey
       if (arr[j].id > maxId) maxId = arr[j].id;
     }
   }
@@ -5647,14 +5610,7 @@ function saveData(silent) {
     var encrypted = encryptData(txs);
     localStorage.setItem("macau_data", encrypted);
     console.log('[saveData] 已保存到 localStorage（加密）');
-    if (typeof syncUpload === 'function') {
-      console.log('[saveData] 準備呼叫 syncUpload()');
-      showToast('同步中…', 'info');
-      syncUpload(function(success) {
-        if (success) showToast('同步成功', 'success');
-        else showToast('同步完成（部分失敗）', 'warning');
-      });
-    }
+    if (typeof syncUpload === 'function') { console.log('[saveData] 準備呼叫 syncUpload()'); syncUpload(); }
     if (!silent) showToast("已儲存 " + txs.length + " 筆","success");
   } catch(e) {
     console.error('saveData error:', e);
@@ -5669,14 +5625,14 @@ function saveData(silent) {
   }
 }
 
-// v11.1.2 B方案：載入時自動補 _fbKey
+// v11.2.3 B方案：載入時自動補 _fbKey
 function loadData(silent) {
   var d = localStorage.getItem("macau_data");
   if (!d) { if (!silent) showToast("無資料","info"); return; }
   txs = decryptData(d);
   var maxId = 0;
   for (var i = 0; i < txs.length; i++) {
-    if (!txs[i]._fbKey) txs[i]._fbKey = _fbKey();  // v11.1.2 補 _fbKey
+    if (!txs[i]._fbKey) txs[i]._fbKey = _fbKey();  // v11.2.3 補 _fbKey
     if (txs[i].id > maxId) maxId = txs[i].id;
   }
   nextId = maxId + 1;
@@ -5686,7 +5642,7 @@ function loadData(silent) {
   if (!silent) showToast("已讀取 " + txs.length + " 筆","success");
 }
 
-// v11.1.2 B方案：刪除事件監聽器，使用 _fbKey
+// v11.2.3 B方案：刪除事件監聽器，使用 _fbKey
 document.addEventListener("click", function(e) {
   var btn = e.target.closest("[data-del]");
   if (!btn) return;
@@ -5697,9 +5653,6 @@ document.addEventListener("click", function(e) {
 });
 
 function renderAll() {
-  // v11.1.9 保存所有表格滾動位置
-  saveTableScrolls();
-  
   var tbody = document.getElementById("all-body");
   tbody.innerHTML = "";
   var tbl = document.getElementById("all-table");
@@ -5763,12 +5716,12 @@ function renderAll() {
   }
   fillAgent();
   populateVenueDropdown();
-  // v11.1.9 檢查表格滾動狀態（已移除自動恢復滾動位置，避免手機版無法水平滾動）
+  // v11.2.3 檢查表格滾動狀態
   setTimeout(checkTableScroll, 150);
 }
 
 function calcTotalWallet() {
-  // 計算所有代理錢包餘額（v11.1.2 修復）
+  // 計算所有代理錢包餘額（v11.2.3 修復）
   var agentSet = {};
   var agentTxDrawn = {};  // 每位代理的 tx.drawn（因 syncAgentDrawn 全部設成一樣，只需取一次）
   for (var i = 0; i < txs.length; i++) {
@@ -5817,10 +5770,10 @@ function updateTotalWalletUI() {
 }
 
 
-// ===== 月末结算（v11.1.2 修復）=====
+// ===== 月末结算（v11.2.3 修復）=====
 
 /* === sync.js === */
-// js/sync.js - v11.1.2
+// js/sync.js - v11.2.3
 // Non-overlapping extraction
 
 // 輔助函數：將物件格式轉為陣列（Firebase 物件 → 本地陣列）
@@ -5854,7 +5807,7 @@ function _awArrToObj(aw) {
   for (var i = 0; i < agents.length; i++) {
     var agent = agents[i];
     var arr = aw[agent] || [];
-    result[agent] = {};  // v11.1.2 修正：空陲列也要寫入，觸發 Firebase 刪除
+    result[agent] = {};  // v11.2.3 修正：空陲列也要寫入，觸發 Firebase 刪除
     for (var j = 0; j < arr.length; j++) {
       var item = arr[j];
       if (!item._fbKey) item._fbKey = _fbKey();
@@ -5864,21 +5817,12 @@ function _awArrToObj(aw) {
   return result;
 }
 
-function syncUpload(onComplete) {
-  if (!db) { console.log('[Sync ↑] Firebase 未初始化'); if (onComplete) onComplete(false); return; }
-  console.log('[Sync ↑] v11.1.3：分路徑個別寫入（回呼式）');
+function syncUpload() {
+  if (!db) { console.log('[Sync ↑] Firebase 未初始化'); return; }
+  console.log('[Sync ↑] v11.2.3 B方案：分路徑個別寫入');
 
-  // v11.1.3：追蹤所有非同步作業，全部完成後才回呼
-  var pending = 6;  // txs + fund + agentList + agentWallets + rmBookings + hcConfig
-  var hasError = false;
-
-  function done(err) {
-    if (err) { hasError = true; }
-    pending--;
-    if (pending <= 0 && typeof onComplete === 'function') {
-      onComplete(!hasError);
-    }
-  }
+  // v11.2.3 B方案：每個記錄已透過個別路徑寫入。syncUpload 作為批量備援。
+  // 使用 transaction() 安全合併整個物件（不是陣列！）
 
   // 1. txs：交易記錄（物件格式）
   db.ref('macau_data/txs').transaction(function(current) {
@@ -5888,12 +5832,13 @@ function syncUpload(onComplete) {
     var localKeys = {};
     var keys = Object.keys(local);
     for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; localKeys[keys[i]] = true; }
+    // 刪除 fb 中存在但本地不存在的鍵
     var fbKeys = Object.keys(fb);
     for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
     return fb;
   }, function(error, committed) {
-    if (error) { console.error('[Sync ↑] txs 失敗', error); done(error); }
-    else { console.log('[Sync ↑] txs 同步成功'); done(null); }
+    if (error) console.error('[Sync ↑] txs 失敗', error);
+    else if (committed) console.log('[Sync ↑] txs 同步成功');
   });
 
   // 2. fundWithdrawals：公基金
@@ -5908,8 +5853,7 @@ function syncUpload(onComplete) {
     for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
     return fb;
   }, function(error, committed) {
-    if (error) { console.error('[Sync ↑] fundWithdrawals 失敗', error); done(error); }
-    else { done(null); }
+    if (error) console.error('[Sync ↑] fundWithdrawals 失敗', error);
   });
 
   // 3. agentList（保持陣列）
@@ -5919,15 +5863,18 @@ function syncUpload(onComplete) {
     var s = {}; for (var i = 0; i < current.length; i++) s[current[i]] = true;
     for (var i = 0; i < agentList.length; i++) s[agentList[i]] = true;
     return Object.keys(s);
-  }, function(error) {
-    if (error) { console.error('[Sync ↑] agentList 失敗', error); done(error); }
-    else { done(null); }
   });
 
   // 4. agentWallets（巢狀物件）
+  console.log("[Sync ↑] === agentWallets transaction 開始 ===");
+  console.log("[Sync ↑] 本地 agentWallets 代理列表:", JSON.stringify(Object.keys(agentWallets)));
+  try { console.log("[Sync ↑] 本地 agentWallets 完整內容（前800字）:", JSON.stringify(agentWallets).substring(0, 800)); } catch(e) {}
   db.ref('macau_data/agentWallets').transaction(function(current) {
+    console.log("[Sync ↑] transaction callback 觸發，current 有資料？", !!(current && Object.keys(current).length));
+    try { console.log("[Sync ↑] current 內容（前800字）:", current ? JSON.stringify(current).substring(0, 800) : 'null'); } catch(e) {}
     var fb = current || {};
     var local = _awArrToObj(agentWallets);
+    try { console.log("[Sync ↑] local (目標寫入值) 內容（前800字）:", JSON.stringify(local).substring(0, 800)); } catch(e) {}
     var localAgentKeys = {};
     var agents = Object.keys(local);
     for (var i = 0; i < agents.length; i++) {
@@ -5937,57 +5884,56 @@ function syncUpload(onComplete) {
       var keys = Object.keys(local[a]);
       for (var j = 0; j < keys.length; j++) { fb[a][keys[j]] = local[a][keys[j]]; localAgentKeys[a][keys[j]] = true; }
     }
+    // 刪除 fb 中存在但本地不存在的鍵（每個代理內）
     var fbAgents = Object.keys(fb);
+    console.log("[Sync ↑] 準備清理多餘鍵，fb 中有 " + fbAgents.length + " 個代理");
     for (var i = 0; i < fbAgents.length; i++) {
       var a = fbAgents[i];
-      if (!localAgentKeys[a]) { delete fb[a]; continue; }
+      if (!localAgentKeys[a]) { console.log("[Sync ↑] 刪除整個代理 " + a + " (本地無此代理)"); delete fb[a]; continue; }
       var fbKeys = Object.keys(fb[a]);
-      for (var j = 0; j < fbKeys.length; j++) { if (!localAgentKeys[a][fbKeys[j]]) delete fb[a][fbKeys[j]]; }
+      var delCount = 0;
+      for (var j = 0; j < fbKeys.length; j++) { if (!localAgentKeys[a][fbKeys[j]]) { delete fb[a][fbKeys[j]]; delCount++; } }
+      if (delCount > 0) console.log("[Sync ↑] 代理 " + a + " 刪除了 " + delCount + " 個鍵");
     }
+    try { console.log("[Sync ↑] transaction callback 準備回傳，fb 內容（前800字）:", JSON.stringify(fb).substring(0, 800)); } catch(e) {}
     return fb;
   }, function(error, committed, snapshot) {
-    if (error) { console.error('[Sync ↑] agentWallets 失敗', error); done(error); }
-    else { console.log('[Sync ↑] agentWallets 同步成功'); done(null); }
+    if (error) { console.error('[Sync ↑] agentWallets transaction 失敗', error); }
+    else if (committed) { console.log('[Sync ↑] === agentWallets transaction 成功提交 ==='); try { console.log('[Sync ↑] 提交後 Firebase 值（前800字）:', snapshot ? JSON.stringify(snapshot.val()).substring(0, 800) : 'null'); } catch(e) {} }
+    else { console.log('[Sync ↑] agentWallets transaction 未提交（資料未變更）'); }
   });
 
-  // 5. workingMonth (set 無 callback 所以不追蹤；保持簡單)
+  // 5. workingMonth
   if (workingMonth) db.ref('macau_data/workingMonth').set(workingMonth);
 
   // 6. rmBookings（修正：同步刪除）
   if (typeof RM !== 'undefined' && RM.bookings) {
     db.ref('macau_data/rmBookings').transaction(function(current) {
+      // 以本地為基礎（確保刪除會同步）
       var local = _arrToObj(RM.bookings);
-      if (!current) return local;
+      if (!current) return local;  // Firebase 無資料，直接用本地
       var fb = current;
-      if (Array.isArray(fb)) fb = _arrToObj(fb);
+      if (Array.isArray(fb)) fb = _arrToObj(fb);  // 舊格式遷移
+      // 先將本地所有記錄覆蓋到 fb
       var localKeys = {};
       var lk = Object.keys(local);
       for (var i = 0; i < lk.length; i++) { fb[lk[i]] = local[lk[i]]; localKeys[lk[i]] = true; }
+      // 再刪除 fb 中存在但本地不存在的鍵（本地已刪除的）
       var fbKeys = Object.keys(fb);
-      for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
+      for (var j = 0; j < fbKeys.length; j++) {
+        if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]];
+      }
       return fb;
     }, function(error, committed) {
-      if (error) { console.error('[Sync ↑] rmBookings 失敗', error); done(error); }
-      else { console.log('[Sync ↑] rmBookings 同步成功'); done(null); }
+      if (error) console.error('[Sync ↑] rmBookings transaction 失敗', error);
+      else if (committed) console.log('[Sync ↑] rmBookings 同步成功');
     });
   }
 
-  // 7. hcConfig：酒店房型設定
-  pending++;  // 追加追蹤
-  try {
-    var hc = localStorage.getItem('macau_hotel_config_v7');
-    if (hc) {
-      db.ref('macau_data/hcConfig').set(JSON.parse(hc), function(error) {
-        if (error) { console.error('[Sync ↑] hcConfig 失敗', error); done(error); }
-        else { console.log('[Sync ↑] hcConfig 同步成功'); done(null); }
-      });
-    } else { done(null); }
-  } catch(e) { done(e); }
-
-  // 8. archives
+  // 7. archives
   try { var a = localStorage.getItem('macau_archives'); if (a) db.ref('macau_data/archives').set(JSON.parse(a)); } catch(e) {}
 
-  console.log('[Sync ↑] 已送出（等待全部完成）');
+  console.log('[Sync ↑] 已送出');
 }
 
 function syncDownload() {
@@ -5997,23 +5943,17 @@ function syncDownload() {
 
 function manualSync() {
   showLoading('正在同步…');
-  syncUpload(function(success) {
-    hideLoading();
-    if (success) {
-      showToast('同步完成', 'success');
-    } else {
-      showToast('同步完成（部分失敗，請檢查網路）', 'warn');
-    }
-  });
+  syncUpload();
+  setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 800);
 }
 
-// v11.1.2 B方案：Firebase push() 鍵架構 — 物件格式即時監聽
+// v11.2.3 B方案：Firebase push() 鍵架構 — 物件格式即時監聽
 
 function initSync() {
   if (!db) { console.log('[Sync] Firebase 未初始化'); return; }
-  console.log('[Sync] v11.1.2 B方案：push() 鍵即時同步已啟動');
+  console.log('[Sync] v11.2.3 B方案：push() 鍵即時同步已啟動');
 
-  // v11.1.2 B方案：監聽物件格式資料，自動轉換為陣列（含 _fbKey）
+  // v11.2.3 B方案：監聽物件格式資料，自動轉換為陣列（含 _fbKey）
   // 每個數據類型獨立監聽，互不干擾，永不衝突
 
   // 1. txs：交易記錄（物件 → 陣列）
@@ -6021,7 +5961,7 @@ function initSync() {
     try {
       var d = snapshot.val();
       if (!d) { txs = []; return; }
-      // v11.1.2：支援三種格式：物件（新）、陣列（舊，遷移中）、空
+      // v11.2.3：支援三種格式：物件（新）、陣列（舊，遷移中）、空
       if (Array.isArray(d)) {
         // 舊格式陣列：自動遷移（給所有記錄補 _fbKey 並轉為物件）
         console.log('[Sync ↓] 偵測到舊格式 txs 陣列，自動遷移中...');
@@ -6038,7 +5978,7 @@ function initSync() {
       } else if (typeof d === 'object') {
         // 新格式物件：轉為陣列
         txs = _objToArray(d);
-        if (!_migrated) { _migrated = true; console.log('[Sync ↓] 已遷移至 v11.1.2 物件格式'); }
+        if (!_migrated) { _migrated = true; console.log('[Sync ↓] 已遷移至 v11.2.3 物件格式'); }
       }
       // 更新 nextId
       var maxId = 0;
@@ -6084,23 +6024,9 @@ function initSync() {
     } catch(e) { console.error('[Sync ↓] fundWithdrawals 錯誤:', e); }
   });
 
-  // 3. agentList（保持陣列）— v11.1.3 同步後全面刷新所有代理下拉
+  // 3. agentList（保持陣列）
   db.ref('macau_data/agentList').on('value', function(snapshot) {
-    try {
-      var d = snapshot.val();
-      if (d && Array.isArray(d)) {
-        agentList = d;
-        // 主查詢下拉
-        fillAgent();
-        // 交易表單代理下拉（page-all）
-        if (typeof populateAgentDropdown === 'function') populateAgentDropdown();
-        // 房務系統代理下拉（page-room）
-        if (typeof RM !== 'undefined' && typeof RM.populateAgentFilter === 'function') RM.populateAgentFilter();
-        // 如果查詢頁面顯示著，重新查詢
-        var pq = document.getElementById('page-query');
-        if (pq && pq.style.display === 'block') try { doQuery(); } catch(e) {}
-      }
-    } catch(e) {}
+    try { var d = snapshot.val(); if (d && Array.isArray(d)) { agentList = d; fillAgent(); } } catch(e) {}
   });
 
   // 4. agentWallets（巢狀物件 → 巢狀陣列）
@@ -6108,7 +6034,7 @@ function initSync() {
     try {
       var d = snapshot.val();
       console.log('[Sync ↓] agentWallets 收到資料', d ? Object.keys(d).length + ' 個代理' : '空');
-      // v11.1.2 修復：d===null 表示 Firebase 上整個 agentWallets 已被清空
+      // v11.2.3 修復：d===null 表示 Firebase 上整個 agentWallets 已被清空
       if (d === null) {
         console.log('[Sync ↓] Firebase 無資料，清空本地 agentWallets');
         agentWallets = {};
@@ -6144,7 +6070,7 @@ function initSync() {
         for (var j = 0; j < arr.length; j++) { if (arr[j] && arr[j].id > maxAWId) maxAWId = arr[j].id; }
       }
       agentWalletNextId = maxAWId + 1;
-      // v11.1.2 同步後刷新 UI（總是嘗試，確保資料變更時 UI 也跟著更新）
+      // v11.2.3 同步後刷新 UI（總是嘗試，確保資料變更時 UI 也跟著更新）
       try {
         console.log('[Sync ↓] 準備刷新 UI (agentWallets)');
         var pq = document.getElementById("page-query");
@@ -6169,7 +6095,7 @@ function initSync() {
     try { var d = snapshot.val(); if (d) workingMonth = d; } catch(e) {}
   });
 
-  // 6. rmBookings（v11.1.3 修復：同步後重算 lastId + hcConfig 監聽）
+  // 6. rmBookings（v11.2.3 修復：直接寫 localStorage，不觸發 syncUpload 避免循環）
   db.ref('macau_data/rmBookings').on('value', function(snapshot) {
     try {
       if (typeof RM !== 'undefined') {
@@ -6177,14 +6103,7 @@ function initSync() {
         if (!d) { RM.bookings = []; }
         else if (Array.isArray(d)) { RM.bookings = d; }
         else if (typeof d === 'object') { RM.bookings = _objToArray(d); }
-        // v11.1.3：同步後重算 lastId，避免跨裝置 ID 衝突
-        var maxId = 0;
-        for (var i = 0; i < RM.bookings.length; i++) {
-          if (RM.bookings[i] && RM.bookings[i].id > maxId) maxId = RM.bookings[i].id;
-        }
-        RM.lastId = maxId;
         localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings));
-        localStorage.setItem("rm_last_id", RM.lastId.toString());
         RM.render();
       }
     } catch(e) {}
@@ -6195,25 +6114,9 @@ function initSync() {
     try { var d = snapshot.val(); if (d) localStorage.setItem('macau_archives', JSON.stringify(d)); } catch(e) {}
   });
 
-  // 8. hcConfig：酒店房型設定（v11.1.3 新增雙向同步）
-  db.ref('macau_data/hcConfig').on('value', function(snapshot) {
-    try {
-      var d = snapshot.val();
-      if (d && Array.isArray(d)) {
-        localStorage.setItem('macau_hotel_config_v7', JSON.stringify(d));
-        if (typeof HOTEL_CONFIG !== 'undefined') {
-          HOTEL_CONFIG = d;
-          // 刷新酒店設定頁面（如開啟中）
-          if (typeof hcRenderTable === 'function') try { hcRenderTable(); } catch(e) {}
-          if (typeof hcPopulateFilters === 'function') try { hcPopulateFilters(); } catch(e) {}
-        }
-      }
-    } catch(e) {}
-  });
+  console.log('[Sync] v11.2.3 B方案：所有監聽器已啟動');
 
-  console.log('[Sync] v11.1.2 B方案：所有監聽器已啟動');
-
-  // v11.1.2 Firebase 連接監控 + 重連補償同步
+  // v11.2.3 Firebase 連接監控 + 重連補償同步
   db.ref('.info/connected').on('value', function(snap) {
     var wasConnected = _syncConnected;
     _syncConnected = snap.val() === true;
@@ -6228,13 +6131,10 @@ function initSync() {
     }
   });
 
-  console.log('[Sync] v11.1.2 連接監控已啟動');
+  console.log('[Sync] v11.2.3 連接監控已啟動');
 }
 
 function renderSummary() {
-  // v11.1.9 保存所有表格滾動位置
-  saveTableScrolls();
-  
   var map = {};
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
@@ -6281,8 +6181,6 @@ function renderSummary() {
     "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(totalBonus) + "</div></div>" +
     "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領總額</div><div class='value'>" + fmt(totalFund) + "</div></div>";
   updateTotalWalletUI();
-  // v11.1.9 檢查表格滾動狀態（已移除自動恢復滾動位置，避免手機版無法水平滾動）
-  setTimeout(checkTableScroll, 150);
 }
 
 function quickFilter(type, ev) {
@@ -6313,7 +6211,7 @@ function quickFilter(type, ev) {
 
 function fillAgent() {
   var sel = document.getElementById("q-agent");
-  // v11.1.2 保存當前選擇的值，避免重建下拉框時重置
+  // v11.2.3 保存當前選擇的值，避免重建下拉框時重置
   var currentVal = sel.value;
   var h = "<option value=''>全部</option>";
   for (var j = 0; j < agentList.length; j++) { h += "<option value='" + agentList[j] + "'>" + agentList[j] + "</option>"; }
@@ -6332,7 +6230,7 @@ function fillAgent() {
 // ===== 進階篩選器 =====
 
 /* === query.js === */
-// js/pages/query.js - v11.1.2
+// js/pages/query.js - v11.2.3
 // Non-overlapping extraction
 
 function toggleAdvFilter() {
@@ -6684,7 +6582,6 @@ function doQuery() {
     totalRow.innerHTML = "<td></td><td style='color:#e6edf3;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
     tbody.appendChild(totalRow);
   }
-  setTimeout(checkTableScroll, 150);
   } catch(e) {
     console.error('[doQuery] error:', e);
     showToast('查詢失敗：' + (e.message||e), 'error');
@@ -6692,52 +6589,11 @@ function doQuery() {
 }
 
 
-function csvEscape(val) {
-  var s = String(val == null ? '' : val);
-  if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1 || s.indexOf('\r') !== -1) {
-    return '"' + s.replace(/"/g, '""') + '"';
-  }
-  return s;
-}
-
-function csvParseRow(line) {
-  var result = [];
-  var current = '';
-  var inQuotes = false;
-  for (var i = 0; i < line.length; i++) {
-    var ch = line[i];
-    if (inQuotes) {
-      if (ch === '"') {
-        if (i + 1 < line.length && line[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        current += ch;
-      }
-    } else {
-      if (ch === '"') {
-        inQuotes = true;
-      } else if (ch === ',') {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += ch;
-      }
-    }
-  }
-  result.push(current.trim());
-  return result;
-}
-
 function exportCSV() {
   var csv = "\uFEFF類型,日期,星期,代理,客戶,地點,洗碼量,碼佣率,佣金總額,代理碼糧,已提領,未提領,公基金,寄放金額,備註\n";
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
-    var fields = [t.type||"rolling", t.date || "", t.dow || "", t.agent || "", t.client || "", t.venue || "", t.volume || 0, t.rate || 0, t.comm || 0, t.bonus || 0, t.drawn || 0, t.undrawn || 0, t.fund || 0, t.cash || 0, t.note || ""];
-    csv += fields.map(function(f) { return csvEscape(f); }).join(",") + "\n";
+    csv += [t.type||"rolling", t.date || "", t.dow || "", t.agent || "", t.client || "", t.venue || "", t.volume || 0, t.rate || 0, t.comm || 0, t.bonus || 0, t.drawn || 0, t.undrawn || 0, t.fund || 0, t.cash || 0, t.note || ""].join(",") + "\n";
   }
   var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   var a = document.createElement("a");
@@ -6754,7 +6610,7 @@ function importCSV(e) {
     try {
       var lines = ev.target.result.split("\n").map(function(l) { return l.trim(); }).filter(function(l) { return l; });
       if (lines.length < 2) { showToast("無資料","info"); return; }
-      var header = csvParseRow(lines[0]).map(function(h) { return h.replace(/\uFEFF/g, "").trim(); });
+      var header = lines[0].split(",").map(function(h) { return h.replace(/\uFEFF/g, "").trim(); });
       function findIdx(names) {
         for (var n = 0; n < names.length; n++)
           for (var j = 0; j < header.length; j++)
@@ -6767,7 +6623,7 @@ function importCSV(e) {
       var ti = findIdx(["類型","type"]), cai = findIdx(["寄放金額","cash"]), noi = findIdx(["備註","note"]);
       var count = 0;
       for (var i = 1; i < lines.length; i++) {
-        var cols = csvParseRow(lines[i]);
+        var cols = lines[i].split(",");
         if (cols.length < 2) continue;
         var type = ti !== -1 ? cols[ti].trim() : "rolling";
         var cashVal = cai !== -1 ? toNum(cols[cai]) : 0;
@@ -6908,10 +6764,33 @@ function getStatusTags(t) {
 }
 
 
-// ===== 代理管理函数（v11.1.2 恢复）=====
+// ===== 代理管理函数（v11.2.3 恢复）=====
+// ===== 動態填入月份下拉選單（v11.2.3）=====
+function populateMonthDropdown() {
+  var sel = document.getElementById("q-month");
+  if (!sel) return;
+  // 保留第一個選項（全部月份）
+  var first = sel.options[0];
+  sel.innerHTML = "";
+  sel.appendChild(first);
+  // 從 txs 中取得不重複的月份
+  var months = {};
+  for (var i = 0; i < txs.length; i++) {
+    var m = (txs[i].date || "").slice(0, 7);
+    if (m) months[m] = true;
+  }
+  // 依月份排序（新到舊）
+  var monthArr = Object.keys(months).sort().reverse();
+  for (var i = 0; i < monthArr.length; i++) {
+    var opt = document.createElement("option");
+    opt.value = monthArr[i];
+    opt.textContent = monthArr[i];
+    sel.appendChild(opt);
+  }
+}
 
 /* === agent-list.js === */
-// js/data/agent-list.js - v11.1.2
+// js/data/agent-list.js - v11.2.3
 // Non-overlapping extraction
 
 function loadAgentList() {
@@ -6922,13 +6801,7 @@ function loadAgentList() {
 function saveAgentList() {
   agentList.sort();
   localStorage.setItem('macau_agent_list', JSON.stringify(agentList));
-  if (typeof syncUpload === 'function') {
-    showToast('同步中…', 'info');
-    syncUpload(function(success) {
-      if (success) showToast('同步成功', 'success');
-      else showToast('同步完成（部分失敗）', 'warning');
-    });
-  }
+  if (typeof syncUpload === 'function') syncUpload();
 }
 
 function populateAgentDropdown() {
@@ -7032,8 +6905,8 @@ document.addEventListener('keydown', function(e) {
 })();
 
 loadAgentList();
-loadFundData(true);
-loadAgentWallets(true);
+loadFundData();
+loadAgentWallets();
 // 從 localStorage 加載工作日誌月份
 (function(){ try { var wm = localStorage.getItem("macau_working_month"); if (wm) workingMonth = wm; } catch(e) {} })();
 // 從 localStorage 加載酒店設定（防止 syncUpload 覆蓋 Firebase 資料）
@@ -7047,7 +6920,7 @@ initSync();
 // ===== 總覽頁渲染 =====
 
 /* === overview.js === */
-// js/pages/overview.js - v11.1.2
+// js/pages/overview.js - v11.2.3
 // Non-overlapping extraction
 
 var _renderingOverview = false;
@@ -7056,7 +6929,7 @@ function renderOverview() {
   if (_renderingOverview) return;
   _renderingOverview = true;
   try {
-  // v11.1.2 時間篩選
+  // v11.2.3 時間篩選
   var filteredTxs = window.__currentTimeFilter ? filterTxsByTime(txs) : txs;
   // --- KPI 卡片 ---
   var now = workingMonth || nowStr().slice(0,7);
@@ -7146,8 +7019,8 @@ function renderOverview() {
 
   // --- 代理洗碼排行 Top 10（Chart.js 長條圖）---
   var agtVol={};
-  for (var i=0;i<filteredTxs.length;i++){
-    var t=filteredTxs[i];
+  for (var i=0;i<txs.length;i++){
+    var t=txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.agent) continue;
     if (!agtVol[t.agent]) agtVol[t.agent]=0;
     agtVol[t.agent]+=(t.volume||0);
@@ -7161,8 +7034,8 @@ function renderOverview() {
   // --- 場地洗碼分佈 ---
   var venueColors = ['#00d4ff','#58a6ff','#7c3aed','#2dd4a0','#f85149','#f0a500','#c9a84c'];
   var venVol={};
-  for (var i=0;i<filteredTxs.length;i++){
-    var t=filteredTxs[i];
+  for (var i=0;i<txs.length;i++){
+    var t=txs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.venue) continue;
     if (!venVol[t.venue]) venVol[t.venue]=0;
     venVol[t.venue]+=(t.volume||0);
@@ -7186,8 +7059,8 @@ function renderOverview() {
   var timeline=document.getElementById("ov-timeline");
   var entries=[];
   // 交易紀錄
-  for (var i=0;i<filteredTxs.length;i++){
-    var t=filteredTxs[i];
+  for (var i=0;i<txs.length;i++){
+    var t=txs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     entries.push({date:t.date,type:t.type||"rolling",desc:(t.type==="cash"?t.agent+" 現金寄放":t.agent+" — "+t.client+(t.venue?" @ "+t.venue:"")),amount:t.type==="cash"?(t.cash||0):(t.bonus||0),extra:t.type==="cash"?"dep":"pos"});
   }
@@ -7220,7 +7093,7 @@ function renderOverview() {
 // ===== Chart.js 趨勢圖 =====
 
 /* === overview-charts.js === */
-// js/pages/overview-charts.js - v11.1.2
+// js/pages/overview-charts.js - v11.2.3
 // Non-overlapping extraction
 
 var _trendChartInst = null;
@@ -7313,7 +7186,7 @@ function renderTrendChart(daily, monthLabel) {
 // ===== Chart.js 代理排行圖 =====
 
 /* === rank-chart.js === */
-// js/pages/rank-chart.js - v11.1.2
+// js/pages/rank-chart.js - v11.2.3
 // Non-overlapping extraction
 
 var _rankChartInst = null;
@@ -7394,7 +7267,7 @@ function renderRankChart(agtArr) {
 // ===== 房務系統 JS =====
 
 /* === room.js === */
-// js/pages/room.js - v11.1.2
+// js/pages/room.js - v11.2.3
 // Non-overlapping extraction
 
 var RM = {
@@ -7766,7 +7639,7 @@ var RM = {
       showToast("訂房已新增","success");
     }
     this.save();
-    // v11.1.2 使用重試封裝直接寫入 Firebase 同步（確保即時同步）
+    // v11.2.3 使用重試封裝直接寫入 Firebase 同步（確保即時同步）
     if (typeof db !== 'undefined' && db && _k) {
       try {
         var syncBooking = this.bookings.find(function(x){ return x._fbKey === _k; });
@@ -7790,7 +7663,7 @@ var RM = {
     }
     this.bookings = this.bookings.filter(function(x){ return String(x._fbKey)!==key && x.id!==id && x.id!==parseInt(id); });
     this.save();
-    // v11.1.2 重試封裝刪除 Firebase 記錄
+    // v11.2.3 重試封裝刪除 Firebase 記錄
     if (fbKey && typeof db !== 'undefined' && db) {
       _syncSet(db.ref('macau_data/rmBookings/' + fbKey), null);
     }
@@ -7840,7 +7713,7 @@ var RM = {
       html += "</tr>";
     }
     tbody.innerHTML = html;
-    // v11.1.2 檢查訂房表格滾動狀態
+    // v11.2.3 檢查訂房表格滾動狀態
     setTimeout(checkTableScroll, 150);
   },
   updateQuota: function() {
@@ -7946,8 +7819,7 @@ var RM = {
     var csv = "\uFEFF日期,代理,客戶,體系,酒店,房型,入住日期,退房日期,天數,每晚單價,所需轉碼門檻,總費用,狀態,備註\n";
     for (var i=0; i<filtered.length; i++) {
       var b = filtered[i];
-      var fields = [b.date,b.agent,b.client,(b.casino||""),b.hotel,(b.roomType||""),b.checkIn,(b.checkOut||b.checkout),b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note];
-      csv += fields.map(function(f) { return csvEscape(f); }).join(",")+"\n";
+      csv += [b.date,b.agent,b.client,(b.casino||""),b.hotel,(b.roomType||""),b.checkIn,(b.checkOut||b.checkout),b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note].join(",")+"\n";
     }
     var blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
     var url = URL.createObjectURL(blob);
@@ -7967,12 +7839,12 @@ var RM = {
     reader.onload = function(ev) {
       var lines = ev.target.result.split("\n").filter(function(x){ return x.trim(); });
       if (lines.length<2) { showToast("CSV 無資料","error"); return; }
-      // 檢測標頭是否包含「體系」或「房型」（新格式 v11.1.2+）
-      var header = csvParseRow(lines[0]).map(function(h) { return h.trim(); }).join(",");
+      // 檢測標頭是否包含「體系」或「房型」（新格式 v11.2.3+）
+      var header = lines[0].trim();
       var hasNewFormat = header.indexOf("體系") >= 0 || header.indexOf("房型") >= 0;
       var imported = 0;
       for (var i=1; i<lines.length; i++) {
-        var cols = csvParseRow(lines[i]);
+        var cols = lines[i].split(",");
         if (cols.length<10) continue;
         self.lastId++;
         if (hasNewFormat && cols.length >= 14) {
@@ -8025,7 +7897,7 @@ RM.init();
 // ===== 房務頁籤切換 =====
 
 /* === room-misc.js === */
-// js/pages/room-misc.js - v11.1.2
+// js/pages/room-misc.js - v11.2.3
 // Non-overlapping extraction
 
 function switchRoomTab(name, btn) {
@@ -8049,7 +7921,7 @@ function escHtml(s) {
 // ===== 酒店設定預設數據 =====
 
 /* === hotel-config-presets.js === */
-// js/hotel-config-presets.js - v11.1.2
+// js/hotel-config-presets.js - v11.2.3
 // Non-overlapping extraction
 
 var PRESET_CONFIG = [
@@ -8132,7 +8004,7 @@ var CASINO_ORDER = ['新濠天地', '新濠影滙', '金沙', '銀河', '永利'
 // ===== 酒店設定全局狀態 =====
 
 /* === hotel-config-logic.js === */
-// js/hotel-config-logic.js - v11.1.2
+// js/hotel-config-logic.js - v11.2.3
 // Non-overlapping extraction
 
 var HOTEL_CONFIG = [];
@@ -8471,7 +8343,7 @@ document.addEventListener('keydown', function(e) {
 // ===== 手機版側邊欄初始化（預設隱藏）=====
 
 /* === mobile.js === */
-// js/mobile.js - v11.1.2
+// js/mobile.js - v11.2.3
 // Non-overlapping extraction
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -8522,7 +8394,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ═══════════════════════════════════════════════
-// v11.1.2 功能优化
+// v11.2.3 功能优化
 // ═══════════════════════════════════════════════
 
 // ── KPI 数字动画 ──
@@ -8543,6 +8415,94 @@ function animateKPIValue(el, targetValue) {
     else el.textContent = targetValue.toLocaleString();
   }
   requestAnimationFrame(step);
+}
+
+// ── 多级撤销系统 ──
+var _undoStack = [];
+var _MAX_UNDO = 10;
+
+// 重写 deleteTx 以支持多级撤销
+(function() {
+  var _origDeleteTx = deleteTx;
+  deleteTx = function(id) {
+    console.log('[deleteTx] 函數被調用，ID:', id);
+    if (!confirm("確定刪除此筆交易？")) { console.log('[deleteTx] 使用者取消刪除'); return; }
+    showLoading("刪除中…");
+    try {
+      console.log('[deleteTx] 開始刪除，交易數量（刪除前）:', txs.length);
+      var key = String(id);
+      var deleted = null, delIndex = -1, targetFbKey = null;
+      for (var i = 0; i < txs.length; i++) {
+        var t = txs[i];
+        if (!t) continue;
+        if (t._fbKey === key || String(t.id) === key || t.id === parseInt(id)) {
+          deleted = t; delIndex = i; targetFbKey = t._fbKey || key; break;
+        }
+      }
+      if (deleted) {
+        _undoStack.push({ tx: JSON.parse(JSON.stringify(deleted)), index: delIndex });
+        if (_undoStack.length > _MAX_UNDO) _undoStack.shift();
+      }
+      // v11.2.3 直接從 Firebase 刪除該筆記錄
+      if (db && targetFbKey && targetFbKey !== "undefined") {
+        db.ref('macau_data/txs/' + targetFbKey).set(null, function(error) {
+          if (error) console.error('[deleteTx] Firebase 刪除失敗:', error);
+        });
+      }
+      var newTxs = [];
+      for (var i = 0; i < txs.length; i++) {
+        var t = txs[i];
+        if (!t) continue;
+        var isMatch = (t._fbKey === targetFbKey) || (String(t.id) === String(targetFbKey)) || (t.id === parseInt(targetFbKey));
+        if (!isMatch) newTxs.push(t);
+      }
+      txs = newTxs;
+      saveData(true);
+      renderAll();
+      renderOverview();
+      renderSummary();
+      updateTotalWalletUI();
+      if (deleted) showUndoToast();
+    } catch(e) {
+      console.error("[deleteTx] error:", e);
+      showToast("删除失败：" + e.message, "error");
+    } finally {
+      setTimeout(hideLoading, 300);
+    }
+  };
+
+  // 增强撤销Toast
+  var _origShowUndoToast = showUndoToast;
+  showUndoToast = function() {
+    var container = document.getElementById("toast-container");
+    var el = document.createElement("div");
+    el.className = "toast toast-warning";
+    el.style.cssText = "cursor:pointer;flex-direction:column;gap:6px;";
+    el.innerHTML = "<span>已删除 1 笔交易（" + _undoStack.length + " 笔可撤销历史）</span>" +
+      "<button style='padding:4px 12px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:6px;color:#fff;cursor:pointer;font-size:12px;margin-right:4px;'>↩ 撤销</button>" +
+      "<button style='padding:4px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:#ccc;cursor:pointer;font-size:12px;' onclick='event.stopPropagation();_undoStack=[];this.parentElement.remove();'>清空历史</button>";
+    el.querySelector("button").onclick = function(e) {
+      e.stopPropagation();
+      undoLastDelete();
+      el.remove();
+    };
+    el.onclick = function() { el.remove(); };
+    container.appendChild(el);
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 5000);
+  };
+})();
+
+// 撤销最近删除
+function undoLastDelete() {
+  if (_undoStack.length === 0) { showToast("无可撤销操作", "warning"); return; }
+  var item = _undoStack.pop();
+  txs.splice(item.index, 0, item.tx);
+  saveData(true);
+  renderAll();
+  renderOverview();
+  renderSummary();
+  updateTotalWalletUI();
+  showToast("已恢复交易！（剩余 " + _undoStack.length + " 笔可撤销）", "success");
 }
 
 // ── 键盘快捷键帮助面板 ──
@@ -8650,7 +8610,7 @@ function throttle(func, limit) {
   }
 })();
 
-console.log("[v11.1.2] 功能优化已加载：KPI动画、多级撤销、快捷键帮助");
+console.log("[v11.2.3] 功能优化已加载：KPI动画、多级撤销、快捷键帮助");
 
   // 回到顶部按钮
   var btt = document.getElementById("back-to-top");
@@ -8661,35 +8621,26 @@ console.log("[v11.1.2] 功能优化已加载：KPI动画、多级撤销、快捷
     });
   }
 
-  // v11.1.2 手機版底部導航
+  // v11.2.3 手機版底部導航
   function mobileNavigate(page, el) {
-    showPage(page, el);
+    // 切換頁面
+    showPage(page);
+    // 滾動到頂部
     var scrollEl = document.getElementById('page-scroll');
-    if (scrollEl) scrollEl.scrollTop = 0;
+    if (scrollEl) { scrollEl.scrollTop = 0; }
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // 更新導航 active 狀態
+    var items = document.querySelectorAll('#mobile-bottom-nav .nav-item');
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.remove('active');
+    }
+    if (el) el.classList.add('active');
+    // v11.2.3 延遲檢查表格滾動狀態
+    setTimeout(checkTableScroll, 200);
   }
 
-  // v11.1.9 通用表格滾動位置保存/恢復
-  var _savedScrolls = {};
-  function saveTableScrolls() {
-    var scrolls = document.querySelectorAll('.table-scroll');
-    for (var i = 0; i < scrolls.length; i++) {
-      var id = scrolls[i].id || ('ts-' + i);
-      scrolls[i].setAttribute('data-scroll-id', id);
-      _savedScrolls[id] = scrolls[i].scrollLeft;
-    }
-  }
-  function restoreTableScrolls() {
-    var scrolls = document.querySelectorAll('.table-scroll');
-    for (var i = 0; i < scrolls.length; i++) {
-      var id = scrolls[i].getAttribute('data-scroll-id') || ('ts-' + i);
-      if (_savedScrolls[id] !== undefined && _savedScrolls[id] > 0) {
-        scrolls[i].scrollLeft = _savedScrolls[id];
-      }
-    }
-  }
-
-  // v11.1.2 檢測表格橫向滾動狀態，添加 scrollable/scrolled-end 類
+  // v11.2.3 檢測表格橫向滾動狀態，添加 scrollable/scrolled-end 類
   function checkTableScroll() {
     var scrolls = document.querySelectorAll('.table-scroll');
     for (var i = 0; i < scrolls.length; i++) {
@@ -8708,7 +8659,7 @@ console.log("[v11.1.2] 功能优化已加载：KPI动画、多级撤销、快捷
     }
   }
 
-// v11.1.2 時間篩選器
+// v11.2.3 時間篩選器
 window.__currentTimeFilter = null;
 
 function setMonth(offset, page, el) {
@@ -8779,6 +8730,6 @@ function filterTxsByTime(txs) {
 
 
   <div id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">▲</div>
-<div id="version-badge" style="position:fixed;bottom:4px;left:8px;font-size:10px;color:rgba(255,255,255,0.18);z-index:1;pointer-events:none;">v11.1.2</div>
+<div id="version-badge" style="position:fixed;bottom:4px;left:8px;font-size:10px;color:rgba(255,255,255,0.18);z-index:1;pointer-events:none;">v11.2.3</div>
 </body>
 </html>

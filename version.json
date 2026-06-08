@@ -1,7 +1,7 @@
 {
-  "version": "11.1.2",
-  "buildDate": "2026-06-08",
-  "buildNumber": 4,
-  "previousVersion": "11.1.1",
-  "description": "v11.1.2 結構穩定版 — 鎖定 DOM 骨架、補回缺失 modal、統整 inline style、修復版本號"
+  "version": "11.2.3",
+  "buildDate": "2026-06-09",
+  "buildNumber": 1,
+  "previousVersion": "11.2.2",
+  "description": "v11.2.3 — 修復查詢功能月份篩選問題：q-month 改為下拉選單，預設顯示全部月份"
 }

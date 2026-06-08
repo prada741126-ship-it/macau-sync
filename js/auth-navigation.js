@@ -124,7 +124,7 @@ function showPage(name, sidebarEl) {
   if (name === "overview") { setTimeout(function(){ var tp=document.getElementById("page-overview"); if(tp&&tp.style.display==="block"){ try{ renderOverview(); }catch(e){ console.error("renderOverview error:",e); } } }, 50); }
   if (name === "all") { try { renderAll(); } catch(e) { console.error("renderAll error:", e); } }
   if (name === "summary") { try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); } }
-  if (name === "query") { try { fillAgent(); doQuery(); updateTotalWalletUI(); } catch(e) { console.error("query page error:", e); } }
+  if (name === "query") { try { fillAgent(); populateMonthDropdown(); doQuery(); updateTotalWalletUI(); } catch(e) { console.error("query page error:", e); } }
   if (name === "room") { try { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } switchRoomTab("booking", document.querySelector('.room-tab')); } catch(e) { console.error("room page error:", e); } }
   // v10.26 檢查表格滾動狀態
   setTimeout(checkTableScroll, 200);

@@ -5,7 +5,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.1.2</title>
+<title>澳門洗碼報表 v11.2.3</title>
 <!-- CSS_PLACEHOLDER -->
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -276,7 +276,7 @@
       <label>地點：</label>
       <select id="q-venue" style="min-width:100px;"><option value="">全部</option></select>
       <label>月份：</label>
-      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;">
+      <select id="q-month" style="min-width:100px;"><option value="__ALL__">全部月份</option></select>
       <button class="btn btn-primary" onclick="doQuery()" style="padding:6px 14px;">查詢</button>
       <button class="btn" onclick="toggleAdvFilter()" style="padding:6px 10px;font-size:11px;" id="btn-adv-filter">⚙ 進階</button>
       <button class="btn" onclick="showSavedFilters()" style="padding:6px 10px;font-size:11px;" title="儲存的篩選">📌</button>

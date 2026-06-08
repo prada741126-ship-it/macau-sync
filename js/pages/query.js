@@ -533,3 +533,26 @@ function getStatusTags(t) {
 
 
 // ===== 代理管理函数（v2.6 恢复）=====
+// ===== 動態填入月份下拉選單（v11.2.3）=====
+function populateMonthDropdown() {
+  var sel = document.getElementById("q-month");
+  if (!sel) return;
+  // 保留第一個選項（全部月份）
+  var first = sel.options[0];
+  sel.innerHTML = "";
+  sel.appendChild(first);
+  // 從 txs 中取得不重複的月份
+  var months = {};
+  for (var i = 0; i < txs.length; i++) {
+    var m = (txs[i].date || "").slice(0, 7);
+    if (m) months[m] = true;
+  }
+  // 依月份排序（新到舊）
+  var monthArr = Object.keys(months).sort().reverse();
+  for (var i = 0; i < monthArr.length; i++) {
+    var opt = document.createElement("option");
+    opt.value = monthArr[i];
+    opt.textContent = monthArr[i];
+    sel.appendChild(opt);
+  }
+}
