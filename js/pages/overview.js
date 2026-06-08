@@ -110,7 +110,7 @@ function renderOverview() {
   renderRankChart(agtArr);
 
   // --- 場地洗碼分佈 ---
-  var venueColors = ['#d4af37','#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c','#f39c12'];
+  var venueColors = ['#00d4ff','#58a6ff','#7c3aed','#2dd4a0','#f85149','#f0a500','#c9a84c'];
   var venVol={};
   for (var i=0;i<txs.length;i++){
     var t=txs[i];

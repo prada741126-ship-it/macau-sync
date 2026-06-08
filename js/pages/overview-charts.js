@@ -30,8 +30,8 @@ function renderTrendChart(daily, monthLabel) {
   var ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, "rgba(212,175,55,0.3)");
-  gradient.addColorStop(1, "rgba(212,175,55,0.02)");
+  gradient.addColorStop(0, "rgba(0,212,255,0.3)");
+  gradient.addColorStop(1, "rgba(0,212,255,0.02)");
   _trendChartInst = new Chart(ctx, {
     type: "line",
     data: {
@@ -39,14 +39,14 @@ function renderTrendChart(daily, monthLabel) {
       datasets: [{
         label: "洗碼量（100萬）",
         data: daily,
-        borderColor: "var(--gold-light)",
+        borderColor: "#00d4ff",
         backgroundColor: gradient,
         borderWidth: 2,
         fill: true,
         tension: 0.3,
         pointRadius: daily.map(function(v) { return v > 0 ? 3 : 0; }),
-        pointBackgroundColor: "var(--gold-light)",
-        pointBorderColor: "#1a1a2e",
+        pointBackgroundColor: "#00d4ff",
+        pointBorderColor: "#161b22",
         pointBorderWidth: 1
       }]
     },
@@ -56,10 +56,10 @@ function renderTrendChart(daily, monthLabel) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "rgba(20,20,30,0.95)",
-          titleColor: "var(--gold-light)",
-          bodyColor: "#e0d0a0",
-          borderColor: "rgba(212,175,55,0.3)",
+          backgroundColor: "rgba(13,17,23,0.95)",
+          titleColor: "#00d4ff",
+          bodyColor: "#e6edf3",
+          borderColor: "rgba(0,212,255,0.3)",
           borderWidth: 1,
           callbacks: {
             title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
@@ -69,13 +69,13 @@ function renderTrendChart(daily, monthLabel) {
       },
       scales: {
         x: {
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: { color: "#887755", font: { size: 10 }, maxRotation: 0 }
+          grid: { color: "rgba(255,255,255,0.06)" },
+          ticks: { color: "#6e7681", font: { size: 10 }, maxRotation: 0 }
         },
         y: {
-          grid: { color: "rgba(255,255,255,0.05)" },
+          grid: { color: "rgba(255,255,255,0.06)" },
           ticks: {
-            color: "#887755", font: { size: 10 },
+            color: "#6e7681", font: { size: 10 },
             callback: function(v) { return v >= 10000 ? (v/10000).toFixed(1) + "萬" : v; }
           },
           beginAtZero: true

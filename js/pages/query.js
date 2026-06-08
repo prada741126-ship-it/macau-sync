@@ -48,7 +48,7 @@ function showSavedFilters() {
     var f = saved[n];
     var desc = (f.agent || "全部代理") + " / " + (f.month || "不限月份") + (f.venue ? " / " + f.venue : "");
     inner += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:4px 0;background:rgba(255,255,255,0.03);border-radius:6px;">';
-    inner += '<div><span style="font-size:13px;color:var(--gold-light);">' + n + '</span><br><span style="font-size:10px;color:#888;">' + desc + '</span></div>';
+    inner += '<div><span style="font-size:13px;color:var(--gold-light);">' + n + '</span><br><span style="font-size:10px;color:#6e7681;">' + desc + '</span></div>';
     inner += '<div><button class="btn" style="padding:3px 8px;font-size:10px;min-height:26px;" onclick="closeFilterModal();loadSavedFilter(\'' + n.replace(/'/g, "\\'") + '\')">套用</button>';
     inner += ' <button class="btn btn-red" style="padding:3px 8px;font-size:10px;min-height:26px;" onclick="deleteSavedFilter(\'' + n.replace(/'/g, "\\'") + '\')">✕</button></div>';
     inner += '</div>';
@@ -147,7 +147,7 @@ function doQuery() {
     // 上月累計行
     if (preBalance > 0) {
       var pr = document.createElement("tr");
-      pr.style.cssText = "background:rgba(212,175,55,0.08);";
+      pr.style.cssText = "background:rgba(201,168,76,0.08);";
       pr.innerHTML = "<td>" + month + "-01</td><td style='color:var(--gold-light);font-weight:600;'>上月累計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-weight:700;color:var(--gold-light);'>" + fmt(preBalance) + "</td>";
       tbody.appendChild(pr);
     }
@@ -160,17 +160,17 @@ function doQuery() {
       if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") running += e.amount;
       else running -= e.amount;
       var tr = document.createElement("tr");
-      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(\"" + (e._fbKey||e.id) + "\")'>刪除</button>" : "<span style='color:#999;font-size:11px;'>自動</span>";
+      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(\"" + (e._fbKey||e.id) + "\")'>刪除</button>" : "<span style='color:#6e7681;font-size:11px;'>自動</span>";
       var inVal = (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") ? fmt(e.amount) : "";
       var outVal = (e.type === "提領") ? fmt(e.amount) : "";
-      var typeClr = e.type === "提領" ? "color:#e74c3c;font-weight:600;" : (e.type === "存入" ? "color:#2980b9;" : (e.type === "自存現金" ? "color:#e67e22;font-weight:600;" : "color:var(--gold-light);"));
-      tr.innerHTML = "<td>" + e.date + "</td><td style='" + typeClr + "'>" + e.desc + "</td><td class='num' style='color:var(--gold-light);'>" + inVal + "</td><td class='num' style='color:#e74c3c;'>" + outVal + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td>";
+      var typeClr = e.type === "提領" ? "color:#f85149;font-weight:600;" : (e.type === "存入" ? "color:#58a6ff;" : (e.type === "自存現金" ? "color:#e67e22;font-weight:600;" : "color:var(--gold-light);"));
+      tr.innerHTML = "<td>" + e.date + "</td><td style='" + typeClr + "'>" + e.desc + "</td><td class='num' style='color:var(--gold-light);'>" + inVal + "</td><td class='num' style='color:#f85149;'>" + outVal + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td>";
       tbody.appendChild(tr);
     }
     // 合計行
     var totalRow = document.createElement("tr");
-    totalRow.style.cssText = "background:rgba(30,30,40,0.8);font-weight:700;color:var(--gold-light);";
-    totalRow.innerHTML = "<td></td><td style='color:#1a1a2e;'>合計</td><td class='num' style='color:var(--gold-light);'></td><td class='num' style='color:#e74c3c;'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td>";
+    totalRow.style.cssText = "background:rgba(22,27,34,0.8);font-weight:700;color:var(--gold-light);";
+    totalRow.innerHTML = "<td></td><td style='color:#e6edf3;'>合計</td><td class='num' style='color:var(--gold-light);'></td><td class='num' style='color:#f85149;'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td>";
     tbody.appendChild(totalRow);
     return;
   }
@@ -290,14 +290,14 @@ function doQuery() {
     sep.innerHTML = "<td colspan='7' style='padding:4px;border:none;'></td>";
     tbody.appendChild(sep);
     var titleRow = document.createElement("tr");
-    titleRow.innerHTML = "<td colspan='7' style='padding:8px 0;font-weight:700;color:#FFD700;font-size:16px;'>💼 " + agent + " 代理對帳單</td>";
+    titleRow.innerHTML = "<td colspan='7' style='padding:8px 0;font-weight:700;color:#c9a84c;font-size:16px;'>💼 " + agent + " 代理對帳單</td>";
     tbody.appendChild(titleRow);
     var kpiRow = document.createElement("tr");
     kpiRow.innerHTML = "<td colspan='7' style='padding:8px 0;border:none;'>" +
       "<div class='kpi-box' style='margin-bottom:8px;'>" +
         "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(allBonus) + "</div></div>" +
         (allCash > 0 ? "<div class='kpi-card' style='background:#e67e22;'><div class='label'>現金寄放</div><div class='value'>" + fmt(allCash) + "</div></div>" : "") +
-        (awDep > 0 ? "<div class='kpi-card' style='background:#2980b9;'><div class='label'>錢包存入</div><div class='value'>" + fmt(awDep) + "</div></div>" : "") +
+        (awDep > 0 ? "<div class='kpi-card' style='background:#58a6ff;'><div class='label'>錢包存入</div><div class='value'>" + fmt(awDep) + "</div></div>" : "") +
         (awCDep > 0 ? "<div class='kpi-card' style='background:#e67e22;'><div class='label'>自存現金</div><div class='value'>" + fmt(awCDep) + "</div></div>" : "") +
         "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(allDrawn) + "</div></div>" +
         "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領</div><div class='value'>" + fmt(awBalance) + "</div></div>" +
@@ -307,7 +307,7 @@ function doQuery() {
     // 上月累計行
     if (preRunning > 0) {
       var pr = document.createElement("tr");
-      pr.style.cssText = "background:rgba(212,175,55,0.08);";
+      pr.style.cssText = "background:rgba(201,168,76,0.08);";
       pr.innerHTML = "<td>" + month + "-01</td><td style='color:var(--gold-light);font-weight:600;'>上月累計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-weight:700;color:var(--gold-light);'>" + fmt(preRunning) + "</td><td></td>";
       tbody.appendChild(pr);
     }
@@ -323,12 +323,12 @@ function doQuery() {
         // 提領行：日期 | 提領(紅) | | -金額(紅) | 刪除 | 累計餘額
         var val = (e._fbKey||e.id).toString();
         var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
-        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e74c3c;font-weight:700;'>提領" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e74c3c;font-weight:700;'>-" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#f85149;font-weight:700;'>提領" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#f85149;font-weight:700;'>-" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "aw_deposit") {
         // 錢包存入行：日期 | 存入(藍) | | +金額(藍) | 刪除 | 累計餘額
         var val = (e._fbKey||e.id).toString();
         var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
-        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#2980b9;font-weight:700;'>存入" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#2980b9;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#58a6ff;font-weight:700;'>存入" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#58a6ff;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "aw_cash_dep") {
         // 自存現金行：日期 | 自存現金(橙) | | +金額(橙) | 刪除 | 累計餘額
         var val = (e._fbKey||e.id).toString();
@@ -336,18 +336,18 @@ function doQuery() {
         tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>自存現金" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "cash") {
         // 現金寄放行：日期 | 現金寄放(橙) | | +金額(橙) | 自動 | 累計餘額
-        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>現金寄放" + (e.client?"："+e.client:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.bonus) + "</td><td><span style='color:#999;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>現金寄放" + (e.client?"："+e.client:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.bonus) + "</td><td><span style='color:#6e7681;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else {
         // 入帳行：日期 | 地點(客戶) | 轉碼數 | 碼糧 | 自動 | 累計餘額
         var volStr = e.volume > 0 ? e.volume.toLocaleString() + "萬" : "";
-        tr2.innerHTML = "<td>" + e.date + "</td><td>" + (e.venue||"") + "(" + (e.client||"") + ")</td><td class='num'>" + volStr + "</td><td class='num' style='color:var(--gold-light);'>" + fmt(e.bonus) + "</td><td><span style='color:#999;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td>" + (e.venue||"") + "(" + (e.client||"") + ")</td><td class='num'>" + volStr + "</td><td class='num' style='color:var(--gold-light);'>" + fmt(e.bonus) + "</td><td><span style='color:#6e7681;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       }
       tbody.appendChild(tr2);
     }
     // 合計行
     var totalRow = document.createElement("tr");
-    totalRow.style.cssText = "background:rgba(30,30,40,0.8);font-weight:700;color:var(--gold-light);";
-    totalRow.innerHTML = "<td></td><td style='color:#1a1a2e;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+    totalRow.style.cssText = "background:rgba(22,27,34,0.8);font-weight:700;color:var(--gold-light);";
+    totalRow.innerHTML = "<td></td><td style='color:#e6edf3;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
     tbody.appendChild(totalRow);
   }
   } catch(e) {
@@ -503,9 +503,9 @@ function renderAllMiniKPI() {
   var totalBonusAll = 0;
   for (var i = 0; i < txs.length; i++) totalBonusAll += (txs[i].bonus||0);
   el.innerHTML =
-    '<div class="kpi-mini"><div class="label">📅 本月笔数</div><div class="value" style="color:#3498db;">' + thisMonthTxs.length + ' 笔</div></div>' +
+    '<div class="kpi-mini"><div class="label">📅 本月笔数</div><div class="value" style="color:#58a6ff;">' + thisMonthTxs.length + ' 笔</div></div>' +
     '<div class="kpi-mini"><div class="label">📊 本月洗码量</div><div class="value">' + (totalVol >= 10000 ? (totalVol/10000).toFixed(1) + '億' : totalVol.toLocaleString()) + '万</div></div>' +
-    '<div class="kpi-mini"><div class="label">💰 本月码粮</div><div class="value" style="color:#2ecc71;">' + fmt(totalBonus) + '</div></div>' +
+    '<div class="kpi-mini"><div class="label">💰 本月码粮</div><div class="value" style="color:#2dd4a0;">' + fmt(totalBonus) + '</div></div>' +
     '<div class="kpi-mini"><div class="label">⚠️ 本月未提</div><div class="value" style="color:#e67e22;">' + fmt(totalUndrawn) + '</div></div>' +
     '<div class="kpi-mini"><div class="label">📁 全部码粮</div><div class="value" style="color:var(--gold-light);">' + fmt(totalBonusAll) + '</div></div>';
 }

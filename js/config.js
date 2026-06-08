@@ -22,8 +22,18 @@ var UI_COLORS = {
   borderSubtle:  'rgba(255,255,255,0.06)',
   dangerDim:     'rgba(248,81,73,0.08)',
   warningDim:    'rgba(240,165,0,0.08)',
-  successDim:    'rgba(45,212,15,0.08)',
-  infoDim:       'rgba(88,166,255,0.08)'
+  successDim:    'rgba(45,212,160,0.08)',
+  infoDim:       'rgba(88,166,255,0.08)',
+  // 图表专用
+  chartGrid:     'rgba(255,255,255,0.06)',
+  chartTick:     '#6e7681',
+  tooltipBg:     'rgba(13,17,23,0.95)',
+  tooltipBorder: 'rgba(0,212,255,0.3)',
+  totalRowBg:    'rgba(22,27,34,0.8)',
+  cashOrange:    '#e67e22',
+  // 隐式中国风
+  inkBrush:      'rgba(201,168,76,0.04)',
+  windowLine:    'rgba(201,168,76,0.06)'
 };
 
 // Production mode: set to false to disable verbose logging

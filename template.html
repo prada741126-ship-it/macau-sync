@@ -266,11 +266,11 @@
   <div class="page" id="page-query">
     <div class="toolbar" style="flex-wrap:wrap;gap:4px;">
       <label style="line-height:35px;">代理：</label>
-      <select id="q-agent" style="padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;"></select>
+      <select id="q-agent" style="padding:6px 10px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;"></select>
       <label style="line-height:35px;">地點：</label>
-      <select id="q-venue" style="padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;min-width:100px;"><option value="">全部</option></select>
+      <select id="q-venue" style="padding:6px 10px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;min-width:100px;"><option value="">全部</option></select>
       <label style="line-height:35px;">月份：</label>
-      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;padding:6px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
+      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;padding:6px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;">
       <button class="btn btn-primary" onclick="doQuery()" style="padding:6px 14px;">查詢</button>
       <button class="btn" onclick="toggleAdvFilter()" style="padding:6px 10px;font-size:11px;" id="btn-adv-filter">⚙ 進階</button>
       <button class="btn" onclick="showSavedFilters()" style="padding:6px 10px;font-size:11px;" title="儲存的篩選">📌</button>
@@ -284,16 +284,16 @@
         <button onclick="quickFilter('all',event)">全部</button>
       </span>
     </div>
-    <div id="adv-filter" style="display:none;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(212,175,55,0.1);">
+    <div id="adv-filter" style="display:none;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(0,212,255,0.08);">
       <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
         <label style="font-size:11px;color:#888;">日期從：</label>
-        <input type="date" id="q-date-from" style="padding:4px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;width:130px;">
+        <input type="date" id="q-date-from" style="padding:4px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;width:130px;">
         <label style="font-size:11px;color:#888;">至：</label>
-        <input type="date" id="q-date-to" style="padding:4px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;width:130px;">
+        <input type="date" id="q-date-to" style="padding:4px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;width:130px;">
         <label style="font-size:11px;color:#888;">洗碼量：</label>
-        <input type="number" id="q-vol-min" placeholder="最低(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;">
+        <input type="number" id="q-vol-min" placeholder="最低(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;">
         <label style="font-size:11px;color:#888;">~</label>
-        <input type="number" id="q-vol-max" placeholder="最高(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;">
+        <input type="number" id="q-vol-max" placeholder="最高(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;">
         <button class="btn" onclick="saveCurrentFilter()" style="padding:4px 8px;font-size:10px;">💾 儲存篩選</button>
       </div>
     </div>
@@ -491,7 +491,7 @@
     <div class="form-group" style="flex:1;"><label>備註</label><input type="text" id="f-note" placeholder="選填"></div>
   </div>
   <div style="text-align:right;margin-top:16px;">
-    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeModal()">取消</button>
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeModal()">取消</button>
     <button class="btn btn-primary" onclick="saveForm()">儲存</button>
   </div>
 </div>
@@ -519,7 +519,7 @@
     <div class="form-group"><label>可提領餘額</label><input type="text" id="fund-balance" readonly style="background:rgba(30,30,40,0.6);color:var(--gold-light);font-weight:700;font-size:16px;"></div>
   </div>
   <div style="text-align:right;margin-top:16px;">
-    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeFundModal()">取消</button>
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeFundModal()">取消</button>
     <button class="btn btn-primary" onclick="saveFundForm()">儲存</button>
   </div>
 </div>
@@ -548,7 +548,7 @@
     <div class="form-group"><label>可提領餘額</label><input type="text" id="aw-balance" readonly style="background:rgba(30,30,40,0.6);color:var(--gold-light);font-weight:700;font-size:16px;"></div>
   </div>
   <div style="text-align:right;margin-top:16px;">
-    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeAgentWalletModal()">取消</button>
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeAgentWalletModal()">取消</button>
     <button class="btn btn-primary" onclick="saveAgentWalletForm()">儲存</button>
   </div>
 </div>
@@ -560,12 +560,12 @@
 <div class="modal">
   <h3>代理管理</h3>
   <div style="margin-bottom:14px;display:flex;gap:8px;">
-    <input type="text" id="agent-mgr-new" placeholder="輸入新代理名稱" style="flex:1;padding:9px 12px;border:1px solid rgba(212,175,55,0.2);border-radius:10px;font-size:14px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
+    <input type="text" id="agent-mgr-new" placeholder="輸入新代理名稱" style="flex:1;padding:9px 12px;border:1px solid rgba(0,212,255,0.15);border-radius:10px;font-size:14px;background:rgba(13,17,23,0.8);color:#e6edf3;">
     <button class="btn btn-primary" onclick="addAgentFromMgr()">＋ 新增</button>
   </div>
   <div id="agent-mgr-list" style="max-height:300px;overflow-y:auto;"></div>
   <div style="text-align:right;margin-top:16px;">
-    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;" onclick="closeAgentMgr()">關閉</button>
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;" onclick="closeAgentMgr()">關閉</button>
   </div>
 </div>
 </div>

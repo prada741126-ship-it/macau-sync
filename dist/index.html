@@ -3226,11 +3226,11 @@ h1::after {
   <div class="page" id="page-query">
     <div class="toolbar" style="flex-wrap:wrap;gap:4px;">
       <label style="line-height:35px;">代理：</label>
-      <select id="q-agent" style="padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;"></select>
+      <select id="q-agent" style="padding:6px 10px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;"></select>
       <label style="line-height:35px;">地點：</label>
-      <select id="q-venue" style="padding:6px 10px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;min-width:100px;"><option value="">全部</option></select>
+      <select id="q-venue" style="padding:6px 10px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;min-width:100px;"><option value="">全部</option></select>
       <label style="line-height:35px;">月份：</label>
-      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;padding:6px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:6px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
+      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;padding:6px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;">
       <button class="btn btn-primary" onclick="doQuery()" style="padding:6px 14px;">查詢</button>
       <button class="btn" onclick="toggleAdvFilter()" style="padding:6px 10px;font-size:11px;" id="btn-adv-filter">⚙ 進階</button>
       <button class="btn" onclick="showSavedFilters()" style="padding:6px 10px;font-size:11px;" title="儲存的篩選">📌</button>
@@ -3244,16 +3244,16 @@ h1::after {
         <button onclick="quickFilter('all',event)">全部</button>
       </span>
     </div>
-    <div id="adv-filter" style="display:none;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(212,175,55,0.1);">
+    <div id="adv-filter" style="display:none;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(0,212,255,0.08);">
       <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
         <label style="font-size:11px;color:#888;">日期從：</label>
-        <input type="date" id="q-date-from" style="padding:4px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;width:130px;">
+        <input type="date" id="q-date-from" style="padding:4px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;width:130px;">
         <label style="font-size:11px;color:#888;">至：</label>
-        <input type="date" id="q-date-to" style="padding:4px 8px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;width:130px;">
+        <input type="date" id="q-date-to" style="padding:4px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;width:130px;">
         <label style="font-size:11px;color:#888;">洗碼量：</label>
-        <input type="number" id="q-vol-min" placeholder="最低(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;">
+        <input type="number" id="q-vol-min" placeholder="最低(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;">
         <label style="font-size:11px;color:#888;">~</label>
-        <input type="number" id="q-vol-max" placeholder="最高(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(212,175,55,0.2);border-radius:4px;background:rgba(20,20,30,0.8);color:#e0d0a0;font-size:11px;">
+        <input type="number" id="q-vol-max" placeholder="最高(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;">
         <button class="btn" onclick="saveCurrentFilter()" style="padding:4px 8px;font-size:10px;">💾 儲存篩選</button>
       </div>
     </div>
@@ -3451,7 +3451,7 @@ h1::after {
     <div class="form-group" style="flex:1;"><label>備註</label><input type="text" id="f-note" placeholder="選填"></div>
   </div>
   <div style="text-align:right;margin-top:16px;">
-    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeModal()">取消</button>
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeModal()">取消</button>
     <button class="btn btn-primary" onclick="saveForm()">儲存</button>
   </div>
 </div>
@@ -3479,7 +3479,7 @@ h1::after {
     <div class="form-group"><label>可提領餘額</label><input type="text" id="fund-balance" readonly style="background:rgba(30,30,40,0.6);color:var(--gold-light);font-weight:700;font-size:16px;"></div>
   </div>
   <div style="text-align:right;margin-top:16px;">
-    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeFundModal()">取消</button>
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeFundModal()">取消</button>
     <button class="btn btn-primary" onclick="saveFundForm()">儲存</button>
   </div>
 </div>
@@ -3508,7 +3508,7 @@ h1::after {
     <div class="form-group"><label>可提領餘額</label><input type="text" id="aw-balance" readonly style="background:rgba(30,30,40,0.6);color:var(--gold-light);font-weight:700;font-size:16px;"></div>
   </div>
   <div style="text-align:right;margin-top:16px;">
-    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeAgentWalletModal()">取消</button>
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;margin-right:8px;" onclick="closeAgentWalletModal()">取消</button>
     <button class="btn btn-primary" onclick="saveAgentWalletForm()">儲存</button>
   </div>
 </div>
@@ -3520,12 +3520,12 @@ h1::after {
 <div class="modal">
   <h3>代理管理</h3>
   <div style="margin-bottom:14px;display:flex;gap:8px;">
-    <input type="text" id="agent-mgr-new" placeholder="輸入新代理名稱" style="flex:1;padding:9px 12px;border:1px solid rgba(212,175,55,0.2);border-radius:10px;font-size:14px;background:rgba(20,20,30,0.8);color:#e0d0a0;">
+    <input type="text" id="agent-mgr-new" placeholder="輸入新代理名稱" style="flex:1;padding:9px 12px;border:1px solid rgba(0,212,255,0.15);border-radius:10px;font-size:14px;background:rgba(13,17,23,0.8);color:#e6edf3;">
     <button class="btn btn-primary" onclick="addAgentFromMgr()">＋ 新增</button>
   </div>
   <div id="agent-mgr-list" style="max-height:300px;overflow-y:auto;"></div>
   <div style="text-align:right;margin-top:16px;">
-    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(212,175,55,0.1);border-radius:8px;cursor:pointer;" onclick="closeAgentMgr()">關閉</button>
+    <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;" onclick="closeAgentMgr()">關閉</button>
   </div>
 </div>
 </div>
@@ -3759,8 +3759,18 @@ var UI_COLORS = {
   borderSubtle:  'rgba(255,255,255,0.06)',
   dangerDim:     'rgba(248,81,73,0.08)',
   warningDim:    'rgba(240,165,0,0.08)',
-  successDim:    'rgba(45,212,15,0.08)',
-  infoDim:       'rgba(88,166,255,0.08)'
+  successDim:    'rgba(45,212,160,0.08)',
+  infoDim:       'rgba(88,166,255,0.08)',
+  // 图表专用
+  chartGrid:     'rgba(255,255,255,0.06)',
+  chartTick:     '#6e7681',
+  tooltipBg:     'rgba(13,17,23,0.95)',
+  tooltipBorder: 'rgba(0,212,255,0.3)',
+  totalRowBg:    'rgba(22,27,34,0.8)',
+  cashOrange:    '#e67e22',
+  // 隐式中国风
+  inkBrush:      'rgba(201,168,76,0.04)',
+  windowLine:    'rgba(201,168,76,0.06)'
 };
 
 // Production mode: set to false to disable verbose logging
@@ -4191,7 +4201,7 @@ function closeCurrentMonth() {
   if (typeof syncUpload === 'function') syncUpload();
   document.getElementById('month-badge').textContent = now;
   document.getElementById('month-status').textContent = '已鎖定';
-  document.getElementById('month-status').style.color = '#e74c3c';
+  document.getElementById('month-status').style.color = '#f85149';
   document.getElementById('btn-close-month').disabled = true;
   showToast('月末結算完成，' + now + ' 已鎖定', 'success');
 }
@@ -5798,7 +5808,7 @@ function showSavedFilters() {
     var f = saved[n];
     var desc = (f.agent || "全部代理") + " / " + (f.month || "不限月份") + (f.venue ? " / " + f.venue : "");
     inner += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:4px 0;background:rgba(255,255,255,0.03);border-radius:6px;">';
-    inner += '<div><span style="font-size:13px;color:var(--gold-light);">' + n + '</span><br><span style="font-size:10px;color:#888;">' + desc + '</span></div>';
+    inner += '<div><span style="font-size:13px;color:var(--gold-light);">' + n + '</span><br><span style="font-size:10px;color:#6e7681;">' + desc + '</span></div>';
     inner += '<div><button class="btn" style="padding:3px 8px;font-size:10px;min-height:26px;" onclick="closeFilterModal();loadSavedFilter(\'' + n.replace(/'/g, "\\'") + '\')">套用</button>';
     inner += ' <button class="btn btn-red" style="padding:3px 8px;font-size:10px;min-height:26px;" onclick="deleteSavedFilter(\'' + n.replace(/'/g, "\\'") + '\')">✕</button></div>';
     inner += '</div>';
@@ -5897,7 +5907,7 @@ function doQuery() {
     // 上月累計行
     if (preBalance > 0) {
       var pr = document.createElement("tr");
-      pr.style.cssText = "background:rgba(212,175,55,0.08);";
+      pr.style.cssText = "background:rgba(201,168,76,0.08);";
       pr.innerHTML = "<td>" + month + "-01</td><td style='color:var(--gold-light);font-weight:600;'>上月累計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-weight:700;color:var(--gold-light);'>" + fmt(preBalance) + "</td>";
       tbody.appendChild(pr);
     }
@@ -5910,17 +5920,17 @@ function doQuery() {
       if (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") running += e.amount;
       else running -= e.amount;
       var tr = document.createElement("tr");
-      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(\"" + (e._fbKey||e.id) + "\")'>刪除</button>" : "<span style='color:#999;font-size:11px;'>自動</span>";
+      var delBtn = e.source === "fund" ? "<button class='btn-red' onclick='deleteFund(\"" + (e._fbKey||e.id) + "\")'>刪除</button>" : "<span style='color:#6e7681;font-size:11px;'>自動</span>";
       var inVal = (e.type === "入帳" || e.type === "存入" || e.type === "自存現金") ? fmt(e.amount) : "";
       var outVal = (e.type === "提領") ? fmt(e.amount) : "";
-      var typeClr = e.type === "提領" ? "color:#e74c3c;font-weight:600;" : (e.type === "存入" ? "color:#2980b9;" : (e.type === "自存現金" ? "color:#e67e22;font-weight:600;" : "color:var(--gold-light);"));
-      tr.innerHTML = "<td>" + e.date + "</td><td style='" + typeClr + "'>" + e.desc + "</td><td class='num' style='color:var(--gold-light);'>" + inVal + "</td><td class='num' style='color:#e74c3c;'>" + outVal + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td>";
+      var typeClr = e.type === "提領" ? "color:#f85149;font-weight:600;" : (e.type === "存入" ? "color:#58a6ff;" : (e.type === "自存現金" ? "color:#e67e22;font-weight:600;" : "color:var(--gold-light);"));
+      tr.innerHTML = "<td>" + e.date + "</td><td style='" + typeClr + "'>" + e.desc + "</td><td class='num' style='color:var(--gold-light);'>" + inVal + "</td><td class='num' style='color:#f85149;'>" + outVal + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td>";
       tbody.appendChild(tr);
     }
     // 合計行
     var totalRow = document.createElement("tr");
-    totalRow.style.cssText = "background:rgba(30,30,40,0.8);font-weight:700;color:var(--gold-light);";
-    totalRow.innerHTML = "<td></td><td style='color:#1a1a2e;'>合計</td><td class='num' style='color:var(--gold-light);'></td><td class='num' style='color:#e74c3c;'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td>";
+    totalRow.style.cssText = "background:rgba(22,27,34,0.8);font-weight:700;color:var(--gold-light);";
+    totalRow.innerHTML = "<td></td><td style='color:#e6edf3;'>合計</td><td class='num' style='color:var(--gold-light);'></td><td class='num' style='color:#f85149;'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td>";
     tbody.appendChild(totalRow);
     return;
   }
@@ -6040,14 +6050,14 @@ function doQuery() {
     sep.innerHTML = "<td colspan='7' style='padding:4px;border:none;'></td>";
     tbody.appendChild(sep);
     var titleRow = document.createElement("tr");
-    titleRow.innerHTML = "<td colspan='7' style='padding:8px 0;font-weight:700;color:#FFD700;font-size:16px;'>💼 " + agent + " 代理對帳單</td>";
+    titleRow.innerHTML = "<td colspan='7' style='padding:8px 0;font-weight:700;color:#c9a84c;font-size:16px;'>💼 " + agent + " 代理對帳單</td>";
     tbody.appendChild(titleRow);
     var kpiRow = document.createElement("tr");
     kpiRow.innerHTML = "<td colspan='7' style='padding:8px 0;border:none;'>" +
       "<div class='kpi-box' style='margin-bottom:8px;'>" +
         "<div class='kpi-card'><div class='label'>碼糧總額</div><div class='value'>" + fmt(allBonus) + "</div></div>" +
         (allCash > 0 ? "<div class='kpi-card' style='background:#e67e22;'><div class='label'>現金寄放</div><div class='value'>" + fmt(allCash) + "</div></div>" : "") +
-        (awDep > 0 ? "<div class='kpi-card' style='background:#2980b9;'><div class='label'>錢包存入</div><div class='value'>" + fmt(awDep) + "</div></div>" : "") +
+        (awDep > 0 ? "<div class='kpi-card' style='background:#58a6ff;'><div class='label'>錢包存入</div><div class='value'>" + fmt(awDep) + "</div></div>" : "") +
         (awCDep > 0 ? "<div class='kpi-card' style='background:#e67e22;'><div class='label'>自存現金</div><div class='value'>" + fmt(awCDep) + "</div></div>" : "") +
         "<div class='kpi-card'><div class='label'>已提領</div><div class='value'>" + fmt(allDrawn) + "</div></div>" +
         "<div class='kpi-card' style='background:#f0a500;'><div class='label'>未提領</div><div class='value'>" + fmt(awBalance) + "</div></div>" +
@@ -6057,7 +6067,7 @@ function doQuery() {
     // 上月累計行
     if (preRunning > 0) {
       var pr = document.createElement("tr");
-      pr.style.cssText = "background:rgba(212,175,55,0.08);";
+      pr.style.cssText = "background:rgba(201,168,76,0.08);";
       pr.innerHTML = "<td>" + month + "-01</td><td style='color:var(--gold-light);font-weight:600;'>上月累計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-weight:700;color:var(--gold-light);'>" + fmt(preRunning) + "</td><td></td>";
       tbody.appendChild(pr);
     }
@@ -6073,12 +6083,12 @@ function doQuery() {
         // 提領行：日期 | 提領(紅) | | -金額(紅) | 刪除 | 累計餘額
         var val = (e._fbKey||e.id).toString();
         var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
-        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e74c3c;font-weight:700;'>提領" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e74c3c;font-weight:700;'>-" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#f85149;font-weight:700;'>提領" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#f85149;font-weight:700;'>-" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "aw_deposit") {
         // 錢包存入行：日期 | 存入(藍) | | +金額(藍) | 刪除 | 累計餘額
         var val = (e._fbKey||e.id).toString();
         var delBtn = "<button class='btn-red' onclick=\"deleteAgentWallet('" + agent + "','" + val + "')\">刪除</button>";
-        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#2980b9;font-weight:700;'>存入" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#2980b9;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#58a6ff;font-weight:700;'>存入" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#58a6ff;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "aw_cash_dep") {
         // 自存現金行：日期 | 自存現金(橙) | | +金額(橙) | 刪除 | 累計餘額
         var val = (e._fbKey||e.id).toString();
@@ -6086,18 +6096,18 @@ function doQuery() {
         tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>自存現金" + (e.note?"："+e.note:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.amount) + "</td><td>" + delBtn + "</td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else if (e.rowType === "cash") {
         // 現金寄放行：日期 | 現金寄放(橙) | | +金額(橙) | 自動 | 累計餘額
-        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>現金寄放" + (e.client?"："+e.client:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.bonus) + "</td><td><span style='color:#999;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td style='color:#e67e22;font-weight:700;'>現金寄放" + (e.client?"："+e.client:"") + "</td><td class='num'></td><td class='num' style='color:#e67e22;font-weight:700;'>+" + fmt(e.bonus) + "</td><td><span style='color:#6e7681;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       } else {
         // 入帳行：日期 | 地點(客戶) | 轉碼數 | 碼糧 | 自動 | 累計餘額
         var volStr = e.volume > 0 ? e.volume.toLocaleString() + "萬" : "";
-        tr2.innerHTML = "<td>" + e.date + "</td><td>" + (e.venue||"") + "(" + (e.client||"") + ")</td><td class='num'>" + volStr + "</td><td class='num' style='color:var(--gold-light);'>" + fmt(e.bonus) + "</td><td><span style='color:#999;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+        tr2.innerHTML = "<td>" + e.date + "</td><td>" + (e.venue||"") + "(" + (e.client||"") + ")</td><td class='num'>" + volStr + "</td><td class='num' style='color:var(--gold-light);'>" + fmt(e.bonus) + "</td><td><span style='color:#6e7681;font-size:11px;'>自動</span></td><td class='num' style='font-weight:700;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
       }
       tbody.appendChild(tr2);
     }
     // 合計行
     var totalRow = document.createElement("tr");
-    totalRow.style.cssText = "background:rgba(30,30,40,0.8);font-weight:700;color:var(--gold-light);";
-    totalRow.innerHTML = "<td></td><td style='color:#1a1a2e;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
+    totalRow.style.cssText = "background:rgba(22,27,34,0.8);font-weight:700;color:var(--gold-light);";
+    totalRow.innerHTML = "<td></td><td style='color:#e6edf3;'>合計</td><td class='num'></td><td class='num'></td><td></td><td class='num' style='font-size:15px;'>" + fmt(Math.max(0, running)) + "</td><td></td>";
     tbody.appendChild(totalRow);
   }
   } catch(e) {
@@ -6253,9 +6263,9 @@ function renderAllMiniKPI() {
   var totalBonusAll = 0;
   for (var i = 0; i < txs.length; i++) totalBonusAll += (txs[i].bonus||0);
   el.innerHTML =
-    '<div class="kpi-mini"><div class="label">📅 本月笔数</div><div class="value" style="color:#3498db;">' + thisMonthTxs.length + ' 笔</div></div>' +
+    '<div class="kpi-mini"><div class="label">📅 本月笔数</div><div class="value" style="color:#58a6ff;">' + thisMonthTxs.length + ' 笔</div></div>' +
     '<div class="kpi-mini"><div class="label">📊 本月洗码量</div><div class="value">' + (totalVol >= 10000 ? (totalVol/10000).toFixed(1) + '億' : totalVol.toLocaleString()) + '万</div></div>' +
-    '<div class="kpi-mini"><div class="label">💰 本月码粮</div><div class="value" style="color:#2ecc71;">' + fmt(totalBonus) + '</div></div>' +
+    '<div class="kpi-mini"><div class="label">💰 本月码粮</div><div class="value" style="color:#2dd4a0;">' + fmt(totalBonus) + '</div></div>' +
     '<div class="kpi-mini"><div class="label">⚠️ 本月未提</div><div class="value" style="color:#e67e22;">' + fmt(totalUndrawn) + '</div></div>' +
     '<div class="kpi-mini"><div class="label">📁 全部码粮</div><div class="value" style="color:var(--gold-light);">' + fmt(totalBonusAll) + '</div></div>';
 }
@@ -6527,7 +6537,7 @@ function renderOverview() {
   renderRankChart(agtArr);
 
   // --- 場地洗碼分佈 ---
-  var venueColors = ['#d4af37','#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c','#f39c12'];
+  var venueColors = ['#00d4ff','#58a6ff','#7c3aed','#2dd4a0','#f85149','#f0a500','#c9a84c'];
   var venVol={};
   for (var i=0;i<txs.length;i++){
     var t=txs[i];
@@ -6620,8 +6630,8 @@ function renderTrendChart(daily, monthLabel) {
   var ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, "rgba(212,175,55,0.3)");
-  gradient.addColorStop(1, "rgba(212,175,55,0.02)");
+  gradient.addColorStop(0, "rgba(0,212,255,0.3)");
+  gradient.addColorStop(1, "rgba(0,212,255,0.02)");
   _trendChartInst = new Chart(ctx, {
     type: "line",
     data: {
@@ -6629,14 +6639,14 @@ function renderTrendChart(daily, monthLabel) {
       datasets: [{
         label: "洗碼量（100萬）",
         data: daily,
-        borderColor: "var(--gold-light)",
+        borderColor: "#00d4ff",
         backgroundColor: gradient,
         borderWidth: 2,
         fill: true,
         tension: 0.3,
         pointRadius: daily.map(function(v) { return v > 0 ? 3 : 0; }),
-        pointBackgroundColor: "var(--gold-light)",
-        pointBorderColor: "#1a1a2e",
+        pointBackgroundColor: "#00d4ff",
+        pointBorderColor: "#161b22",
         pointBorderWidth: 1
       }]
     },
@@ -6646,10 +6656,10 @@ function renderTrendChart(daily, monthLabel) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "rgba(20,20,30,0.95)",
-          titleColor: "var(--gold-light)",
-          bodyColor: "#e0d0a0",
-          borderColor: "rgba(212,175,55,0.3)",
+          backgroundColor: "rgba(13,17,23,0.95)",
+          titleColor: "#00d4ff",
+          bodyColor: "#e6edf3",
+          borderColor: "rgba(0,212,255,0.3)",
           borderWidth: 1,
           callbacks: {
             title: function(items) { return items[0].label || (items[0].dataIndex + 1) + "日"; },
@@ -6659,13 +6669,13 @@ function renderTrendChart(daily, monthLabel) {
       },
       scales: {
         x: {
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: { color: "#887755", font: { size: 10 }, maxRotation: 0 }
+          grid: { color: "rgba(255,255,255,0.06)" },
+          ticks: { color: "#6e7681", font: { size: 10 }, maxRotation: 0 }
         },
         y: {
-          grid: { color: "rgba(255,255,255,0.05)" },
+          grid: { color: "rgba(255,255,255,0.06)" },
           ticks: {
-            color: "#887755", font: { size: 10 },
+            color: "#6e7681", font: { size: 10 },
             callback: function(v) { return v >= 10000 ? (v/10000).toFixed(1) + "萬" : v; }
           },
           beginAtZero: true
@@ -6692,12 +6702,12 @@ function renderRankChart(agtArr) {
     var panel = document.getElementById("ov-agent-rank");
     if (!agtArr.length) { if (panel) panel.innerHTML = '<div class="rank-empty">本月尚無交易</div>'; return; }
     var html = '';
-    var rankColors = ['#d4af37','#a0a0a0','#cd7f32','rgba(255,255,255,0.4)','rgba(255,255,255,0.3)'];
+    var rankColors = ['#00d4ff','#8b949e','#6e7681','rgba(255,255,255,0.15)','rgba(255,255,255,0.10)'];
     var maxV = agtArr[0].vol;
     for (var r = 0; r < agtArr.length; r++) {
       var ag = agtArr[r];
       var pct = Math.round(ag.vol / maxV * 100);
-      html += '<div class="rank-row"><div class="rank-num">'+(r+1)+'</div><div class="rank-name">'+ag.name+'</div><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+(rankColors[r]||rankColors[4])+',rgba(212,175,55,0.3));"></div></div><div class="rank-val">'+fmt(ag.vol)+'萬</div></div></div>';
+      html += '<div class="rank-row"><div class="rank-num">'+(r+1)+'</div><div class="rank-name">'+ag.name+'</div><div class="rank-bar-wrap"><div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+pct+'%;background:linear-gradient(90deg,'+(rankColors[r]||rankColors[4])+',rgba(0,212,255,0.3));"></div></div><div class="rank-val">'+fmt(ag.vol)+'萬</div></div></div>';
     }
     if (panel) panel.innerHTML = html;
     return;
@@ -6722,12 +6732,12 @@ function renderRankChart(agtArr) {
         label: "洗碼量（萬）",
         data: data,
         backgroundColor: data.map(function(v, idx) {
-          var colors = ["rgba(212,175,55,0.6)","rgba(160,160,160,0.5)","rgba(205,127,50,0.5)","rgba(255,255,255,0.25)","rgba(255,255,255,0.2)"];
+          var colors = ["rgba(0,212,255,0.6)","rgba(88,166,255,0.5)","rgba(240,165,0,0.5)","rgba(255,255,255,0.08)","rgba(255,255,255,0.05)"];
           var i = data.length - 1 - idx;
           return colors[i] || "rgba(255,255,255,0.15)";
         }),
         borderColor: data.map(function(v, idx) {
-          var colors = ["#d4af37","#a0a0a0","#cd7f32","rgba(255,255,255,0.4)","rgba(255,255,255,0.3)"];
+          var colors = ["#00d4ff","#58a6ff","#f0a500","rgba(255,255,255,0.15)","rgba(255,255,255,0.10)"];
           var i = data.length - 1 - idx;
           return colors[i] || "rgba(255,255,255,0.2)";
         }),
@@ -6742,16 +6752,16 @@ function renderRankChart(agtArr) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "rgba(20,20,30,0.95)",
-          bodyColor: "#e0d0a0",
-          borderColor: "rgba(212,175,55,0.3)",
+          backgroundColor: "rgba(13,17,23,0.95)",
+          bodyColor: "#e6edf3",
+          borderColor: "rgba(0,212,255,0.3)",
           borderWidth: 1,
           callbacks: { label: function(item) { return "洗碼量: " + fmt(item.raw) + " 萬"; } }
         }
       },
       scales: {
-        x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#887755", font: { size: 9 } }, beginAtZero: true },
-        y: { grid: { display: false }, ticks: { color: "#e0d0a0", font: { size: 11 } } }
+        x: { grid: { color: "rgba(255,255,255,0.06)" }, ticks: { color: "#6e7681", font: { size: 9 } }, beginAtZero: true },
+        y: { grid: { display: false }, ticks: { color: "#e6edf3", font: { size: 11 } } }
       }
     }
   });

@@ -190,7 +190,7 @@ function closeCurrentMonth() {
   if (typeof syncUpload === 'function') syncUpload();
   document.getElementById('month-badge').textContent = now;
   document.getElementById('month-status').textContent = '已鎖定';
-  document.getElementById('month-status').style.color = '#e74c3c';
+  document.getElementById('month-status').style.color = '#f85149';
   document.getElementById('btn-close-month').disabled = true;
   showToast('月末結算完成，' + now + ' 已鎖定', 'success');
 }
