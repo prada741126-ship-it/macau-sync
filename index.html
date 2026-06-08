@@ -4310,7 +4310,7 @@ function initSync() {
     try { var d = snapshot.val(); if (d) workingMonth = d; } catch(e) {}
   });
 
-  // 6. rmBookings
+  // 6. rmBookings（v10.26 修復：直接寫 localStorage，不觸發 syncUpload 避免循環）
   db.ref('macau_data/rmBookings').on('value', function(snapshot) {
     try {
       if (typeof RM !== 'undefined') {
@@ -4318,7 +4318,8 @@ function initSync() {
         if (!d) { RM.bookings = []; }
         else if (Array.isArray(d)) { RM.bookings = d; }
         else if (typeof d === 'object') { RM.bookings = _objToArray(d); }
-        RM.save(); RM.render();
+        localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings));
+        RM.render();
       }
     } catch(e) {}
   });
@@ -5771,18 +5772,31 @@ var RM = {
     if (!agent||!client||!hotel||!checkIn||!checkout||nights<=0) {
       showToast("請填寫所有必填欄位（體系/酒店/房型）","error"); return;
     }
+    var _k;
     if (this.editingId) {
       var idx = this.bookings.findIndex(function(x){ return x._fbKey===String(RM.editingId) || x.id===RM.editingId || x.id===parseInt(RM.editingId); });
-      var _k = (idx>=0 && this.bookings[idx] && this.bookings[idx]._fbKey) ? this.bookings[idx]._fbKey : _fbKey();
+      _k = (idx>=0 && this.bookings[idx] && this.bookings[idx]._fbKey) ? this.bookings[idx]._fbKey : _fbKey();
       if (idx>=0) this.bookings[idx] = { id:this.bookings[idx].id, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
       showToast("訂房已更新","success");
     } else {
       this.lastId++;
-      var _k = _fbKey();
+      _k = _fbKey();
       this.bookings.push({ id:this.lastId, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
       showToast("訂房已新增","success");
     }
     this.save();
+    // v10.26 直接寫入 Firebase 同步（確保即時同步，不等 syncUpload 延遲）
+    if (typeof db !== 'undefined' && db && _k) {
+      try {
+        var syncBooking = this.bookings.find(function(x){ return x._fbKey === _k; });
+        if (syncBooking) {
+          db.ref('macau_data/rmBookings/' + _k).set(syncBooking, function(err){
+            if (err) console.error('[Sync] rmBookings set error:', err);
+            else console.log('[Sync] rmBookings 訂房即時同步成功');
+          });
+        }
+      } catch(e) { console.error('[Sync] rmBookings set error:', e); }
+    }
     this.closeModal();  // 先關閉彈窗，確保一定執行
     this.editingId = null;
     // 後台重新渲染（即使報錯也不影響彈窗關閉）
