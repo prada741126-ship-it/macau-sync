@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<!-- BUILD: v11.2.0 (2026-06-09 #011) — 修復手機版表格滾動問題 + 操作按鈕移至左側 -->
+<!-- BUILD: v11.2.1 (2026-06-09 #012) — 緊急修復手機版側邊欄預設隱藏 -->
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.2.0</title>
+<title>澳門洗碼報表 v11.2.1</title>
 <style>
 
 /* === base.css === */
@@ -3004,21 +3004,6 @@ h1::after {
   .table-scroll.scrollable::after { opacity: 1; }
   .table-scroll.scrolled-end::after { opacity: 0; }
 
-  /* 手機版：反轉表格列順序，將操作按鈕移到左側 */
-  #all-table,
-  #query-table,
-  #summary-table {
-    direction: rtl;
-  }
-  #all-table th,
-  #all-table td,
-  #query-table th,
-  #query-table td,
-  #summary-table th,
-  #summary-table td {
-    direction: ltr;
-  }
-
 
   /* ============================================================
      表单
@@ -3531,7 +3516,7 @@ h1::after {
 <div id="app-shell">
 
 <!-- ===== SIDEBAR ===== -->
-<div id="sidebar" class="glass">
+<div id="sidebar" class="glass mobile-hidden">
   <!-- Logo 區 -->
   <div class="sb-logo">
     <span class="sb-logo-icon">♠</span>
@@ -3595,7 +3580,7 @@ h1::after {
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
-  <div id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+  <div id="sidebar-overlay" onclick="toggleMobileSidebar()" style="display:none;"></div>
 
   <!-- 手機版底部導航 -->
   <div class="mobile-bottom-nav" id="mobile-bottom-nav">
