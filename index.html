@@ -2621,70 +2621,6 @@ tbody tr:hover {
 <!-- Toast 通知容器 -->
 <div class="toast-container" id="toast-container"></div>
 
-<!-- v10.10 手機除錯面板 -->
-<button id="debug-toggle" onclick="DBG.toggle()" title="除錯面板">⌨</button>
-<div id="debug-panel"></div>
-<script>
-// ══════════════════════════════════════
-// v10.10 手機除錯系統：攔截 console.log/error/warn
-// ══════════════════════════════════════
-var DBG = (function(){
-  var MAX = 200;
-  var logs = [];
-  var panel = null;
-  var timer = null;
-
-  function render() {
-    if (!panel) panel = document.getElementById('debug-panel');
-    if (!panel) return;
-    var html = '<div id="debug-clear" onclick="DBG.clear()">— 清除紀錄 —</div>';
-    for (var i = 0; i < logs.length; i++) {
-      var c = logs[i].level === 'error' ? 'dbg-err' : logs[i].level === 'warn' ? 'dbg-warn' : 'dbg-info';
-      html += '<div class="dbg-line ' + c + '">' + escHtml(logs[i].msg) + '</div>';
-    }
-    panel.innerHTML = html;
-    panel.scrollTop = panel.scrollHeight;
-  }
-
-  function escHtml(s) {
-    if (!s) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // 攔截並記錄
-  function hook(fn, level) {
-    return function() {
-      var args = Array.prototype.slice.call(arguments);
-      var msg = args.map(function(a){ try{ return typeof a==='object'? JSON.stringify(a) : String(a); }catch(e){ return String(a); } }).join(' ');
-      logs.push({ level: level, msg: msg, t: Date.now() });
-      if (logs.length > MAX) logs.shift();
-      render();
-      return fn.apply(console, arguments);
-    };
-  }
-
-  // 攔截 XMLHttpRequest/fetch 的 Firebase 呼叫（簡易版）
-  function init() {
-    panel = document.getElementById('debug-panel');
-    // 攔截 console
-    console.log   = hook(console.log.bind(console),   'info');
-    console.error  = hook(console.error.bind(console),  'error');
-    console.warn   = hook(console.warn.bind(console),   'warn');
-    console.info   = hook(console.info.bind(console),   'info');
-    render();
-  }
-
-  return {
-    toggle: function() {
-      if (!panel) panel = document.getElementById('debug-panel');
-      if (panel) panel.classList.toggle('show');
-      if (!DBG._inited) { DBG._inited = true; init(); }
-    },
-    clear: function() { logs = []; render(); },
-    _inited: false
-  };
-})();
-</script>
 
 <script>
 var txs = [];
@@ -7169,64 +7105,6 @@ input:focus, select:focus, textarea:focus {
 /* 手机版调整到左下角 */
 @media (max-width: 700px) {
   #back-to-top { bottom: 18px; right: 18px; width: 38px; height: 38px; font-size: 16px; }
-}
-/* ============================================================
-   手機除錯面板（v10.10）
-   ============================================================ */
-#debug-panel {
-  position: fixed;
-  bottom: 52px;
-  left: 8px;
-  width: calc(100vw - 80px);
-  max-height: 50vh;
-  background: rgba(0,0,0,0.92);
-  color: #0f0;
-  font-family: 'Courier New', monospace;
-  font-size: 11px;
-  line-height: 1.5;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #0f0;
-  overflow-y: auto;
-  z-index: 99999;
-  display: none;
-  white-space: pre-wrap;
-  word-break: break-all;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.7);
-}
-#debug-panel.show { display: block; }
-#debug-toggle {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  width: 38px;
-  height: 38px;
-  background: rgba(12,12,18,0.9);
-  color: #0f0;
-  border: 1px solid #0f0;
-  border-radius: 50%;
-  font-size: 18px;
-  z-index: 100000;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#debug-panel .dbg-line { padding: 2px 0; border-bottom: 1px solid rgba(0,255,0,0.08); }
-#debug-panel .dbg-err { color: #f44; }
-#debug-panel .dbg-warn { color: #fa0; }
-#debug-panel .dbg-info { color: #4af; }
-#debug-clear {
-  position: sticky;
-  top: 0;
-  background: rgba(255,0,0,0.2);
-  color: #f88;
-  border: none;
-  width: 100%;
-  padding: 4px;
-  cursor: pointer;
-  font-size: 11px;
-  text-align: center;
 }
 </style>
 
