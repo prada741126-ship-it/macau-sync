@@ -1022,8 +1022,10 @@ tr.row-warning td { color: #f39c12; }
 
   /* 模態視窗模化 */
   .modal-scroll { padding: 10px 8px 40px 8px; }
-  .modal { padding: 18px 14px; width: 96vw; max-width: 96vw; margin: 10px auto; border-radius: 14px; }
+  .modal { padding: 18px 14px; width: 96vw; max-width: 96vw; margin: 10px auto; border-radius: 14px; max-height: 85vh; overflow-y: auto; }
   .modal h3 { font-size: 18px; margin-bottom: 14px; padding-bottom: 10px; }
+  /* v10.26 模態窗背景增加觸覺回饋（點擊關閉的視覺提示） */
+  .modal-bg { cursor: pointer; }
 
   /* 按鈕觸摸優化（最小44px） */
   .btn { padding: 10px 18px; font-size: 13px; min-height: 42px; }
@@ -1088,6 +1090,32 @@ tr.row-warning td { color: #f39c12; }
   .mobile-bottom-nav .nav-item .nav-label {
     font-size: 10px;
     letter-spacing: 0.5px;
+  }
+
+  /* v10.26 底部導航 active 光條指示器 */
+  .mobile-bottom-nav .nav-item {
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .mobile-bottom-nav .nav-item::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 22px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    border-radius: 0 0 3px 3px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .mobile-bottom-nav .nav-item.active::after {
+    transform: translateX(-50%) scaleX(1);
+  }
+  /* 按壓回饋 */
+  .mobile-bottom-nav .nav-item:active {
+    transform: scale(0.9);
+    transition: transform 0.1s ease;
   }
 
   /* 主內容區需要預留底部空間（導航欄80px + iPhone安全區 + 額外緩衝） */
@@ -1449,6 +1477,44 @@ tr.row-warning td { color: #f39c12; }
   .table-scroll table { min-width: 640px; font-size: 11px; }
   .table-scroll th { padding: 7px 5px; font-size: 9px; white-space: nowrap; }
   .table-scroll td { padding: 6px 5px; white-space: nowrap; }
+  /* v10.26 表格 sticky 表頭 + 滾動陰影指示 */
+  .table-scroll {
+    position: relative;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-scroll thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: rgba(14,8,4,1);
+    box-shadow: 0 1px 0 0 rgba(212,175,55,0.1);
+  }
+  /* 橫向滾動提示（表格寬度 > 容器時顯示） */
+  .table-scroll::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, transparent, rgba(0,0,0,0.3));
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .table-scroll.scrollable::after { opacity: 1; }
+  .table-scroll.scrolled-end::after { opacity: 0; }
+
+  /* v10.26 時間篩選器 sticky */
+  .time-filter-bar {
+    position: sticky;
+    top: 48px;
+    z-index: 49;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
 
   /* KPI 迷你卡片優化 */
   .kpi-mini-box { gap: 6px; }
@@ -2291,7 +2357,7 @@ tbody tr:hover {
 </div><!-- /page-scroll -->
 </div><!-- /main-content -->
 
-<div class="modal-bg" id="modal">
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
 <div class="modal-scroll">
 <div class="modal">
   <h3 id="modal-title">新增交易</h3>
@@ -2348,7 +2414,7 @@ tbody tr:hover {
 </div>
 </div>
 </div>
-<div class="modal-bg" id="fund-modal">
+<div class="modal-bg" id="fund-modal" onclick="if(event.target===this)closeFundModal()">
 <div class="modal-scroll">
 <div class="modal">
   <h3>公基金提領</h3>
@@ -2406,7 +2472,7 @@ tbody tr:hover {
 </div>
 </div>
 
-<div class="modal-bg" id="agent-mgr-modal">
+<div class="modal-bg" id="agent-mgr-modal" onclick="if(event.target===this)closeAgentMgr()">
 <div class="modal-scroll">
 <div class="modal">
   <h3>代理管理</h3>
@@ -2423,7 +2489,7 @@ tbody tr:hover {
 </div>
 
 <!-- 房務系統 Modal -->
-  <div id="rm-modal-bg">
+  <div id="rm-modal-bg" onclick="if(event.target===this)RM.closeModal()">
   <div class="rm-modal">
     <h2 id="rm-modal-title">新增訂房</h2>
     <div class="rm-form-row">
@@ -3080,6 +3146,8 @@ function showPage(name, sidebarEl) {
   if (name === "summary") { try { renderSummary(); } catch(e) { console.error("renderSummary error:", e); } }
   if (name === "query") { try { fillAgent(); doQuery(); updateTotalWalletUI(); } catch(e) { console.error("query page error:", e); } }
   if (name === "room") { try { if (typeof RM !== "undefined") { RM.updateQuota(); RM.render(); RM.populateAgentFilter(); } switchRoomTab("booking", document.querySelector('.room-tab')); } catch(e) { console.error("room page error:", e); } }
+  // v10.26 檢查表格滾動狀態
+  setTimeout(checkTableScroll, 200);
 }
 
 // ===== Sidebar toggle =====
@@ -3937,6 +4005,8 @@ function renderAll() {
   }
   fillAgent();
   populateVenueDropdown();
+  // v10.26 檢查表格滾動狀態
+  setTimeout(checkTableScroll, 150);
 }
 
 function calcTotalWallet() {
@@ -5891,6 +5961,8 @@ var RM = {
       html += "</tr>";
     }
     tbody.innerHTML = html;
+    // v10.26 檢查訂房表格滾動狀態
+    setTimeout(checkTableScroll, 150);
   },
   updateQuota: function() {
     var monthEl = document.getElementById("rm-filter-month");
@@ -6781,6 +6853,10 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
   function mobileNavigate(page, el) {
     // 切換頁面
     showPage(page);
+    // 滾動到頂部
+    var scrollEl = document.getElementById('page-scroll');
+    if (scrollEl) { scrollEl.scrollTop = 0; }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // 更新導航 active 狀態
     var items = document.querySelectorAll('#mobile-bottom-nav .nav-item');
@@ -6788,6 +6864,27 @@ console.log("[v6.0] 功能优化已加载：KPI动画、多级撤销、快捷键
       items[i].classList.remove('active');
     }
     if (el) el.classList.add('active');
+    // v10.26 延遲檢查表格滾動狀態
+    setTimeout(checkTableScroll, 200);
+  }
+
+  // v10.26 檢測表格橫向滾動狀態，添加 scrollable/scrolled-end 類
+  function checkTableScroll() {
+    var scrolls = document.querySelectorAll('.table-scroll');
+    for (var i = 0; i < scrolls.length; i++) {
+      var el = scrolls[i];
+      var hasScroll = el.scrollWidth > el.clientWidth + 2;
+      if (hasScroll) {
+        el.classList.add('scrollable');
+        // 監聽滾動更新邊界狀態
+        el.addEventListener('scroll', function updateEnd(e) {
+          var tgt = e.target;
+          var atEnd = tgt.scrollLeft + tgt.clientWidth >= tgt.scrollWidth - 5;
+          if (atEnd) tgt.classList.add('scrolled-end');
+          else tgt.classList.remove('scrolled-end');
+        });
+      }
+    }
   }
 
 // v10.23 時間篩選器
