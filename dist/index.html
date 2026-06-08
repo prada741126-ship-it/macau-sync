@@ -5,7 +5,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.1.3</title>
+<title>澳門洗碼報表 v11.1.4</title>
 <style>
 
 /* === base.css === */
@@ -3572,7 +3572,7 @@ h1::after {
     <span class="sb-label">折疊選單</span>
   </div>
   <!-- v11.1.2 版本號顯示 -->
-  <div class="sb-version" id="sb-version">v11.1.3</div>
+  <div class="sb-version" id="sb-version">v11.1.4</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
@@ -5860,12 +5860,21 @@ function _awArrToObj(aw) {
   return result;
 }
 
-function syncUpload() {
-  if (!db) { console.log('[Sync ↑] Firebase 未初始化'); return; }
-  console.log('[Sync ↑] v11.1.2 B方案：分路徑個別寫入');
+function syncUpload(onComplete) {
+  if (!db) { console.log('[Sync ↑] Firebase 未初始化'); if (onComplete) onComplete(false); return; }
+  console.log('[Sync ↑] v11.1.3：分路徑個別寫入（回呼式）');
 
-  // v11.1.2 B方案：每個記錄已透過個別路徑寫入。syncUpload 作為批量備援。
-  // 使用 transaction() 安全合併整個物件（不是陣列！）
+  // v11.1.3：追蹤所有非同步作業，全部完成後才回呼
+  var pending = 6;  // txs + fund + agentList + agentWallets + rmBookings + hcConfig
+  var hasError = false;
+
+  function done(err) {
+    if (err) { hasError = true; }
+    pending--;
+    if (pending <= 0 && typeof onComplete === 'function') {
+      onComplete(!hasError);
+    }
+  }
 
   // 1. txs：交易記錄（物件格式）
   db.ref('macau_data/txs').transaction(function(current) {
@@ -5875,13 +5884,12 @@ function syncUpload() {
     var localKeys = {};
     var keys = Object.keys(local);
     for (var i = 0; i < keys.length; i++) { fb[keys[i]] = local[keys[i]]; localKeys[keys[i]] = true; }
-    // 刪除 fb 中存在但本地不存在的鍵
     var fbKeys = Object.keys(fb);
     for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
     return fb;
   }, function(error, committed) {
-    if (error) console.error('[Sync ↑] txs 失敗', error);
-    else if (committed) console.log('[Sync ↑] txs 同步成功');
+    if (error) { console.error('[Sync ↑] txs 失敗', error); done(error); }
+    else { console.log('[Sync ↑] txs 同步成功'); done(null); }
   });
 
   // 2. fundWithdrawals：公基金
@@ -5896,7 +5904,8 @@ function syncUpload() {
     for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
     return fb;
   }, function(error, committed) {
-    if (error) console.error('[Sync ↑] fundWithdrawals 失敗', error);
+    if (error) { console.error('[Sync ↑] fundWithdrawals 失敗', error); done(error); }
+    else { done(null); }
   });
 
   // 3. agentList（保持陣列）
@@ -5906,18 +5915,15 @@ function syncUpload() {
     var s = {}; for (var i = 0; i < current.length; i++) s[current[i]] = true;
     for (var i = 0; i < agentList.length; i++) s[agentList[i]] = true;
     return Object.keys(s);
+  }, function(error) {
+    if (error) { console.error('[Sync ↑] agentList 失敗', error); done(error); }
+    else { done(null); }
   });
 
   // 4. agentWallets（巢狀物件）
-  console.log("[Sync ↑] === agentWallets transaction 開始 ===");
-  console.log("[Sync ↑] 本地 agentWallets 代理列表:", JSON.stringify(Object.keys(agentWallets)));
-  try { console.log("[Sync ↑] 本地 agentWallets 完整內容（前800字）:", JSON.stringify(agentWallets).substring(0, 800)); } catch(e) {}
   db.ref('macau_data/agentWallets').transaction(function(current) {
-    console.log("[Sync ↑] transaction callback 觸發，current 有資料？", !!(current && Object.keys(current).length));
-    try { console.log("[Sync ↑] current 內容（前800字）:", current ? JSON.stringify(current).substring(0, 800) : 'null'); } catch(e) {}
     var fb = current || {};
     var local = _awArrToObj(agentWallets);
-    try { console.log("[Sync ↑] local (目標寫入值) 內容（前800字）:", JSON.stringify(local).substring(0, 800)); } catch(e) {}
     var localAgentKeys = {};
     var agents = Object.keys(local);
     for (var i = 0; i < agents.length; i++) {
@@ -5927,56 +5933,57 @@ function syncUpload() {
       var keys = Object.keys(local[a]);
       for (var j = 0; j < keys.length; j++) { fb[a][keys[j]] = local[a][keys[j]]; localAgentKeys[a][keys[j]] = true; }
     }
-    // 刪除 fb 中存在但本地不存在的鍵（每個代理內）
     var fbAgents = Object.keys(fb);
-    console.log("[Sync ↑] 準備清理多餘鍵，fb 中有 " + fbAgents.length + " 個代理");
     for (var i = 0; i < fbAgents.length; i++) {
       var a = fbAgents[i];
-      if (!localAgentKeys[a]) { console.log("[Sync ↑] 刪除整個代理 " + a + " (本地無此代理)"); delete fb[a]; continue; }
+      if (!localAgentKeys[a]) { delete fb[a]; continue; }
       var fbKeys = Object.keys(fb[a]);
-      var delCount = 0;
-      for (var j = 0; j < fbKeys.length; j++) { if (!localAgentKeys[a][fbKeys[j]]) { delete fb[a][fbKeys[j]]; delCount++; } }
-      if (delCount > 0) console.log("[Sync ↑] 代理 " + a + " 刪除了 " + delCount + " 個鍵");
+      for (var j = 0; j < fbKeys.length; j++) { if (!localAgentKeys[a][fbKeys[j]]) delete fb[a][fbKeys[j]]; }
     }
-    try { console.log("[Sync ↑] transaction callback 準備回傳，fb 內容（前800字）:", JSON.stringify(fb).substring(0, 800)); } catch(e) {}
     return fb;
   }, function(error, committed, snapshot) {
-    if (error) { console.error('[Sync ↑] agentWallets transaction 失敗', error); }
-    else if (committed) { console.log('[Sync ↑] === agentWallets transaction 成功提交 ==='); try { console.log('[Sync ↑] 提交後 Firebase 值（前800字）:', snapshot ? JSON.stringify(snapshot.val()).substring(0, 800) : 'null'); } catch(e) {} }
-    else { console.log('[Sync ↑] agentWallets transaction 未提交（資料未變更）'); }
+    if (error) { console.error('[Sync ↑] agentWallets 失敗', error); done(error); }
+    else { console.log('[Sync ↑] agentWallets 同步成功'); done(null); }
   });
 
-  // 5. workingMonth
+  // 5. workingMonth (set 無 callback 所以不追蹤；保持簡單)
   if (workingMonth) db.ref('macau_data/workingMonth').set(workingMonth);
 
   // 6. rmBookings（修正：同步刪除）
   if (typeof RM !== 'undefined' && RM.bookings) {
     db.ref('macau_data/rmBookings').transaction(function(current) {
-      // 以本地為基礎（確保刪除會同步）
       var local = _arrToObj(RM.bookings);
-      if (!current) return local;  // Firebase 無資料，直接用本地
+      if (!current) return local;
       var fb = current;
-      if (Array.isArray(fb)) fb = _arrToObj(fb);  // 舊格式遷移
-      // 先將本地所有記錄覆蓋到 fb
+      if (Array.isArray(fb)) fb = _arrToObj(fb);
       var localKeys = {};
       var lk = Object.keys(local);
       for (var i = 0; i < lk.length; i++) { fb[lk[i]] = local[lk[i]]; localKeys[lk[i]] = true; }
-      // 再刪除 fb 中存在但本地不存在的鍵（本地已刪除的）
       var fbKeys = Object.keys(fb);
-      for (var j = 0; j < fbKeys.length; j++) {
-        if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]];
-      }
+      for (var j = 0; j < fbKeys.length; j++) { if (!localKeys[fbKeys[j]]) delete fb[fbKeys[j]]; }
       return fb;
     }, function(error, committed) {
-      if (error) console.error('[Sync ↑] rmBookings transaction 失敗', error);
-      else if (committed) console.log('[Sync ↑] rmBookings 同步成功');
+      if (error) { console.error('[Sync ↑] rmBookings 失敗', error); done(error); }
+      else { console.log('[Sync ↑] rmBookings 同步成功'); done(null); }
     });
   }
 
-  // 7. archives
+  // 7. hcConfig：酒店房型設定
+  pending++;  // 追加追蹤
+  try {
+    var hc = localStorage.getItem('macau_hotel_config_v7');
+    if (hc) {
+      db.ref('macau_data/hcConfig').set(JSON.parse(hc), function(error) {
+        if (error) { console.error('[Sync ↑] hcConfig 失敗', error); done(error); }
+        else { console.log('[Sync ↑] hcConfig 同步成功'); done(null); }
+      });
+    } else { done(null); }
+  } catch(e) { done(e); }
+
+  // 8. archives
   try { var a = localStorage.getItem('macau_archives'); if (a) db.ref('macau_data/archives').set(JSON.parse(a)); } catch(e) {}
 
-  console.log('[Sync ↑] 已送出');
+  console.log('[Sync ↑] 已送出（等待全部完成）');
 }
 
 function syncDownload() {
@@ -5986,8 +5993,14 @@ function syncDownload() {
 
 function manualSync() {
   showLoading('正在同步…');
-  syncUpload();
-  setTimeout(function() { hideLoading(); showToast('同步完成', 'success'); }, 800);
+  syncUpload(function(success) {
+    hideLoading();
+    if (success) {
+      showToast('同步完成', 'success');
+    } else {
+      showToast('同步完成（部分失敗，請檢查網路）', 'warn');
+    }
+  });
 }
 
 // v11.1.2 B方案：Firebase push() 鍵架構 — 物件格式即時監聽
@@ -6067,9 +6080,23 @@ function initSync() {
     } catch(e) { console.error('[Sync ↓] fundWithdrawals 錯誤:', e); }
   });
 
-  // 3. agentList（保持陣列）
+  // 3. agentList（保持陣列）— v11.1.3 同步後全面刷新所有代理下拉
   db.ref('macau_data/agentList').on('value', function(snapshot) {
-    try { var d = snapshot.val(); if (d && Array.isArray(d)) { agentList = d; fillAgent(); } } catch(e) {}
+    try {
+      var d = snapshot.val();
+      if (d && Array.isArray(d)) {
+        agentList = d;
+        // 主查詢下拉
+        fillAgent();
+        // 交易表單代理下拉（page-all）
+        if (typeof populateAgentDropdown === 'function') populateAgentDropdown();
+        // 房務系統代理下拉（page-room）
+        if (typeof RM !== 'undefined' && typeof RM.populateAgentFilter === 'function') RM.populateAgentFilter();
+        // 如果查詢頁面顯示著，重新查詢
+        var pq = document.getElementById('page-query');
+        if (pq && pq.style.display === 'block') try { doQuery(); } catch(e) {}
+      }
+    } catch(e) {}
   });
 
   // 4. agentWallets（巢狀物件 → 巢狀陣列）
@@ -6138,7 +6165,7 @@ function initSync() {
     try { var d = snapshot.val(); if (d) workingMonth = d; } catch(e) {}
   });
 
-  // 6. rmBookings（v11.1.2 修復：直接寫 localStorage，不觸發 syncUpload 避免循環）
+  // 6. rmBookings（v11.1.3 修復：同步後重算 lastId + hcConfig 監聽）
   db.ref('macau_data/rmBookings').on('value', function(snapshot) {
     try {
       if (typeof RM !== 'undefined') {
@@ -6146,7 +6173,14 @@ function initSync() {
         if (!d) { RM.bookings = []; }
         else if (Array.isArray(d)) { RM.bookings = d; }
         else if (typeof d === 'object') { RM.bookings = _objToArray(d); }
+        // v11.1.3：同步後重算 lastId，避免跨裝置 ID 衝突
+        var maxId = 0;
+        for (var i = 0; i < RM.bookings.length; i++) {
+          if (RM.bookings[i] && RM.bookings[i].id > maxId) maxId = RM.bookings[i].id;
+        }
+        RM.lastId = maxId;
         localStorage.setItem("rm_bookings", JSON.stringify(RM.bookings));
+        localStorage.setItem("rm_last_id", RM.lastId.toString());
         RM.render();
       }
     } catch(e) {}
@@ -6155,6 +6189,22 @@ function initSync() {
   // 7. archives
   db.ref('macau_data/archives').on('value', function(snapshot) {
     try { var d = snapshot.val(); if (d) localStorage.setItem('macau_archives', JSON.stringify(d)); } catch(e) {}
+  });
+
+  // 8. hcConfig：酒店房型設定（v11.1.3 新增雙向同步）
+  db.ref('macau_data/hcConfig').on('value', function(snapshot) {
+    try {
+      var d = snapshot.val();
+      if (d && Array.isArray(d)) {
+        localStorage.setItem('macau_hotel_config_v7', JSON.stringify(d));
+        if (typeof HOTEL_CONFIG !== 'undefined') {
+          HOTEL_CONFIG = d;
+          // 刷新酒店設定頁面（如開啟中）
+          if (typeof hcRenderTable === 'function') try { hcRenderTable(); } catch(e) {}
+          if (typeof hcPopulateFilters === 'function') try { hcPopulateFilters(); } catch(e) {}
+        }
+      }
+    } catch(e) {}
   });
 
   console.log('[Sync] v11.1.2 B方案：所有監聽器已啟動');
@@ -6632,11 +6682,52 @@ function doQuery() {
 }
 
 
+function csvEscape(val) {
+  var s = String(val == null ? '' : val);
+  if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1 || s.indexOf('\r') !== -1) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+function csvParseRow(line) {
+  var result = [];
+  var current = '';
+  var inQuotes = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
 function exportCSV() {
   var csv = "\uFEFF類型,日期,星期,代理,客戶,地點,洗碼量,碼佣率,佣金總額,代理碼糧,已提領,未提領,公基金,寄放金額,備註\n";
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
-    csv += [t.type||"rolling", t.date || "", t.dow || "", t.agent || "", t.client || "", t.venue || "", t.volume || 0, t.rate || 0, t.comm || 0, t.bonus || 0, t.drawn || 0, t.undrawn || 0, t.fund || 0, t.cash || 0, t.note || ""].join(",") + "\n";
+    var fields = [t.type||"rolling", t.date || "", t.dow || "", t.agent || "", t.client || "", t.venue || "", t.volume || 0, t.rate || 0, t.comm || 0, t.bonus || 0, t.drawn || 0, t.undrawn || 0, t.fund || 0, t.cash || 0, t.note || ""];
+    csv += fields.map(function(f) { return csvEscape(f); }).join(",") + "\n";
   }
   var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   var a = document.createElement("a");
@@ -6653,7 +6744,7 @@ function importCSV(e) {
     try {
       var lines = ev.target.result.split("\n").map(function(l) { return l.trim(); }).filter(function(l) { return l; });
       if (lines.length < 2) { showToast("無資料","info"); return; }
-      var header = lines[0].split(",").map(function(h) { return h.replace(/\uFEFF/g, "").trim(); });
+      var header = csvParseRow(lines[0]).map(function(h) { return h.replace(/\uFEFF/g, "").trim(); });
       function findIdx(names) {
         for (var n = 0; n < names.length; n++)
           for (var j = 0; j < header.length; j++)
@@ -6666,7 +6757,7 @@ function importCSV(e) {
       var ti = findIdx(["類型","type"]), cai = findIdx(["寄放金額","cash"]), noi = findIdx(["備註","note"]);
       var count = 0;
       for (var i = 1; i < lines.length; i++) {
-        var cols = lines[i].split(",");
+        var cols = csvParseRow(lines[i]);
         if (cols.length < 2) continue;
         var type = ti !== -1 ? cols[ti].trim() : "rolling";
         var cashVal = cai !== -1 ? toNum(cols[cai]) : 0;
@@ -7039,8 +7130,8 @@ function renderOverview() {
 
   // --- 代理洗碼排行 Top 10（Chart.js 長條圖）---
   var agtVol={};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<filteredTxs.length;i++){
+    var t=filteredTxs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.agent) continue;
     if (!agtVol[t.agent]) agtVol[t.agent]=0;
     agtVol[t.agent]+=(t.volume||0);
@@ -7054,8 +7145,8 @@ function renderOverview() {
   // --- 場地洗碼分佈 ---
   var venueColors = ['#00d4ff','#58a6ff','#7c3aed','#2dd4a0','#f85149','#f0a500','#c9a84c'];
   var venVol={};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<filteredTxs.length;i++){
+    var t=filteredTxs[i];
     if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.venue) continue;
     if (!venVol[t.venue]) venVol[t.venue]=0;
     venVol[t.venue]+=(t.volume||0);
@@ -7079,8 +7170,8 @@ function renderOverview() {
   var timeline=document.getElementById("ov-timeline");
   var entries=[];
   // 交易紀錄
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
+  for (var i=0;i<filteredTxs.length;i++){
+    var t=filteredTxs[i];
     if (!t.date||t.date.slice(0,7)!==now) continue;
     entries.push({date:t.date,type:t.type||"rolling",desc:(t.type==="cash"?t.agent+" 現金寄放":t.agent+" — "+t.client+(t.venue?" @ "+t.venue:"")),amount:t.type==="cash"?(t.cash||0):(t.bonus||0),extra:t.type==="cash"?"dep":"pos"});
   }
@@ -7839,7 +7930,8 @@ var RM = {
     var csv = "\uFEFF日期,代理,客戶,體系,酒店,房型,入住日期,退房日期,天數,每晚單價,所需轉碼門檻,總費用,狀態,備註\n";
     for (var i=0; i<filtered.length; i++) {
       var b = filtered[i];
-      csv += [b.date,b.agent,b.client,(b.casino||""),b.hotel,(b.roomType||""),b.checkIn,(b.checkOut||b.checkout),b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note].join(",")+"\n";
+      var fields = [b.date,b.agent,b.client,(b.casino||""),b.hotel,(b.roomType||""),b.checkIn,(b.checkOut||b.checkout),b.nights,b.pricePerNight,(b.threshold||70),b.totalCost,b.status,b.note];
+      csv += fields.map(function(f) { return csvEscape(f); }).join(",")+"\n";
     }
     var blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
     var url = URL.createObjectURL(blob);
@@ -7860,11 +7952,11 @@ var RM = {
       var lines = ev.target.result.split("\n").filter(function(x){ return x.trim(); });
       if (lines.length<2) { showToast("CSV 無資料","error"); return; }
       // 檢測標頭是否包含「體系」或「房型」（新格式 v11.1.2+）
-      var header = lines[0].trim();
+      var header = csvParseRow(lines[0]).map(function(h) { return h.trim(); }).join(",");
       var hasNewFormat = header.indexOf("體系") >= 0 || header.indexOf("房型") >= 0;
       var imported = 0;
       for (var i=1; i<lines.length; i++) {
-        var cols = lines[i].split(",");
+        var cols = csvParseRow(lines[i]);
         if (cols.length<10) continue;
         self.lastId++;
         if (hasNewFormat && cols.length >= 14) {
