@@ -1,7 +1,7 @@
 {
-  "version": "11.1.1",
+  "version": "11.1.2",
   "buildDate": "2026-06-08",
-  "buildNumber": 3,
-  "previousVersion": "11.0.0",
-  "description": "UI 视觉重构 v11.1 — 70% 现代科技感 + 30% 中国风，深色科技仪表板风格"
+  "buildNumber": 4,
+  "previousVersion": "11.1.1",
+  "description": "v11.1.2 結構穩定版 — 鎖定 DOM 骨架、補回缺失 modal、統整 inline style、修復版本號"
 }

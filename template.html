@@ -5,7 +5,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.1.1</title>
+<title>澳門洗碼報表 v11.1.2</title>
 <!-- CSS_PLACEHOLDER -->
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -55,6 +55,12 @@
     <div class="pw-version" id="pw-version"></div>
   </div>
 </div>
+
+<!-- Toast 通知容器 -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- 主應用外框 -->
+<div id="app-shell">
 
 <!-- ===== SIDEBAR ===== -->
 <div id="sidebar" class="glass">
@@ -117,7 +123,7 @@
     <span class="sb-label">折疊選單</span>
   </div>
   <!-- v10.13 版本號顯示 -->
-  <div class="sb-version" id="sb-version">v10.19</div>
+  <div class="sb-version" id="sb-version">v11.1.1</div>
 </div>
 
 <!-- 手機版側邊欄遮罩層 -->
@@ -264,13 +270,13 @@
   </div>
 
   <div class="page" id="page-query">
-    <div class="toolbar" style="flex-wrap:wrap;gap:4px;">
-      <label style="line-height:35px;">代理：</label>
-      <select id="q-agent" style="padding:6px 10px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;"></select>
-      <label style="line-height:35px;">地點：</label>
-      <select id="q-venue" style="padding:6px 10px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;min-width:100px;"><option value="">全部</option></select>
-      <label style="line-height:35px;">月份：</label>
-      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;padding:6px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:6px;background:rgba(13,17,23,0.8);color:#e6edf3;">
+    <div class="toolbar" style="gap:4px;">
+      <label>代理：</label>
+      <select id="q-agent"></select>
+      <label>地點：</label>
+      <select id="q-venue" style="min-width:100px;"><option value="">全部</option></select>
+      <label>月份：</label>
+      <input type="text" id="q-month" placeholder="2026-06" style="width:70px;">
       <button class="btn btn-primary" onclick="doQuery()" style="padding:6px 14px;">查詢</button>
       <button class="btn" onclick="toggleAdvFilter()" style="padding:6px 10px;font-size:11px;" id="btn-adv-filter">⚙ 進階</button>
       <button class="btn" onclick="showSavedFilters()" style="padding:6px 10px;font-size:11px;" title="儲存的篩選">📌</button>
@@ -286,14 +292,14 @@
     </div>
     <div id="adv-filter" style="display:none;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid rgba(0,212,255,0.08);">
       <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-        <label style="font-size:11px;color:#888;">日期從：</label>
-        <input type="date" id="q-date-from" style="padding:4px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;width:130px;">
-        <label style="font-size:11px;color:#888;">至：</label>
-        <input type="date" id="q-date-to" style="padding:4px 8px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;width:130px;">
-        <label style="font-size:11px;color:#888;">洗碼量：</label>
-        <input type="number" id="q-vol-min" placeholder="最低(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;">
-        <label style="font-size:11px;color:#888;">~</label>
-        <input type="number" id="q-vol-max" placeholder="最高(萬)" style="padding:4px 6px;width:70px;border:1px solid rgba(0,212,255,0.15);border-radius:4px;background:rgba(13,17,23,0.8);color:#e6edf3;font-size:11px;">
+        <label>日期從：</label>
+        <input type="date" id="q-date-from" style="width:130px;">
+        <label>至：</label>
+        <input type="date" id="q-date-to" style="width:130px;">
+        <label>洗碼量：</label>
+        <input type="number" id="q-vol-min" placeholder="最低(萬)" style="width:70px;">
+        <label>~</label>
+        <input type="number" id="q-vol-max" placeholder="最高(萬)" style="width:70px;">
         <button class="btn" onclick="saveCurrentFilter()" style="padding:4px 8px;font-size:10px;">💾 儲存篩選</button>
       </div>
     </div>
@@ -439,6 +445,7 @@
   </div><!-- /page-room -->
 </div><!-- /page-scroll -->
 </div><!-- /main-content -->
+</div><!-- /#app-shell -->
 
 <div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
 <div class="modal-scroll">
@@ -566,6 +573,30 @@
   <div id="agent-mgr-list" style="max-height:300px;overflow-y:auto;"></div>
   <div style="text-align:right;margin-top:16px;">
     <button style="background:rgba(40,40,50,0.8);color:#c0c0c0;padding:8px 16px;border:1px solid rgba(0,212,255,0.08);border-radius:8px;cursor:pointer;" onclick="closeAgentMgr()">關閉</button>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- 快捷鍵幫助 Modal -->
+<div class="modal-bg" id="shortcut-help-modal">
+<div class="modal-scroll">
+<div class="modal">
+  <h3>⌨️ 鍵盤快捷鍵指南</h3>
+  <div style="padding:8px 0;">
+    <div class="shortcut-row"><span class="shortcut-label">新增交易</span><span class="shortcut-key">Ctrl + N</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">儲存資料</span><span class="shortcut-key">Ctrl + S</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">快速搜尋</span><span class="shortcut-key">Ctrl + F</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">總覽頁面</span><span class="shortcut-key">Ctrl + 1</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">全部交易</span><span class="shortcut-key">Ctrl + 2</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">查詢頁面</span><span class="shortcut-key">Ctrl + 3</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">統計頁面</span><span class="shortcut-key">Ctrl + 4</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">房務系統</span><span class="shortcut-key">Ctrl + 5</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">關閉彈窗</span><span class="shortcut-key">Esc</span></div>
+    <div class="shortcut-row"><span class="shortcut-label">顯示幫助</span><span class="shortcut-key">?</span></div>
+  </div>
+  <div style="text-align:right;margin-top:16px;">
+    <button onclick="closeShortcutHelp()" class="btn btn-ghost">關閉</button>
   </div>
 </div>
 </div>
@@ -767,15 +798,10 @@
   </div>
 </div>
 
-<!-- Toast 通知容器 -->
-<div class="toast-container" id="toast-container"></div>
-
-
-
 <!-- JS_PLACEHOLDER -->
 
 
   <div id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">▲</div>
-<div id="version-badge" style="position:fixed;bottom:4px;left:8px;font-size:10px;color:rgba(255,255,255,0.18);z-index:1;pointer-events:none;">v10.26</div>
+<div id="version-badge" style="position:fixed;bottom:4px;left:8px;font-size:10px;color:rgba(255,255,255,0.18);z-index:1;pointer-events:none;">v11.1.1</div>
 </body>
 </html>

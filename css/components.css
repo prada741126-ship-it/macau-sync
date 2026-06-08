@@ -1018,3 +1018,59 @@ select {
   .hc-panel { flex: 1; min-height: 0; }
   .hc-table-wrap { max-height: calc(100vh - 350px); }
 }
+
+/* ---------------------------------------------------------------
+   快捷鍵幫助面板 (#shortcut-help-modal)
+   --------------------------------------------------------------- */
+#shortcut-help-modal .modal {
+  max-width: 480px;
+  animation: fadeInUp 0.3s ease;
+}
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.shortcut-row:last-child { border-bottom: none; }
+.shortcut-label { color: var(--text-secondary); font-size: 13px; }
+.shortcut-key {
+  background: rgba(0,212,255,0.08);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: "Consolas", "SF Mono", monospace;
+  color: var(--tech-cyan);
+  border: 1px solid rgba(0,212,255,0.15);
+}
+
+/* ---------------------------------------------------------------
+   查詢頁面專用 (取代 inline style)
+   --------------------------------------------------------------- */
+.page-query .toolbar select,
+.page-query .toolbar input { /* stylelint-disable-line no-descending-specificity */
+  padding: 6px 10px;
+  border: 1px solid var(--tech-cyan-subtle, rgba(0,212,255,0.15));
+  border-radius: 6px;
+  background: var(--bg-input, rgba(13,17,23,0.8));
+  color: var(--text-primary);
+}
+.page-query .toolbar select:focus,
+.page-query .toolbar input:focus {
+  border-color: var(--tech-cyan);
+  outline: none;
+}
+.page-query .toolbar label { line-height: 35px; }
+
+/* 進階篩選區 */
+#adv-filter input[type="date"],
+#adv-filter input[type="number"] {
+  padding: 4px 8px;
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 4px;
+  background: rgba(13,17,23,0.8);
+  color: var(--text-primary);
+  font-size: 11px;
+}
+#adv-filter label { font-size: 11px; color: var(--text-muted); }
