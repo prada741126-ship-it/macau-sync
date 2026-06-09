@@ -1,5 +1,5 @@
 {
-  "version": "11.2.15",
+  "version": "11.2.16",
   "buildDate": "2026-06-10",
-  "note": "fix: add missing #hc-modal-bg CSS (display:none) to components.css"
+  "note": "fix: #page-room CSS specificity bug — must be #page-room.active to respect .page {display:none}"
 }

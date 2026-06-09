@@ -995,7 +995,7 @@ select {
 
 /* 桌面版：房务系统填满剩余空间 */
 @media (min-width: 701px) {
-  #page-room {
+  #page-room.active {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 140px);
