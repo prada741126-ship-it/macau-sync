@@ -1,6 +1,6 @@
 {
   "name": "macau-sync-server",
-  "version": "11.2.9",
+  "version": "11.2.10",
   "description": "澳门洗码报表同步服务器",
   "main": "server.js",
   "scripts": {

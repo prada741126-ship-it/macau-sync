@@ -1,4 +1,5 @@
 const express = require('express');
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const app = express();
@@ -8,6 +9,50 @@ const HOST = '0.0.0.0';
 console.log('[START] Railway server starting...');
 console.log('[START] PORT=' + PORT + ', HOST=' + HOST);
 console.log('[START] __dirname=' + __dirname);
+
+// ===== 啟動時強制重新構建 dist/index.html =====
+var BUILD_VERSION = 'unknown';
+try {
+  console.log('[START] 執行 build.js 重新構建...');
+  var buildPath = path.join(__dirname, 'build.js');
+  if (fs.existsSync(buildPath)) {
+    var buildOut = execSync('"' + process.execPath + '" "' + buildPath + '"', {
+      cwd: __dirname,
+      timeout: 60000,
+      encoding: 'utf8',
+      env: Object.assign({}, process.env, { NODE_ENV: 'production' })
+    });
+    console.log('[START] build.js 輸出:\n' + buildOut);
+  } else {
+    console.log('[START] build.js 不存在，跳過構建');
+  }
+} catch(e) {
+  console.error('[START] build.js 執行失敗:', e.message);
+  console.error('[START] 將使用現有的 dist/index.html（如有）');
+}
+
+// 讀取 version.json 獲取版本號
+try {
+  var vFile = path.join(__dirname, 'version.json');
+  if (fs.existsSync(vFile)) {
+    var vData = JSON.parse(fs.readFileSync(vFile, 'utf8'));
+    BUILD_VERSION = 'v' + (vData.version || 'unknown');
+  }
+} catch (e) { console.error('[START] version.json read error:', e.message); }
+
+// 驗證 dist/index.html 中的 BUILD 版本
+try {
+  var distHtml = path.join(__dirname, 'dist', 'index.html');
+  if (fs.existsSync(distHtml)) {
+    var distContent = fs.readFileSync(distHtml, 'utf8');
+    var buildMatch = distContent.match(/BUILD: (v\d+\.\d+\.\d+)/);
+    if (buildMatch) {
+      console.log('[START] dist/index.html BUILD: ' + buildMatch[1]);
+    } else {
+      console.log('[START] dist/index.html BUILD: 未找到版本標記');
+    }
+  }
+} catch(e) { console.error('[START] dist驗證錯誤:', e.message); }
 
 const DB_FILE = path.join(__dirname, 'db.json');
 
@@ -20,6 +65,7 @@ if (!fs.existsSync(HTML_FILE)) {
   }
 }
 console.log('[START] HTML_FILE=' + HTML_FILE + ', exists=' + fs.existsSync(HTML_FILE));
+console.log('[START] BUILD_VERSION=' + BUILD_VERSION);
 
 // 啟用 CORS（允許手機訪問）
 app.use((req, res, next) => {
@@ -93,19 +139,18 @@ app.get('/', (req, res) => {
   }
 });
 
-// Railway 健康檢查（動態讀取版本號）
-var SERVER_VERSION = 'unknown';
-try {
-  var vFile = path.join(__dirname, 'version.json');
-  if (fs.existsSync(vFile)) {
-    var vData = JSON.parse(fs.readFileSync(vFile, 'utf8'));
-    SERVER_VERSION = 'v' + (vData.version || 'unknown');
-  }
-} catch (e) { console.error('[START] version.json read error:', e.message); }
-console.log('[START] SERVER_VERSION=' + SERVER_VERSION);
-
+// Railway 健康檢查（報告 server 版本 + dist HTML 內 BUILD 版本）
 app.get('/health', (req, res) => {
-  res.json({ ok: true, status: 'running', version: SERVER_VERSION });
+  var distBuild = 'unknown';
+  try {
+    var dh = path.join(__dirname, 'dist', 'index.html');
+    if (fs.existsSync(dh)) {
+      var dc = fs.readFileSync(dh, 'utf8');
+      var dm = dc.match(/BUILD: (v\d+\.\d+\.\d+)/);
+      if (dm) distBuild = dm[1];
+    }
+  } catch(e) {}
+  res.json({ ok: true, status: 'running', serverVersion: BUILD_VERSION, htmlBuild: distBuild });
 });
 
 // 讀取數據庫
