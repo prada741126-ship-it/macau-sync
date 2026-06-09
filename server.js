@@ -88,9 +88,19 @@ app.get('/', (req, res) => {
   }
 });
 
-// Railway 健康檢查
+// Railway 健康檢查（動態讀取版本號）
+var SERVER_VERSION = 'unknown';
+try {
+  var vFile = path.join(__dirname, 'version.json');
+  if (fs.existsSync(vFile)) {
+    var vData = JSON.parse(fs.readFileSync(vFile, 'utf8'));
+    SERVER_VERSION = 'v' + (vData.version || 'unknown');
+  }
+} catch (e) { console.error('[START] version.json read error:', e.message); }
+console.log('[START] SERVER_VERSION=' + SERVER_VERSION);
+
 app.get('/health', (req, res) => {
-  res.json({ ok: true, status: 'running', version: '6.3.5' });
+  res.json({ ok: true, status: 'running', version: SERVER_VERSION });
 });
 
 // 讀取數據庫
