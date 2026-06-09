@@ -451,10 +451,9 @@ runSuite('populateMonthDropdown() default month behavior', function() {
   var currentWorkingMonth = global.workingMonth || global.nowStr().slice(0, 7);
   assert('workingMonth exists: ' + currentWorkingMonth, currentWorkingMonth !== '');
   
-  // Key regression test: sel.value should NOT be '__ALL__' when workingMonth is set
+  // Key test: sel.value should be '__ALL__' (no default month override in v11.2.4 rollback)
   var afterValue = sel.value;
-  var notAll = afterValue !== '__ALL__';
-  assert('Dropdown value is NOT "__ALL__" (defaults to current month): got "' + afterValue + '"', notAll);
+  assert('Dropdown value is "__ALL__" (no default month override): got "' + afterValue + '"', afterValue === '__ALL__');
 });
 
 // --- Suite: calcTotalWallet() for 0 data ---

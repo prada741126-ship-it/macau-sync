@@ -559,7 +559,4 @@ function populateMonthDropdown() {
     opt.textContent = monthArr[i];
     sel.appendChild(opt);
   }
-  // 預設選中當月（workingMonth 或系統當月）
-  var defaultMonth = workingMonth || nowStr().slice(0, 7);
-  if (defaultMonth) sel.value = defaultMonth;
 }
