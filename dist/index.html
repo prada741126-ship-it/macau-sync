@@ -18,8 +18,9 @@
   if (stored && stored !== APP_VERSION) {
     console.log('[Version] 檢測到新版本 ' + APP_VERSION + '，舊版為 ' + stored + '，正在清除快取並重新載入...');
     localStorage.setItem('macau_app_version', APP_VERSION);
-    // 強制重新載入（繞過快取）
-    location.reload(true);
+    // 強制重新載入（附加時間戳繞過所有快取層）
+    var url = location.href.split('?')[0];
+    location.replace(url + '?_v=' + Date.now());
   } else {
     localStorage.setItem('macau_app_version', APP_VERSION);
   }
