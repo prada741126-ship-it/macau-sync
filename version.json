@@ -1,7 +1,7 @@
 {
-  "version": "11.2.12",
+  "version": "11.2.13",
   "buildDate": "2026-06-09",
   "buildNumber": 1,
-  "previousVersion": "11.2.11",
-  "description": "v11.2.12 — package.json start script deletes dist/ before build to ensure fresh output"
+  "previousVersion": "11.2.12",
+  "description": "v11.2.13 — force Railway Nixpacks rebuild by changing package.json"
 }
