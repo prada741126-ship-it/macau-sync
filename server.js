@@ -76,13 +76,18 @@ app.use(function(req, res, next) {
 });
 app.use(express.static(__dirname));
 
-// 根路徑 - 返回 HTML（v11.2.6：禁用快取）
+// 根路徑 - 返回 HTML（v11.2.8：動態響應確保永不緩存）
 app.get('/', (req, res) => {
   if (fs.existsSync(HTML_FILE)) {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    // 讀取 HTML 並在末尾注入時間戳，確保每次響應內容不同
+    var htmlContent = fs.readFileSync(HTML_FILE, 'utf8');
+    htmlContent += '\n<!-- served:' + Date.now() + ' -->';
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-    res.sendFile(HTML_FILE);
+    res.setHeader('Surrogate-Control', 'no-store');
+    res.setHeader('ETag', 'W/"' + Date.now() + '"');
+    res.type('html').send(htmlContent);
   } else {
     res.status(404).send('index.html not found at: ' + HTML_FILE);
   }
