@@ -1,14 +1,14 @@
 {
   "name": "macau-sync-server",
-  "version": "11.2.12",
+  "version": "11.2.14",
   "description": "澳门洗码报表同步服务器",
   "main": "server.js",
   "scripts": {
-    "start": "rm -rf dist/ && node build.js && node server.js",
+    "start": "node server.js",
     "build": "node build.js"
   },
   "dependencies": {
     "express": "^4.21.0"
   },
-  "_railway_force_rebuild": "2026-06-09-2359"
+  "_railway_force_rebuild": "2026-06-10-0114"
 }

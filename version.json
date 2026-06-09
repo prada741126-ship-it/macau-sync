@@ -1,7 +1,5 @@
 {
-  "version": "11.2.13",
-  "buildDate": "2026-06-09",
-  "buildNumber": 1,
-  "previousVersion": "11.2.12",
-  "description": "v11.2.13 — force Railway Nixpacks rebuild by changing package.json"
+  "version": "11.2.14",
+  "build": "2026-06-10 #001",
+  "note": "移除根目錄舊 index.html，簡化 Railway 啟動流程"
 }

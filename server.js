@@ -1,5 +1,4 @@
 const express = require('express');
-const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const app = express();
@@ -10,28 +9,8 @@ console.log('[START] Railway server starting...');
 console.log('[START] PORT=' + PORT + ', HOST=' + HOST);
 console.log('[START] __dirname=' + __dirname);
 
-// ===== 啟動時強制重新構建 dist/index.html =====
-var BUILD_VERSION = 'unknown';
-try {
-  console.log('[START] 執行 build.js 重新構建...');
-  var buildPath = path.join(__dirname, 'build.js');
-  if (fs.existsSync(buildPath)) {
-    var buildOut = execSync('"' + process.execPath + '" "' + buildPath + '"', {
-      cwd: __dirname,
-      timeout: 60000,
-      encoding: 'utf8',
-      env: Object.assign({}, process.env, { NODE_ENV: 'production' })
-    });
-    console.log('[START] build.js 輸出:\n' + buildOut);
-  } else {
-    console.log('[START] build.js 不存在，跳過構建');
-  }
-} catch(e) {
-  console.error('[START] build.js 執行失敗:', e.message);
-  console.error('[START] 將使用現有的 dist/index.html（如有）');
-}
-
 // 讀取 version.json 獲取版本號
+var BUILD_VERSION = 'unknown';
 try {
   var vFile = path.join(__dirname, 'version.json');
   if (fs.existsSync(vFile)) {
@@ -39,6 +18,7 @@ try {
     BUILD_VERSION = 'v' + (vData.version || 'unknown');
   }
 } catch (e) { console.error('[START] version.json read error:', e.message); }
+console.log('[START] SERVER_VERSION=' + BUILD_VERSION);
 
 // 驗證 dist/index.html 中的 BUILD 版本
 try {
@@ -51,6 +31,8 @@ try {
     } else {
       console.log('[START] dist/index.html BUILD: 未找到版本標記');
     }
+  } else {
+    console.error('[START] WARNING: dist/index.html NOT FOUND!');
   }
 } catch(e) { console.error('[START] dist驗證錯誤:', e.message); }
 
