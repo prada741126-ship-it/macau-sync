@@ -10,12 +10,13 @@ function renderOverview() {
   // v10.23 時間篩選
   var filteredTxs = window.__currentTimeFilter ? filterTxsByTime(txs) : txs;
   // --- KPI 卡片 ---
-  var now = workingMonth || nowStr().slice(0,7);
+  var now = nowStr().slice(0,7);  // 當月
+  var showAllMonths = true;  // v11.2.18 顯示所有月份（代理排行+場地分佈）
   var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
   var agentSet = {};
   for (var i=0;i<filteredTxs.length;i++){
     var t=filteredTxs[i];
-    if (!t.date||t.date.slice(0,7)!==now) continue;
+    if (!t.date||(!showAllMonths && t.date.slice(0,7)!==now)) continue;
     if (t.type==="cash"){ totalCash+=(t.cash||0); }
     else { totalVol+=(t.volume||0); }
     totalBonus+=(t.bonus||0);
@@ -49,11 +50,11 @@ function renderOverview() {
   var rmUsedRolling=0;
   var roomMonth=now.slice(0,7);
   var agentsWithRolling = {};
-  for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
+  for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&(!showAllMonths && tr.date.slice(0,7)!==roomMonth)&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
   if (typeof RM!=="undefined"&&RM.bookings){
     for (var k=0;k<RM.bookings.length;k++){
       var b=RM.bookings[k];
-      if (!b.date||b.date.slice(0,7)!==roomMonth) continue;
+      if (!b.date||(!showAllMonths && b.date.slice(0,7)!==roomMonth)) continue;
       if (b.status==="免費") rmUsedRolling += (b.nights||0) * (b.threshold||70);
     }
   }
@@ -99,7 +100,7 @@ function renderOverview() {
   var agtVol={};
   for (var i=0;i<txs.length;i++){
     var t=txs[i];
-    if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.agent) continue;
+    if (!t.date||(!showAllMonths && t.date.slice(0,7)!==now)||t.type==="cash"||!t.agent) continue;
     if (!agtVol[t.agent]) agtVol[t.agent]=0;
     agtVol[t.agent]+=(t.volume||0);
   }
@@ -114,7 +115,7 @@ function renderOverview() {
   var venVol={};
   for (var i=0;i<txs.length;i++){
     var t=txs[i];
-    if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.venue) continue;
+    if (!t.date||(!showAllMonths && t.date.slice(0,7)!==now)||t.type==="cash"||!t.venue) continue;
     if (!venVol[t.venue]) venVol[t.venue]=0;
     venVol[t.venue]+=(t.volume||0);
   }
