@@ -1,7 +1,7 @@
 {
-  "version": "11.2.10",
+  "version": "11.2.11",
   "buildDate": "2026-06-09",
   "buildNumber": 1,
-  "previousVersion": "11.2.9",
-  "description": "v11.2.10 — server.js 啟動時強制執行 build.js，確保 dist/index.html 永遠最新"
+  "previousVersion": "11.2.10",
+  "description": "v11.2.11 — CDN-Cache-Control + Vary header 強制清除 Railway Edge Cache"
 }

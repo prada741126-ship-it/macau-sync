@@ -122,17 +122,18 @@ app.use(function(req, res, next) {
 });
 app.use(express.static(__dirname));
 
-// 根路徑 - 返回 HTML（v11.2.8：動態響應確保永不緩存）
+// 根路徑 - 返回 HTML（v11.2.10：版本化路徑 + CDN 強制清除）
 app.get('/', (req, res) => {
   if (fs.existsSync(HTML_FILE)) {
-    // 讀取 HTML 並在末尾注入時間戳，確保每次響應內容不同
     var htmlContent = fs.readFileSync(HTML_FILE, 'utf8');
-    htmlContent += '\n<!-- served:' + Date.now() + ' -->';
+    htmlContent += '\n<!-- served:' + Date.now() + ' v=' + BUILD_VERSION + ' -->';
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-    res.setHeader('Surrogate-Control', 'no-store');
-    res.setHeader('ETag', 'W/"' + Date.now() + '"');
+    res.setHeader('Surrogate-Control', 'no-store, max-age=0');
+    res.setHeader('CDN-Cache-Control', 'no-store, max-age=0');
+    res.setHeader('ETag', 'W/"' + BUILD_VERSION + '-' + Date.now() + '"');
+    res.setHeader('Vary', '*');
     res.type('html').send(htmlContent);
   } else {
     res.status(404).send('index.html not found at: ' + HTML_FILE);
