@@ -407,6 +407,7 @@ select {
   background-position: right 10px center;
   padding-right: 28px;
   cursor: pointer;
+  color-scheme: dark;
 }
 
 
@@ -827,6 +828,7 @@ select {
   border-radius: 6px;
   color: var(--text-primary);
   font-size: 12px;
+  color-scheme: dark;
 }
 .rm-select:focus, .rm-input:focus { border-color: var(--tech-cyan); outline: none; }
 .room-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
@@ -1055,6 +1057,7 @@ select {
   border-radius: 6px;
   background: var(--bg-input, rgba(13,17,23,0.8));
   color: var(--text-primary);
+  color-scheme: dark;
 }
 .page-query .toolbar select:focus,
 .page-query .toolbar input:focus {
@@ -1160,6 +1163,7 @@ select {
   border-radius: 6px;
   outline: none;
   font-family: inherit;
+  color-scheme: dark;
 }
 .hc-modal .hc-group input:focus,
 .hc-modal .hc-group select:focus {

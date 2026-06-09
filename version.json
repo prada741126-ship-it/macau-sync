@@ -1,5 +1,4 @@
 {
-  "version": "11.2.16",
-  "buildDate": "2026-06-10",
-  "note": "fix: #page-room CSS specificity bug — must be #page-room.active to respect .page {display:none}"
+  "version": "11.2.17",
+  "buildDate": "2026-06-10"
 }
