@@ -1,7 +1,7 @@
 {
-  "version": "11.2.11",
+  "version": "11.2.12",
   "buildDate": "2026-06-09",
   "buildNumber": 1,
-  "previousVersion": "11.2.10",
-  "description": "v11.2.11 — CDN-Cache-Control + Vary header 強制清除 Railway Edge Cache"
+  "previousVersion": "11.2.11",
+  "description": "v11.2.12 — package.json start script deletes dist/ before build to ensure fresh output"
 }
