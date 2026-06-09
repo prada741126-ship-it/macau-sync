@@ -5,11 +5,31 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>澳門洗碼報表 v11.2.4</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>澳門洗碼報表 v11.2.6</title>
+<!-- 版本快取清除：檢測到新版本時強制重新載入 -->
+<script>
+(function(){
+  var APP_VERSION = 'v11.2.6';
+  window.APP_VERSION = APP_VERSION;
+  var stored = localStorage.getItem('macau_app_version');
+  if (stored && stored !== APP_VERSION) {
+    console.log('[Version] 檢測到新版本 ' + APP_VERSION + '，舊版為 ' + stored + '，正在清除快取並重新載入...');
+    localStorage.setItem('macau_app_version', APP_VERSION);
+    // 強制重新載入（繞過快取）
+    location.reload(true);
+  } else {
+    localStorage.setItem('macau_app_version', APP_VERSION);
+  }
+})();
+</script>
 <!-- CSS_PLACEHOLDER -->
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDPLDEr5QnMQ_AD-z7Wppt2fylxWoBuxj0U",

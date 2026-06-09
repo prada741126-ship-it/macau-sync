@@ -1,7 +1,7 @@
 {
-  "version": "11.2.5",
+  "version": "11.2.6",
   "buildDate": "2026-06-09",
   "buildNumber": 1,
-  "previousVersion": "11.2.4",
-  "description": "v11.2.5 — 強制刷新版本（瀏覽器緩存清理）"
+  "previousVersion": "11.2.5",
+  "description": "v11.2.6 — 修復 CryptoJS 缺失、版本號顯示、快取清除機制"
 }
