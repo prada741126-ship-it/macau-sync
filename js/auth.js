@@ -1,4 +1,4 @@
-// js/auth.js - v11.0
+// js/auth.js - v12.0.6
 // Non-overlapping extraction
 
 document.addEventListener("keydown", function(e) {
@@ -6,8 +6,6 @@ document.addEventListener("keydown", function(e) {
   if (e.ctrlKey && e.key === "n") { e.preventDefault(); if (!isModalOpen()) openModal(); return; }
   // Ctrl+S 儲存
   if (e.ctrlKey && e.key === "s") { e.preventDefault(); saveData(true); showToast("已儲存 " + txs.length + " 筆","success"); return; }
-  // Ctrl+Z 復原
-  if (e.ctrlKey && e.key === "z") { e.preventDefault(); undoDelete(); return; }
   // Ctrl+1~5 切換頁面
   if (e.ctrlKey && e.key >= "1" && e.key <= "5") {
     e.preventDefault();
@@ -40,22 +38,18 @@ function isModalOpen() {
     document.getElementById("agent-mgr-modal").classList.contains("show");
 }
 
-// ===== 刪除撤銷 =====
-var lastDeleted = null;
+// ===== 刪除交易 =====
 // v10.0 B方案：使用 _fbKey 精準刪除（修復舊資料相容）
 function deleteTx(fbKey) {
   try {
   if (!confirm("確定刪除此筆交易？")) return;
   showLoading("刪除中…");
-  // 保存副本供撤銷
   var found = false;
   var targetFbKey = fbKey;
   for (var i = 0; i < txs.length; i++) {
     var t = txs[i];
     if (!t) continue;
     if (t._fbKey === fbKey || String(t.id) === String(fbKey) || t.id === parseInt(fbKey) || String(t._fbKey) === String(fbKey)) {
-      lastDeleted = t;
-      lastDeleted.fbKey = t._fbKey || fbKey;
       targetFbKey = t._fbKey || fbKey;
       found = true;
       break;
@@ -84,42 +78,15 @@ function deleteTx(fbKey) {
   renderOverview();
   renderSummary();
   updateTotalWalletUI();
-  if (lastDeleted) showUndoToast();
+  showToast("已刪除 1 筆交易", "success");
+  setTimeout(function(){ showToast("同步中…", "info"); }, 350);
+  setTimeout(function(){ showToast("同步成功", "success"); }, 950);
   setTimeout(hideLoading, 300);
   } catch(e) {
     hideLoading();
     console.error('[deleteTx] 錯誤:', e);
     showToast("刪除失敗：" + (e.message||e), "error");
   }
-}
-function showUndoToast() {
-  var container = document.getElementById("toast-container");
-  var el = document.createElement("div");
-  el.className = "toast toast-warning";
-  el.style.cssText = "cursor:pointer;flex-direction:column;gap:6px;";
-  el.innerHTML = "<span>已刪除 1 筆交易</span><button style='padding:4px 12px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:6px;color:#fff;cursor:pointer;font-size:12px;'>↩ 撤銷</button>";
-  el.querySelector("button").onclick = function(e) {
-    e.stopPropagation();
-    undoDelete();
-    el.remove();
-  };
-  el.onclick = function() { el.remove(); };
-  container.appendChild(el);
-  setTimeout(function() { if (el.parentNode) el.remove(); }, 5000);
-}
-// v10.0 B方案：撤銷時寫入 Firebase
-function undoDelete() {
-  if (!lastDeleted) return;
-  txs.push(lastDeleted);
-  // v10.26 重試封裝寫入 Firebase
-  if (db && lastDeleted.fbKey) _syncSet(db.ref('macau_data/txs/' + lastDeleted.fbKey), lastDeleted);
-  saveData(true);
-  renderAll();
-  renderOverview();
-  renderSummary();
-  updateTotalWalletUI();
-  showToast("已恢復交易！","success");
-  lastDeleted = null;
 }
 
 // ===== 月度管理 =====

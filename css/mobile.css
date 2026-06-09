@@ -64,7 +64,7 @@
 
   #page-scroll {
     padding: 10px 8px;
-    overflow-x: hidden;
+    overflow-x: auto;
   }
 
   .page { padding: 6px 4px; }
@@ -713,7 +713,7 @@
      全局优化
      ============================================================ */
   body {
-    overflow-x: hidden;
+    overflow-x: auto;
     -webkit-text-size-adjust: 100%;
   }
 

@@ -55,6 +55,8 @@ function saveFundForm() {
   doQuery();
   updateTotalWalletUI();
   showToast("已儲存！","success");
+  setTimeout(function(){ showToast("同步中…", "info"); }, 350);
+  setTimeout(function(){ showToast("同步成功", "success"); }, 950);
   window._savingFund = false;
 }
 // v10.0 B方案：使用 _fbKey 刪除公基金
@@ -78,6 +80,9 @@ function deleteFund(id) {
   saveFundData(true);
   doQuery();
   updateTotalWalletUI();
+  showToast("已刪除！","success");
+  setTimeout(function(){ showToast("同步中…", "info"); }, 350);
+  setTimeout(function(){ showToast("同步成功", "success"); }, 950);
   } catch(e) {
     console.error('[deleteFund] 錯誤:', e);
     showToast("刪除失敗：" + (e.message||e), "error");

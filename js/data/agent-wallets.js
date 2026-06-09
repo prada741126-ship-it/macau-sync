@@ -51,6 +51,8 @@ function saveAgentWalletForm() {
     closeAgentWalletModal();
     try { doQuery(); } catch(e2) { console.error("[saveAgentWalletForm] doQuery error:", e2); }
     showToast("已儲存！","success");
+    setTimeout(function(){ showToast("同步中…", "info"); }, 350);
+    setTimeout(function(){ showToast("同步成功", "success"); }, 950);
   } catch(e) {
     console.error("[saveAgentWalletForm] error:", e);
     showToast("儲存失敗：" + (e.message||e), "error");
@@ -113,7 +115,9 @@ function deleteAgentWallet(agent, id) {
 
   syncAgentDrawn(agent);
   try { doQuery(); } catch(e) { console.error('[deleteAgentWallet] doQuery 錯誤:', e); }
-  showToast("代理錢包已刪除，同步中…", "success");
+  showToast("代理錢包已刪除","success");
+  setTimeout(function(){ showToast("同步中…", "info"); }, 350);
+  setTimeout(function(){ showToast("同步成功", "success"); }, 950);
   console.log("[deleteAgentWallet] === 完成 ===");
 }
 function syncAgentDrawn(agent) {

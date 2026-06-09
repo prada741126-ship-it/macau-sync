@@ -363,11 +363,15 @@ var RM = {
       _k = (idx>=0 && this.bookings[idx] && this.bookings[idx]._fbKey) ? this.bookings[idx]._fbKey : _fbKey();
       if (idx>=0) this.bookings[idx] = { id:this.bookings[idx].id, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note };
       showToast("訂房已更新","success");
+      setTimeout(function(){ showToast("同步中…", "info"); }, 350);
+      setTimeout(function(){ showToast("同步成功", "success"); }, 950);
     } else {
       this.lastId++;
       _k = _fbKey();
       this.bookings.push({ id:this.lastId, _fbKey:_k, date:date, agent:agent, client:client, casino:casino, hotel:hotel, roomType:roomType, checkIn:checkIn, checkOut:checkout, nights:nights, pricePerNight:price, totalCost:total, status:status, threshold:threshold, month:date.substring(0,7), note:note });
       showToast("訂房已新增","success");
+      setTimeout(function(){ showToast("同步中…", "info"); }, 350);
+      setTimeout(function(){ showToast("同步成功", "success"); }, 950);
     }
     this.save();
     // v10.26 使用重試封裝直接寫入 Firebase 同步（確保即時同步）
@@ -401,6 +405,8 @@ var RM = {
     this.render();
     this.updateQuota();
     showToast("訂房已刪除","success");
+    setTimeout(function(){ showToast("同步中…", "info"); }, 350);
+    setTimeout(function(){ showToast("同步成功", "success"); }, 950);
   },
 
   render: function() {
