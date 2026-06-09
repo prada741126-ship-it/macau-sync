@@ -120,3 +120,25 @@ fs.writeFileSync(outputPath, template, 'utf8');
 const outputSize = Buffer.byteLength(template, 'utf8');
 console.log(`\n[build] ✅ 構建完成: dist/index.html (${(outputSize / 1024).toFixed(1)} KB)`);
 console.log(`[build] 部署就緒: ${distDir}/`);
+
+// ===== 自動執行回歸測試 =====
+const { execSync } = require('child_process');
+try {
+  const testPath = path.join(ROOT, 'test.js');
+  if (fs.existsSync(testPath)) {
+    console.log('[build] 執行回歸測試...');
+    execSync('"' + process.execPath + '" "' + testPath + '"', {
+      cwd: ROOT,
+      stdio: 'inherit',
+      timeout: 30000,
+      env: { ...process.env, NODE_PATH: require('path').resolve(require('os').homedir(), '.workbuddy/binaries/node/workspace/node_modules') }
+    });
+  } else {
+    console.log('[build] 跳過測試（無 test.js）');
+  }
+} catch(e) {
+  if (e.status !== 0) {
+    console.error('[build] ❌ 回歸測試失敗，請修復後重新構建');
+    process.exit(1);
+  }
+}
