@@ -1,7 +1,7 @@
 {
-  "version": "11.2.4",
-  "buildDate": "2026-06-07",
+  "version": "11.2.5",
+  "buildDate": "2026-06-09",
   "buildNumber": 1,
-  "previousVersion": "11.2.3",
-  "description": "v11.2.4 — 修復查詢功能：公基金/代理碼糧的「上月累計」及月份篩選正確處理 skipMonthFilter"
+  "previousVersion": "11.2.4",
+  "description": "v11.2.5 — 強制刷新版本（瀏覽器緩存清理）"
 }
