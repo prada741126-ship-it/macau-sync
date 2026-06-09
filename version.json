@@ -1,5 +1,5 @@
 {
-  "version": "11.2.14",
-  "build": "2026-06-10 #001",
-  "note": "移除根目錄舊 index.html，簡化 Railway 啟動流程"
+  "version": "11.2.15",
+  "buildDate": "2026-06-10",
+  "note": "fix: add missing #hc-modal-bg CSS (display:none) to components.css"
 }

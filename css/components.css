@@ -1074,3 +1074,102 @@ select {
   font-size: 11px;
 }
 #adv-filter label { font-size: 11px; color: var(--text-muted); }
+
+/* ================================================================
+   酒店配置彈窗 (hotel-config modal) — v11.2.15 修復
+   註：v11.0 模組化時遺漏，導致 hc-modal-bg 沒有 display:none
+   ================================================================ */
+#hc-modal-bg {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 2001;
+  justify-content: center;
+  align-items: center;
+}
+#hc-modal-bg.active { display: flex; }
+
+#hc-help-bg {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 2001;
+  justify-content: center;
+  align-items: center;
+}
+#hc-help-bg.active { display: flex; }
+
+#hc-quick-bg {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 2005;
+  justify-content: center;
+  align-items: center;
+}
+#hc-quick-bg.active { display: flex; }
+
+.hc-modal {
+  background: linear-gradient(180deg, rgba(24,14,8,0.98), rgba(16,8,4,0.99));
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 14px;
+  padding: 20px 22px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(212,175,55,0.06);
+}
+.hc-modal h3 {
+  color: var(--gold-soft);
+  font-size: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(212,175,55,0.2);
+}
+.hc-modal .hc-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.hc-modal .hc-group {
+  flex: 1;
+  min-width: 100px;
+}
+.hc-modal .hc-group label {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.hc-modal .hc-group input,
+.hc-modal .hc-group select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  background: rgba(20,20,30,0.8);
+  color: #d4d4d4;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+}
+.hc-modal .hc-group input:focus,
+.hc-modal .hc-group select:focus {
+  border-color: var(--gold-soft);
+}
+.hc-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(212,175,55,0.12);
+}
