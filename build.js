@@ -42,6 +42,7 @@ const JS_FILES = [
   'js/data/agent-wallets.js',
   'js/sync.js',
   'js/pages/query.js',
+  'js/pages/all.js',
   'js/data/agent-list.js',
   'js/pages/overview.js',
   'js/pages/overview-charts.js',

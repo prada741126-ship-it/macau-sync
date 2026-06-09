@@ -3540,6 +3540,7 @@ h1::after {
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDPLDEr5QnMQ_AD-z7Wppt2fylxWoBuxj0U",
@@ -5776,73 +5777,8 @@ document.addEventListener("click", function(e) {
   deleteTx(fbKey);
 });
 
-function renderAll() {
-  var tbody = document.getElementById("all-body");
-  tbody.innerHTML = "";
-  var tbl = document.getElementById("all-table");
-  var msg = document.getElementById("all-msg");
-  // 搜尋過濾
-  var keyword = "";
-  var searchEl = document.getElementById("search-all");
-  if (searchEl) keyword = searchEl.value.trim().toLowerCase();
-  var filtered = txs;
-  if (keyword) {
-    filtered = txs.filter(function(t) {
-      return (t.agent||"").toLowerCase().indexOf(keyword) >= 0 ||
-        (t.client||"").toLowerCase().indexOf(keyword) >= 0 ||
-        (t.venue||"").toLowerCase().indexOf(keyword) >= 0 ||
-        (t.note||"").toLowerCase().indexOf(keyword) >= 0 ||
-        (t.date||"").indexOf(keyword) >= 0;
-    });
-  }
-  // 排序
-  filtered = sortTxs(filtered.slice());
-  // ✅ 修正：先更新 KPI 卡片（即使沒有資料也要歸零）
-  renderAllMiniKPI();
-  if (!filtered.length) {
-    tbl.style.display = "none";
-    msg.style.display = "block";
-    msg.innerHTML = keyword
-      ? '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">無符合搜尋結果</div><div class="empty-desc">請嘗試其他關鍵字或清除搜尋</div></div>'
-      : '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">尚無交易紀錄</div><div class="empty-desc">點擊上方「＋ 新增」開始第一筆交易</div><button class="empty-action" onclick="openModal()">＋ 新增交易</button></div>';
-    document.getElementById("tx-count").textContent = "";
-    return;
-  }
-  tbl.style.display = "table";
-  msg.style.display = "none";
-  document.getElementById("tx-count").textContent = "共 " + filtered.length + " 筆";
-  for (var i = 0; i < filtered.length; i++) {
-    var t = filtered[i];
-    var tags = getStatusTags(t);
-    var tr = document.createElement("tr");
-    var isCash = t.type === "cash";
-    var typeLabel = isCash ? "<span style='color:#e67e22;font-weight:600;'>現金寄放</span>" : "洗碼";
-    var vol = isCash ? 0 : (toNum(t.volume) || 0);
-    var undrawn = isCash ? (t.cash || 0) : Math.max(0, (t.bonus || 0) - (t.drawn || 0));
-    var commFmt = isCash ? "" : fmt(t.comm);
-    var bonusFmt = isCash ? "" : fmt(t.bonus);
-    var drawnFmt = isCash ? "" : fmt(t.drawn);
-    var undrawnFmt = isCash ? fmt(t.cash) : fmt(undrawn);
-    tr.innerHTML =
-      "<td>" + (tags ? tags + "<br>" : "") + typeLabel + "</td>" +
-      "<td>" + (t.date || "") + "</td>" +
-      "<td>" + (t.agent || "") + "</td>" +
-      "<td>" + (isCash ? "" : (t.client || "")) + "</td>" +
-      "<td>" + (isCash ? "" : (t.venue || "")) + "</td>" +
-      "<td class='num'>" + (vol > 0 ? vol.toLocaleString() + "萬" : "") + "</td>" +
-      "<td class='num'>" + commFmt + "</td>" +
-      "<td class='num'>" + bonusFmt + "</td>" +
-      "<td class='num'>" + drawnFmt + "</td>" +
-      "<td class='num'>" + undrawnFmt + "</td>" +
-      "<td>" + (t.note || "") + "</td>" +
-      "<td><button class='btn-gold' onclick='openModal(\"" + (t._fbKey||t.id) + "\")'>編輯</button> <button class='btn-red' onclick='deleteTx(\"" + (t._fbKey||t.id) + "\")'>刪除</button></td>";
-    tbody.appendChild(tr);
-  }
-  fillAgent();
-  populateVenueDropdown();
-  // v11.2.18 檢查表格滾動狀態
-  setTimeout(checkTableScroll, 150);
-}
+
+
 
 function calcTotalWallet() {
   // 計算所有代理錢包餘額（v11.2.18 修復）
@@ -6460,9 +6396,8 @@ function doQuery() {
   try {
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
-  var skipMonthFilter = (month === "__ALL__");
-  if (!month) month = "__ALL__";  // v11.2.18 改為預設顯示全部月份
-  // 公基金查询 - 分筆流水（含累計餘額）
+  if (!month) month = window.workingMonth || window.nowStr().slice(0, 7);
+  var skipMonthFilter = false;  // v11.2.18 修复：始终按月份过滤（与正式版一致）
   if (agent === "__FUND__") {
     var allFundTxs = [], preBalance = 0, totalFund = 0;
     for (var i = 0; i < txs.length; i++) {
@@ -6917,6 +6852,81 @@ function populateMonthDropdown() {
   }
 }
 
+/* === all.js === */
+// all.js — 全部交易页面渲染（基于正式版 v11.2.18 移植）
+// v11.2.18 修复：从正式版移植 renderAll() 函数
+
+function renderAll() {
+  var tbody = document.getElementById("all-body");
+  if (!tbody) return;  // 页面不存在时直接返回
+  tbody.innerHTML = "";
+  var tbl = document.getElementById("all-table");
+  var msg = document.getElementById("all-msg");
+  // 搜索过滤
+  var keyword = "";
+  var searchEl = document.getElementById("search-all");
+  if (searchEl) keyword = searchEl.value.trim().toLowerCase();
+  var filtered = window.txs;
+  if (keyword) {
+    filtered = window.txs.filter(function(t) {
+      return (t.agent||"").toLowerCase().indexOf(keyword) >= 0 ||
+        (t.client||"").toLowerCase().indexOf(keyword) >= 0 ||
+        (t.venue||"").toLowerCase().indexOf(keyword) >= 0 ||
+        (t.note||"").toLowerCase().indexOf(keyword) >= 0 ||
+        (t.date||"").indexOf(keyword) >= 0;
+    });
+  }
+  // 排序
+  filtered = sortTxs(filtered.slice());
+  // 先更新 KPI 卡片
+  if (typeof renderAllMiniKPI === 'function') renderAllMiniKPI();
+  if (!filtered.length) {
+    if (tbl) tbl.style.display = "none";
+    if (msg) {
+      msg.style.display = "block";
+      msg.innerHTML = keyword
+        ? '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">无符合搜索结果</div><div class="empty-desc">请尝试其他关键字或清除搜索</div></div>'
+        : '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">尚无交易纪录</div><div class="empty-desc">点击上方「＋ 新增」开始第一笔交易</div><button class="empty-action" onclick="openModal()">＋ 新增交易</button></div>';
+    }
+    var txCount = document.getElementById("tx-count");
+    if (txCount) txCount.textContent = "";
+    return;
+  }
+  if (tbl) tbl.style.display = "table";
+  if (msg) msg.style.display = "none";
+  var txCount = document.getElementById("tx-count");
+  if (txCount) txCount.textContent = "共 " + filtered.length + " 笔";
+  for (var i = 0; i < filtered.length; i++) {
+    var t = filtered[i];
+    var tags = getStatusTags(t);
+    var tr = document.createElement("tr");
+    var isCash = t.type === "cash";
+    var typeLabel = isCash ? "<span style='color:#e67e22;font-weight:600;'>现金寄放</span>" : "洗码";
+    var vol = isCash ? 0 : (toNum(t.volume) || 0);
+    var undrawn = isCash ? (t.cash || 0) : Math.max(0, (t.bonus || 0) - (t.drawn || 0));
+    var commFmt = isCash ? "" : fmt(t.comm);
+    var bonusFmt = isCash ? "" : fmt(t.bonus);
+    var drawnFmt = isCash ? "" : fmt(t.drawn);
+    var undrawnFmt = isCash ? fmt(t.cash) : fmt(undrawn);
+    tr.innerHTML =
+      "<td>" + (tags ? tags + "<br>" : "") + typeLabel + "</td>" +
+      "<td>" + (t.date || "") + "</td>" +
+      "<td>" + (t.agent || "") + "</td>" +
+      "<td>" + (isCash ? "" : (t.client || "")) + "</td>" +
+      "<td>" + (isCash ? "" : (t.venue || "")) + "</td>" +
+      "<td class='num'>" + (vol > 0 ? vol.toLocaleString() + "万" : "") + "</td>" +
+      "<td class='num'>" + commFmt + "</td>" +
+      "<td class='num'>" + bonusFmt + "</td>" +
+      "<td class='num'>" + drawnFmt + "</td>" +
+      "<td class='num'>" + undrawnFmt + "</td>" +
+      "<td>" + (t.note || "") + "</td>" +
+      "<td><button class='btn-gold' onclick='openModal(\"" + (t._fbKey||t.id) + "\")'>编辑</button> <button class='btn-red' onclick='deleteTx(\"" + (t._fbKey||t.id) + "\")'>删除</button></td>";
+    tbody.appendChild(tr);
+  }
+  if (typeof fillAgent === 'function') fillAgent();
+  if (typeof populateVenueDropdown === 'function') populateVenueDropdown();
+}
+
 /* === agent-list.js === */
 // js/data/agent-list.js - v11.2.18
 // Non-overlapping extraction
@@ -7048,178 +7058,169 @@ initSync();
 // ===== 總覽頁渲染 =====
 
 /* === overview.js === */
-// js/pages/overview.js - v11.2.18
-// Non-overlapping extraction
+// overview.js — 总览页面渲染（基于正式版 v11.2.18 移植）
+// v11.2.18 修复：使用正式版逻辑，按 workingMonth 过滤
 
 var _renderingOverview = false;
+
 function renderOverview() {
-  // 防止並發渲染（Firebase 同步可能快速觸發多次調用）
   if (_renderingOverview) return;
   _renderingOverview = true;
   try {
-  // v11.2.18 時間篩選
-  var filteredTxs = window.__currentTimeFilter ? filterTxsByTime(txs) : txs;
-  // --- KPI 卡片 ---
-  var now = nowStr().slice(0,7);  // 當月
-  var showAllMonths = true;  // v11.2.18 顯示所有月份（代理排行+場地分佈）
-  var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
-  var agentSet = {};
-  for (var i=0;i<filteredTxs.length;i++){
-    var t=filteredTxs[i];
-    if (!t.date||(!showAllMonths && t.date.slice(0,7)!==now)) continue;
-    if (t.type==="cash"){ totalCash+=(t.cash||0); }
-    else { totalVol+=(t.volume||0); }
-    totalBonus+=(t.bonus||0);
-    totalDrawn+=(t.drawn||0);
-    totalFund+=(t.fund||0);
-    if (t.agent){ agentSet[t.agent]=true; }
-    if ((t.bonus||0)>(t.drawn||0)&&t.type==="rolling") undrawnCount++;
-  }
-  // 公基金異動
-  var fDep=0,fCD=0,fWit=0;
-  for (var j=0;j<fundWithdrawals.length;j++){
-    var f=fundWithdrawals[j];
-    if (!f.date||f.date.slice(0,7)!==now) continue;
-    if (f.type==="deposit") fDep+=f.amount; else if (f.type==="cash_deposit") fCD+=f.amount; else fWit+=f.amount;
-  }
-  var fundNet = totalFund+fDep+fCD-fWit;
-  // 公基金累计馀额（所有时间）
-  var totalFundAll=0, fDepAll=0, fCDAll=0, fWitAll=0;
-  for (var ii=0;ii<txs.length;ii++) totalFundAll+=(txs[ii].fund||0);
-  for (var jj=0;jj<fundWithdrawals.length;jj++){
-    var ff=fundWithdrawals[jj];
-    if (ff.type==="deposit") fDepAll+=ff.amount;
-    else if (ff.type==="cash_deposit") fCDAll+=ff.amount;
-    else fWitAll+=ff.amount;
-  }
-  var fundBalance = Math.max(0, totalFundAll+fDepAll+fCDAll-fWitAll);
-  var undrawnTotal = Math.max(0,totalBonus-totalDrawn);
-
-  var grid=document.getElementById("ov-kpi-grid");
-  // 計算已使用轉碼數（所有免費房晚 × 門檻，不限是否有洗碼記錄）
-  var rmUsedRolling=0;
-  var roomMonth=now.slice(0,7);
-  var agentsWithRolling = {};
-  for (var kk=0;kk<txs.length;kk++){ var tr=txs[kk]; if (tr.date&&(!showAllMonths && tr.date.slice(0,7)!==roomMonth)&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
-  if (typeof RM!=="undefined"&&RM.bookings){
-    for (var k=0;k<RM.bookings.length;k++){
-      var b=RM.bookings[k];
-      if (!b.date||(!showAllMonths && b.date.slice(0,7)!==roomMonth)) continue;
-      if (b.status==="免費") rmUsedRolling += (b.nights||0) * (b.threshold||70);
+    // --- KPI 卡片 ---
+    var now = window.workingMonth || window.nowStr().slice(0,7);
+    var totalVol=0, totalBonus=0, totalDrawn=0, totalFund=0, totalCash=0, undrawnCount=0;
+    var agentSet = {};
+    for (var i=0;i<window.txs.length;i++){
+      var t=window.txs[i];
+      if (!t.date||t.date.slice(0,7)!==now) continue;
+      if (t.type==="cash"){ totalCash+=(t.cash||0); }
+      else { totalVol+=(t.volume||0); }
+      totalBonus+=(t.bonus||0);
+      totalDrawn+=(t.drawn||0);
+      totalFund+=(t.fund||0);
+      if (t.agent){ agentSet[t.agent]=true; }
+      if ((t.bonus||0)>(t.drawn||0)&&t.type==="rolling") undrawnCount++;
     }
-  }
-  // 免費一晚計數：只計有洗碼記錄的代理
-  var rmFreeCount = typeof RM!=="undefined" ? RM.bookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免費"&&agentsWithRolling[x.agent];}).length : 0;
-  grid.innerHTML=''+
-    '<div class="kpi-card-new gold"><div class="kpi-label">本月洗碼量</div><div class="kpi-value">'+fmt(totalVol)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>'+
-    '<div class="kpi-card-new green"><div class="kpi-label">剩餘轉碼</div><div class="kpi-value">'+fmt(totalVol-rmUsedRolling)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">萬</span></div></div>'+
-    '<div class="kpi-card-new red"><div class="kpi-label">未提領</div><div class="kpi-value">'+fmt(undrawnTotal)+'</div><div class="kpi-delta down">'+undrawnCount+' 筆待提</div></div>'+
-    '<div class="kpi-card-new blue"><div class="kpi-label">公基金</div><div class="kpi-value">'+fmt(fundBalance)+'</div><div class="kpi-delta">本月入帳 '+fmt(totalFund)+'</div></div>'+
-    '<div class="kpi-card-new orange"><div class="kpi-label">現金寄放</div><div class="kpi-value">'+fmt(totalCash)+'</div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>';
+    // 公基金异动
+    var fDep=0,fCD=0,fWit=0;
+    for (var j=0;j<window.fundWithdrawals.length;j++){
+      var f=window.fundWithdrawals[j];
+      if (!f.date||f.date.slice(0,7)!==now) continue;
+      if (f.type==="deposit") fDep+=f.amount; else if (f.type==="cash_deposit") fCD+=f.amount; else fWit+=f.amount;
+    }
+    var fundNet = totalFund+fDep+fCD-fWit;
+    // 公基金累计余额（所有时间）
+    var totalFundAll=0, fDepAll=0, fCDAll=0, fWitAll=0;
+    for (var ii=0;ii<window.txs.length;ii++) totalFundAll+=(window.txs[ii].fund||0);
+    for (var jj=0;jj<window.fundWithdrawals.length;jj++){
+      var ff=window.fundWithdrawals[jj];
+      if (ff.type==="deposit") fDepAll+=ff.amount;
+      else if (ff.type==="cash_deposit") fCDAll+=ff.amount;
+      else fWitAll+=ff.amount;
+    }
+    var fundBalance = Math.max(0, totalFundAll+fDepAll+fCDAll-fWitAll);
+    var undrawnTotal = Math.max(0,totalBonus-totalDrawn);
 
-  // --- 每日洗碼量 Sparkline（滿寬，顯示全部天數）---
-  var spark=document.getElementById("ov-sparkline");
-  var slbl=document.getElementById("ov-sparklabels");
-  var daysInMonth=new Date(parseInt(now.slice(0,4)),parseInt(now.slice(5,7)),0).getDate();
-  var daily=[], daily100=[];
-  for (var d=1;d<=daysInMonth;d++) daily.push(0);
-  for (var i=0;i<filteredTxs.length;i++){
-    var t=filteredTxs[i];
-    if (!t.date||t.date.slice(0,7)!==now||t.type==="cash") continue;
-    var day=parseInt(t.date.slice(8,10))-1;
-    if (day>=0&&day<daysInMonth) daily[day]+=(t.volume||0);
-  }
-  for (var d=0;d<daysInMonth;d++) daily100.push(daily[d]/100);
-  var maxV=Math.max.apply(null,daily)||1;
-  var maxH=60;
-  var sparkHTML='',lblHTML='';
-  // show every 3rd label to save space, but render all bars
-  for (var d=0;d<daysInMonth;d++){
-    var v=daily[d];
-    var h=v>0?Math.max(2,Math.round(v/maxV*maxH)):2;
-    sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(daily100[d])+' (100萬)"><span>'+fmt(daily100[d])+'</span></div>';
-    lblHTML+='<span>'+(d%3===0||d===0||d===daysInMonth-1?(d+1)+'日':'')+'</span>';
-  }
-  spark.innerHTML=sparkHTML;
-  slbl.innerHTML=lblHTML;
+    var grid=document.getElementById("ov-kpi-grid");
+    // 计算已使用转码数
+    var rmUsedRolling=0;
+    var roomMonth=now.slice(0,7);
+    var agentsWithRolling = {};
+    for (var kk=0;kk<window.txs.length;kk++){ var tr=window.txs[kk]; if (tr.date&&tr.date.slice(0,7)===roomMonth&&tr.type!=="cash"&&tr.agent){ agentsWithRolling[tr.agent]=true; } }
+    if (typeof RM!=="undefined"&&RM.bookings){
+      for (var k=0;k<RM.bookings.length;k++){
+        var b=RM.bookings[k];
+        if (!b.date||b.date.slice(0,7)!==roomMonth) continue;
+        if (b.status==="免费") rmUsedRolling += (b.nights||0) * (b.threshold||70);
+      }
+    }
+    var rmFreeCount = typeof RM!=="undefined" ? RM.bookings.filter(function(x){return x.date&&x.date.slice(0,7)===roomMonth&&x.status==="免费"&&agentsWithRolling[x.agent];}).length : 0;
+    grid.innerHTML=''+
+      '<div class="kpi-card-new gold"><div class="kpi-label">本月洗码量</div><div class="kpi-value">'+fmt(totalVol)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">万</span></div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>'+
+      '<div class="kpi-card-new green"><div class="kpi-label">剩余转码</div><div class="kpi-value">'+fmt(totalVol-rmUsedRolling)+'<span style="font-size:12px;color:var(--text-muted);margin-left:2px;">万</span></div></div>'+
+      '<div class="kpi-card-new red"><div class="kpi-label">未提领</div><div class="kpi-value">'+fmt(undrawnTotal)+'</div><div class="kpi-delta down">'+undrawnCount+' 笔待提</div></div>'+
+      '<div class="kpi-card-new blue"><div class="kpi-label">公基金</div><div class="kpi-value">'+fmt(fundBalance)+'</div><div class="kpi-delta">本月入帐 '+fmt(totalFund)+'</div></div>'+
+      '<div class="kpi-card-new orange"><div class="kpi-label">现金寄放</div><div class="kpi-value">'+fmt(totalCash)+'</div><div class="kpi-delta">'+Object.keys(agentSet).length+' 位代理</div></div>';
 
-  // --- Chart.js 趨勢圖（優先使用，失敗則降級到 sparkline）---
-  renderTrendChart(daily100, now);
+    // --- 每日洗码量 Sparkline ---
+    var spark=document.getElementById("ov-sparkline");
+    var slbl=document.getElementById("ov-sparklabels");
+    var daysInMonth=new Date(parseInt(now.slice(0,4)),parseInt(now.slice(5,7)),0).getDate();
+    var daily=[], daily100=[];
+    for (var d=1;d<=daysInMonth;d++) daily.push(0);
+    for (var i=0;i<window.txs.length;i++){
+      var t=window.txs[i];
+      if (!t.date||t.date.slice(0,7)!==now||t.type==="cash") continue;
+      var day=parseInt(t.date.slice(8,10))-1;
+      if (day>=0&&day<daysInMonth) daily[day]+=(t.volume||0);
+    }
+    for (var d=0;d<daysInMonth;d++) daily100.push(daily[d]/100);
+    var maxV=Math.max.apply(null,daily)||1;
+    var maxH=60;
+    var sparkHTML='',lblHTML='';
+    for (var d=0;d<daysInMonth;d++){
+      var v=daily[d];
+      var h=v>0?Math.max(2,Math.round(v/maxV*maxH)):2;
+      sparkHTML+='<div class="spark-bar'+(v===0?' empty':'')+'" style="height:'+h+'px" title="'+(d+1)+'日: '+fmt(daily100[d])+' (100万)"><span>'+fmt(daily100[d])+'</span></div>';
+      lblHTML+='<span>'+(d%3===0||d===0||d===daysInMonth-1?(d+1)+'日':'')+'</span>';
+    }
+    spark.innerHTML=sparkHTML;
+    slbl.innerHTML=lblHTML;
 
-  // --- 代理洗碼排行 Top 10（Chart.js 長條圖）---
-  var agtVol={};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
-    if (!t.date||(!showAllMonths && t.date.slice(0,7)!==now)||t.type==="cash"||!t.agent) continue;
-    if (!agtVol[t.agent]) agtVol[t.agent]=0;
-    agtVol[t.agent]+=(t.volume||0);
-  }
-  var agtArr=[];
-  for (var a in agtVol) agtArr.push({name:a,vol:agtVol[a]});
-  agtArr.sort(function(a,b){return b.vol-a.vol;});
-  agtArr=agtArr.slice(0,10);
-  renderRankChart(agtArr);
+    // --- Chart.js 趋势图 ---
+    if (typeof renderTrendChart === 'function') renderTrendChart(daily100, now);
 
-  // --- 場地洗碼分佈 ---
-  var venueColors = ['#00d4ff','#58a6ff','#7c3aed','#2dd4a0','#f85149','#f0a500','#c9a84c'];
-  var venVol={};
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
-    if (!t.date||(!showAllMonths && t.date.slice(0,7)!==now)||t.type==="cash"||!t.venue) continue;
-    if (!venVol[t.venue]) venVol[t.venue]=0;
-    venVol[t.venue]+=(t.volume||0);
-  }
-  var venArr=[];
-  for (var vv in venVol) venArr.push({name:vv,vol:venVol[vv]});
-  venArr.sort(function(a,b){return b.vol-a.vol;});
-  var maxVV=venArr.length>0?venArr[0].vol:1;
-  var venHTML='';
-  for (var vi=0;vi<venArr.length;vi++){
-    var vn=venArr[vi];
-    var vpct=Math.round(vn.vol/maxVV*100);
-    var vcol=venueColors[vi%venueColors.length];
-    var shortName=vn.name.length>8?vn.name.slice(0,8)+'..':vn.name;
-    venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'萬</div></div></div>';
-  }
-  if (!venArr.length) venHTML='<div class="venue-empty">本月尚無數據</div>';
-  document.getElementById("ov-venue-dist").innerHTML=venHTML;
+    // --- 代理洗码排行 Top 10 ---
+    var agtVol={};
+    for (var i=0;i<window.txs.length;i++){
+      var t=window.txs[i];
+      if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.agent) continue;
+      if (!agtVol[t.agent]) agtVol[t.agent]=0;
+      agtVol[t.agent]+=(t.volume||0);
+    }
+    var agtArr=[];
+    for (var a in agtVol) agtArr.push({name:a,vol:agtVol[a]});
+    agtArr.sort(function(a,b){return b.vol-a.vol;});
+    agtArr=agtArr.slice(0,10);
+    if (typeof renderRankChart === 'function') renderRankChart(agtArr);
 
-  // --- 近期動態 Timeline ---
-  var timeline=document.getElementById("ov-timeline");
-  var entries=[];
-  // 交易紀錄
-  for (var i=0;i<txs.length;i++){
-    var t=txs[i];
-    if (!t.date||t.date.slice(0,7)!==now) continue;
-    entries.push({date:t.date,type:t.type||"rolling",desc:(t.type==="cash"?t.agent+" 現金寄放":t.agent+" — "+t.client+(t.venue?" @ "+t.venue:"")),amount:t.type==="cash"?(t.cash||0):(t.bonus||0),extra:t.type==="cash"?"dep":"pos"});
-  }
-  // 公基金異動
-  for (var j=0;j<fundWithdrawals.length;j++){
-    var f=fundWithdrawals[j];
-    if (!f.date||f.date.slice(0,7)!==now) continue;
-    var ftype=f.type==="withdraw"?"提領":(f.type==="cash_deposit"?"自存現金":"存入");
-    entries.push({date:f.date,type:"fund",desc:"公基金 "+ftype+(f.note?" — "+f.note:""),amount:f.amount||0,extra:f.type==="withdraw"?"neg":"dep"});
-  }
-  entries.sort(function(a,b){return b.date.localeCompare(a.date);});
-  entries=entries.slice(0,15);
-  var tlHTML='';
-  for (var e=0;e<entries.length;e++){
-    var en=entries[e];
-    var dotClass=en.type==="cash"?"cash":(en.type==="fund"?"fund":"rolling");
-    var amtClass=en.extra==="dep"?"dep":(en.extra==="neg"?"":"pos");
-    var color=amtClass==="dep"?"var(--blue)":(en.extra==="neg"?"":"var(--gold)");
-    var prefix=en.extra==="neg"?"-":"";
-    tlHTML+='<div class="timeline-item"><div class="timeline-dot '+dotClass+'"></div><div class="timeline-content"><div class="timeline-desc">'+en.desc+'</div><div class="timeline-meta">'+en.date.slice(5)+'</div></div><div class="timeline-amount '+amtClass+'" style="color:'+color+'">'+prefix+fmt(en.amount)+'</div></div>';
-  }
-  timeline.innerHTML=tlHTML||'<div class="timeline-empty">尚無本月動態</div>';
+    // --- 场地洗码分布 ---
+    var venueColors = ['#d4af37','#e74c3c','#3498db','#2ecc71','#9b59b6','#e67e22','#1abc9c','#f39c12'];
+    var venVol={};
+    for (var i=0;i<window.txs.length;i++){
+      var t=window.txs[i];
+      if (!t.date||t.date.slice(0,7)!==now||t.type==="cash"||!t.venue) continue;
+      if (!venVol[t.venue]) venVol[t.venue]=0;
+      venVol[t.venue]+=(t.volume||0);
+    }
+    var venArr=[];
+    for (var vv in venVol) venArr.push({name:vv,vol:venVol[vv]});
+    venArr.sort(function(a,b){return b.vol-a.vol;});
+    var maxVV=venArr.length>0?venArr[0].vol:1;
+    var venHTML='';
+    for (var vi=0;vi<venArr.length;vi++){
+      var vn=venArr[vi];
+      var vpct=Math.round(vn.vol/maxVV*100);
+      var vcol=venueColors[vi%venueColors.length];
+      var shortName=vn.name.length>8?vn.name.slice(0,8)+'..':vn.name;
+      venHTML+='<div class="venue-row"><div class="venue-name" title="'+vn.name+'">'+shortName+'</div><div class="venue-bar-wrap"><div class="venue-bar-track"><div class="venue-bar-fill" style="width:'+vpct+'%;background:linear-gradient(90deg,'+vcol+',rgba(255,255,255,0.1));"></div></div><div class="venue-val">'+fmt(vn.vol)+'万</div></div></div>';
+    }
+    if (!venArr.length) venHTML='<div class="venue-empty">本月尚无数据</div>';
+    document.getElementById("ov-venue-dist").innerHTML=venHTML;
+
+    // --- 近期动态 Timeline ---
+    var timeline=document.getElementById("ov-timeline");
+    var entries=[];
+    for (var i=0;i<window.txs.length;i++){
+      var t=window.txs[i];
+      if (!t.date||t.date.slice(0,7)!==now) continue;
+      entries.push({date:t.date,type:t.type||"rolling",desc:(t.type==="cash"?t.agent+" 现金寄放":t.agent+" — "+t.client+(t.venue?" @ "+t.venue:"")),amount:t.type==="cash"?(t.cash||0):(t.bonus||0),extra:t.type==="cash"?"dep":"pos"});
+    }
+    for (var j=0;j<window.fundWithdrawals.length;j++){
+      var f=window.fundWithdrawals[j];
+      if (!f.date||f.date.slice(0,7)!==now) continue;
+      var ftype=f.type==="withdraw"?"提领":(f.type==="cash_deposit"?"自存现金":"存入");
+      entries.push({date:f.date,type:"fund",desc:"公基金 "+ftype+(f.note?" — "+f.note:""),amount:f.amount||0,extra:f.type==="withdraw"?"neg":"dep"});
+    }
+    entries.sort(function(a,b){return b.date.localeCompare(a.date);});
+    entries=entries.slice(0,15);
+    var tlHTML='';
+    for (var e=0;e<entries.length;e++){
+      var en=entries[e];
+      var dotClass=en.type==="cash"?"cash":(en.type==="fund"?"fund":"rolling");
+      var amtClass=en.extra==="dep"?"dep":(en.extra==="neg"?"":"pos");
+      var color=amtClass==="dep"?"var(--blue)":(en.extra==="neg"?"":"var(--gold)");
+      var prefix=en.extra==="neg"?"-":"";
+      tlHTML+='<div class="timeline-item"><div class="timeline-dot '+dotClass+'"></div><div class="timeline-content"><div class="timeline-desc">'+en.desc+'</div><div class="timeline-meta">'+en.date.slice(5)+'</div></div><div class="timeline-amount '+amtClass+'" style="color:'+color+'">'+prefix+fmt(en.amount)+'</div></div>';
+    }
+    timeline.innerHTML=tlHTML||'<div class="timeline-empty">尚无本月动态</div>';
   } catch(e) {
     console.error('[renderOverview] fatal error:', e);
   } finally {
     _renderingOverview = false;
   }
 }
-
-// ===== Chart.js 趨勢圖 =====
 
 /* === overview-charts.js === */
 // js/pages/overview-charts.js - v11.2.18

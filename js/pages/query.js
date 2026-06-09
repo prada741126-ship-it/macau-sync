@@ -104,9 +104,8 @@ function doQuery() {
   try {
   var agent = document.getElementById("q-agent").value;
   var month = document.getElementById("q-month").value.trim();
-  var skipMonthFilter = (month === "__ALL__");
-  if (!month) month = "__ALL__";  // v11.2.18 改為預設顯示全部月份
-  // 公基金查询 - 分筆流水（含累計餘額）
+  if (!month) month = window.workingMonth || window.nowStr().slice(0, 7);
+  var skipMonthFilter = false;  // v11.2.19 修复：始终按月份过滤（与正式版一致）
   if (agent === "__FUND__") {
     var allFundTxs = [], preBalance = 0, totalFund = 0;
     for (var i = 0; i < txs.length; i++) {

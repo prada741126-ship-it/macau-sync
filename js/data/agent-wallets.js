@@ -209,73 +209,8 @@ document.addEventListener("click", function(e) {
   deleteTx(fbKey);
 });
 
-function renderAll() {
-  var tbody = document.getElementById("all-body");
-  tbody.innerHTML = "";
-  var tbl = document.getElementById("all-table");
-  var msg = document.getElementById("all-msg");
-  // 搜尋過濾
-  var keyword = "";
-  var searchEl = document.getElementById("search-all");
-  if (searchEl) keyword = searchEl.value.trim().toLowerCase();
-  var filtered = txs;
-  if (keyword) {
-    filtered = txs.filter(function(t) {
-      return (t.agent||"").toLowerCase().indexOf(keyword) >= 0 ||
-        (t.client||"").toLowerCase().indexOf(keyword) >= 0 ||
-        (t.venue||"").toLowerCase().indexOf(keyword) >= 0 ||
-        (t.note||"").toLowerCase().indexOf(keyword) >= 0 ||
-        (t.date||"").indexOf(keyword) >= 0;
-    });
-  }
-  // 排序
-  filtered = sortTxs(filtered.slice());
-  // ✅ 修正：先更新 KPI 卡片（即使沒有資料也要歸零）
-  renderAllMiniKPI();
-  if (!filtered.length) {
-    tbl.style.display = "none";
-    msg.style.display = "block";
-    msg.innerHTML = keyword
-      ? '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">無符合搜尋結果</div><div class="empty-desc">請嘗試其他關鍵字或清除搜尋</div></div>'
-      : '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">尚無交易紀錄</div><div class="empty-desc">點擊上方「＋ 新增」開始第一筆交易</div><button class="empty-action" onclick="openModal()">＋ 新增交易</button></div>';
-    document.getElementById("tx-count").textContent = "";
-    return;
-  }
-  tbl.style.display = "table";
-  msg.style.display = "none";
-  document.getElementById("tx-count").textContent = "共 " + filtered.length + " 筆";
-  for (var i = 0; i < filtered.length; i++) {
-    var t = filtered[i];
-    var tags = getStatusTags(t);
-    var tr = document.createElement("tr");
-    var isCash = t.type === "cash";
-    var typeLabel = isCash ? "<span style='color:#e67e22;font-weight:600;'>現金寄放</span>" : "洗碼";
-    var vol = isCash ? 0 : (toNum(t.volume) || 0);
-    var undrawn = isCash ? (t.cash || 0) : Math.max(0, (t.bonus || 0) - (t.drawn || 0));
-    var commFmt = isCash ? "" : fmt(t.comm);
-    var bonusFmt = isCash ? "" : fmt(t.bonus);
-    var drawnFmt = isCash ? "" : fmt(t.drawn);
-    var undrawnFmt = isCash ? fmt(t.cash) : fmt(undrawn);
-    tr.innerHTML =
-      "<td>" + (tags ? tags + "<br>" : "") + typeLabel + "</td>" +
-      "<td>" + (t.date || "") + "</td>" +
-      "<td>" + (t.agent || "") + "</td>" +
-      "<td>" + (isCash ? "" : (t.client || "")) + "</td>" +
-      "<td>" + (isCash ? "" : (t.venue || "")) + "</td>" +
-      "<td class='num'>" + (vol > 0 ? vol.toLocaleString() + "萬" : "") + "</td>" +
-      "<td class='num'>" + commFmt + "</td>" +
-      "<td class='num'>" + bonusFmt + "</td>" +
-      "<td class='num'>" + drawnFmt + "</td>" +
-      "<td class='num'>" + undrawnFmt + "</td>" +
-      "<td>" + (t.note || "") + "</td>" +
-      "<td><button class='btn-gold' onclick='openModal(\"" + (t._fbKey||t.id) + "\")'>編輯</button> <button class='btn-red' onclick='deleteTx(\"" + (t._fbKey||t.id) + "\")'>刪除</button></td>";
-    tbody.appendChild(tr);
-  }
-  fillAgent();
-  populateVenueDropdown();
-  // v10.26 檢查表格滾動狀態
-  setTimeout(checkTableScroll, 150);
-}
+
+
 
 function calcTotalWallet() {
   // 計算所有代理錢包餘額（v4.9 修復）
