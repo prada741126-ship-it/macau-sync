@@ -60,24 +60,28 @@ app.use('/api', function(req, res, next) {
   next();
 });
 
-// 靜態資源快取策略（v11.0 模組化：不再強制禁用快取）
+// 靜態資源快取策略（v11.2.6：禁用 HTML 快取以確保版本更新立即生效）
 app.use(function(req, res, next) {
-  // HTML 使用短快取（5 分鐘），確保版本更新後快速生效
+  // HTML：完全禁用快取（版本更新必須立即生效）
   if (req.url === '/' || req.url === '/index.html') {
-    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
   }
-  // 靜態資源（CSS/JS/圖片）使用長快取（1 小時）
+  // 靜態資源（CSS/JS/圖片）使用短快取（10 分鐘）
   else if (req.url.match(/\.(js|css|png|jpg|svg|ico)$/)) {
-    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Cache-Control', 'public, max-age=600');
   }
   next();
 });
 app.use(express.static(__dirname));
 
-// 根路徑 - 返回 HTML（v11.0: 短快取策略）
+// 根路徑 - 返回 HTML（v11.2.6：禁用快取）
 app.get('/', (req, res) => {
   if (fs.existsSync(HTML_FILE)) {
-    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(HTML_FILE);
   } else {
     res.status(404).send('index.html not found at: ' + HTML_FILE);
