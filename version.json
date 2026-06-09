@@ -1,7 +1,7 @@
 {
-  "version": "11.2.7",
+  "version": "11.2.8",
   "buildDate": "2026-06-09",
   "buildNumber": 1,
-  "previousVersion": "11.2.6",
-  "description": "v11.2.7 — server.js 动态版本号、强制触发 Railway 重新部署"
+  "previousVersion": "11.2.7",
+  "description": "v11.2.8 — 修复 Railway 部署失败：build.js 在生產環境跳過回歸測試（jsdom 未安裝）"
 }
