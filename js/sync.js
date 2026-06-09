@@ -216,6 +216,18 @@ function initSync() {
       if (po && po.style.display === "block") renderOverview();
       var ps = document.getElementById("page-summary");
       if (ps && ps.style.display === "block") renderSummary();
+      var pq = document.getElementById("page-query");
+      if (pq && pq.style.display === "block") {
+        var qm = document.getElementById("q-month");
+        var savedMonth = qm ? qm.value : null;
+        try { populateMonthDropdown(); } catch(e) {}
+        if (qm && savedMonth) {
+          for (var i = 0; i < qm.options.length; i++) {
+            if (qm.options[i].value === savedMonth) { qm.value = savedMonth; break; }
+          }
+        }
+        try { doQuery(); } catch(e) {}
+      }
       try { updateTotalWalletUI(); } catch(e) {}
       console.log('[Sync ↓] txs 已同步，共 ' + txs.length + ' 筆');
     } catch(e) { console.error('[Sync ↓] txs 錯誤:', e); }
